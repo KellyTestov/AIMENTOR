@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI-Ментор | Главная</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Основная навигация">
+      <div class="sidebar__brand">
+        <img src="./robot.png" class="brand-logo" alt="AI-Ментор логотип" />
+        <div class="brand-title">AI-Ментор</div>
+      </div>
+
+      <nav class="sidebar__nav" id="main-nav"></nav>
+
+      <div class="sidebar__footer">
+        <div class="user-chip">
+          <div class="user-chip__avatar" id="user-avatar"></div>
+          <div>
+            <div class="user-chip__name" id="user-name"></div>
+            <div class="user-chip__role" id="user-role"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="workspace__header">
+        <div>
+          <h1 class="workspace__title" id="section-title">Каталог обучения</h1>
+          <p class="workspace__subtitle" id="section-subtitle">Единицы обучения, доступные по вашей роли</p>
+        </div>
+        <button class="btn btn--primary" id="create-btn" type="button">Создать обучение</button>
+      </header>
+
+      <section class="section section--catalog" id="catalog-section" aria-label="Каталог обучения">
+        <div class="catalog-toolbar" role="region" aria-label="Навигация каталога">
+          <div class="toolbar-search">
+            <label for="search-input">
+              <span>Поиск</span>
+              <input id="search-input" type="search" placeholder="По названию обучения" autocomplete="off" />
+            </label>
+          </div>
+
+          <div class="toolbar-controls">
+            <label>
+              <span>Тип</span>
+              <select id="type-filter">
+                <option value="all">Все типы</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Категория</span>
+              <select id="category-filter">
+                <option value="all">Все категории</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Фабрика</span>
+              <select id="factory-filter">
+                <option value="all">Все фабрики</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Сортировка</span>
+              <select id="sort-select">
+                <option value="updated_desc">Сначала новые изменения</option>
+                <option value="created_desc">Сначала новые создания</option>
+                <option value="name_asc">По алфавиту А-Я</option>
+              </select>
+            </label>
+          </div>
+
+          <button class="btn btn--ghost" id="reset-filters" type="button">Сбросить</button>
+        </div>
+
+        <div class="catalog-grid" id="catalog-grid" aria-live="polite"></div>
+
+        <div class="empty-state hidden" id="empty-state">
+          <h2 id="empty-title">Нет доступных единиц обучения</h2>
+          <p id="empty-description">Каталог пока пуст для вашей роли.</p>
+        </div>
+      </section>
+
+      <section class="section section--analytics hidden" id="analytics-section" aria-label="Аналитика">
+        <div class="analytics-card">
+          <h2>Аналитика</h2>
+          <p>Статистика по единицам обучения вашего каталога.</p>
+          <div class="analytics-metrics">
+            <div>
+              <span>Всего единиц</span>
+              <strong id="metric-total">0</strong>
+            </div>
+            <div>
+              <span>Проверяющих</span>
+              <strong id="metric-assessment">0</strong>
+            </div>
+            <div>
+              <span>Обучающих</span>
+              <strong id="metric-learning">0</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section--admin hidden" id="admin-section" aria-label="Админ-панель">
+        <div class="admin-card">
+          <div class="admin-card__head">
+            <div class="admin-card__titles">
+              <h2>Пользователи с доступом <span class="admin-count" id="admin-user-count">0</span></h2>
+              <p>Управление ролями доступа в AI-Ментор</p>
+            </div>
+            <label class="admin-search-label">
+              <span class="sr-only">Поиск пользователей</span>
+              <input
+                id="admin-search-input"
+                type="search"
+                placeholder="Поиск по ФИО, userID или роли"
+                autocomplete="off"
+              />
+            </label>
+          </div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ФИО</th>
+                  <th>userID</th>
+                  <th>Роль</th>
+                  <th>Действие</th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ===== MODAL: удаление обучения ===== -->
+  <div class="modal-backdrop hidden" id="delete-modal-backdrop">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+      <h2 id="delete-modal-title">Удаление обучения</h2>
+      <p>Вы собираетесь удалить «<strong id="delete-unit-title"></strong>». Это действие необратимо.</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn--ghost" id="delete-cancel-btn">Отмена</button>
+        <button type="button" class="btn btn--danger" id="delete-confirm-btn">Удалить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: подтверждение действия в админ-панели ===== -->
+  <div class="modal-backdrop hidden" id="admin-confirm-backdrop">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="admin-confirm-title">
+      <h2 id="admin-confirm-title">Подтверждение</h2>
+      <p id="admin-confirm-text"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn--ghost" id="admin-confirm-cancel-btn">Отмена</button>
+        <button type="button" class="btn btn--primary" id="admin-confirm-ok-btn">Подтвердить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: кроппер обложки ===== -->
+  <div class="modal-backdrop crop-backdrop hidden" id="crop-backdrop">
+    <div class="crop-dialog" role="dialog" aria-modal="true" aria-label="Настройка обложки">
+      <div class="crop-dialog__head">
+        <h3 class="crop-dialog__title">Настройте обложку</h3>
+        <p class="crop-dialog__hint">Перетащите изображение · прокрутите колёсиком для масштаба</p>
+      </div>
+      <div class="crop-viewport" id="crop-viewport">
+        <img id="crop-img" alt="" draggable="false" />
+      </div>
+      <div class="crop-zoom-bar">
+        <button type="button" class="crop-zoom-btn" id="crop-zoom-out" aria-label="Уменьшить">−</button>
+        <input type="range" class="crop-zoom-range" id="crop-zoom-range" min="0" max="100" value="0" step="1" />
+        <button type="button" class="crop-zoom-btn" id="crop-zoom-in" aria-label="Увеличить">+</button>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn--ghost" id="crop-cancel-btn">Отмена</button>
+        <button type="button" class="btn btn--primary" id="crop-apply-btn">Применить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== WIZARD: Мастер создания обучения ===== -->
+  <div class="modal-backdrop wizard-backdrop hidden" id="wizard-backdrop">
+    <div class="wizard" id="wizard-dialog" role="dialog" aria-modal="true" aria-labelledby="wizard-h1">
+
+      <!-- Прогресс-бар (общий для всех шагов) -->
+      <div class="wizard__progress" id="wizard-progress" aria-hidden="true">
+        <div class="wizard__progress-seg is-fill" id="wizard-prog-1"></div>
+        <div class="wizard__progress-seg" id="wizard-prog-2"></div>
+        <div class="wizard__progress-seg" id="wizard-prog-3"></div>
+      </div>
+
+      <!-- Шаг 1: выбор типа -->
+      <div class="wizard-step" id="wizard-step-1">
+        <div class="wizard__top">
+          <span></span>
+          <button type="button" class="wizard__close-btn" data-wizard-action="close" aria-label="Закрыть">✕</button>
+        </div>
+        <div class="wizard__content">
+          <h2 class="wizard__heading" id="wizard-h1">Создание обучения</h2>
+          <p class="wizard__lead">Выберите тип единицы обучения, которую хотите создать.</p>
+          <div class="wizard__type-cards">
+            <button type="button" class="wizard-type-card" data-wizard-action="pick-type" data-value="trainer">
+              <span class="wizard-type-card__icon" aria-hidden="true">🎯</span>
+              <strong class="wizard-type-card__name">Тренажер</strong>
+              <span class="wizard-type-card__hint">Обучающий сценарий для отработки практических навыков</span>
+            </button>
+            <button type="button" class="wizard-type-card" data-wizard-action="pick-type" data-value="exam">
+              <span class="wizard-type-card__icon" aria-hidden="true">📋</span>
+              <strong class="wizard-type-card__name">Экзамен</strong>
+              <span class="wizard-type-card__hint">Проверочный сценарий для оценки знаний сотрудников</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Шаг 2: способ создания -->
+      <div class="wizard-step hidden" id="wizard-step-2">
+        <div class="wizard__top">
+          <button type="button" class="wizard__back-btn" data-wizard-action="go-back" data-value="1">← Назад</button>
+          <button type="button" class="wizard__close-btn" data-wizard-action="close" aria-label="Закрыть">✕</button>
+        </div>
+        <div class="wizard__content">
+          <h2 class="wizard__heading">Способ создания</h2>
+          <p class="wizard__lead" id="wizard-step2-hint">Начните с нуля или возьмите за основу существующее обучение.</p>
+          <div class="wizard__type-cards">
+            <button type="button" class="wizard-type-card" data-wizard-action="pick-method" data-value="new">
+              <span class="wizard-type-card__icon" aria-hidden="true">✨</span>
+              <strong class="wizard-type-card__name">Новое</strong>
+              <span class="wizard-type-card__hint">Создать обучение с чистого листа</span>
+            </button>
+            <button type="button" class="wizard-type-card" data-wizard-action="pick-method" data-value="template">
+              <span class="wizard-type-card__icon" aria-hidden="true">📂</span>
+              <strong class="wizard-type-card__name">Из шаблона</strong>
+              <span class="wizard-type-card__hint">Взять за основу существующее обучение данного типа</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Шаг 3: параметры обучения (полноэкранный) -->
+      <div class="wizard-step wizard-step--form hidden" id="wizard-step-3">
+        <div class="wizard__top wizard__top--form">
+          <button type="button" class="wizard__back-btn" data-wizard-action="go-back" data-value="2">← Назад</button>
+          <h2 class="wizard__heading-inline">Настройка обучения</h2>
+          <button type="button" class="wizard__close-btn" data-wizard-action="close" aria-label="Закрыть">✕</button>
+        </div>
+        <div class="wizard__form-scroll">
+          <div class="wf-layout">
+          <form id="wizard-form" novalidate autocomplete="off">
+            <div class="wf-grid">
+              <div class="wf-field">
+                <label class="wf-label" for="wf-title">Название обучения <span class="wf-req" aria-hidden="true">*</span></label>
+                <input class="wf-input" type="text" id="wf-title" name="title" placeholder="Введите название" />
+              </div>
+              <div class="wf-field">
+                <label class="wf-label" for="wf-topic">Тема обучения <span class="wf-req" aria-hidden="true">*</span></label>
+                <select class="wf-input wf-select" id="wf-topic" name="topic">
+                  <option value="">Выберите тему</option>
+                  <option>Продукты банка</option>
+                  <option>Продажи</option>
+                  <option>Коммуникации с клиентами</option>
+                  <option>Кредитование</option>
+                  <option>Карточные продукты</option>
+                  <option>Работа с возражениями</option>
+                  <option>Комплаенс</option>
+                  <option>Управление</option>
+                </select>
+              </div>
+              <div class="wf-field wf-field--span2">
+                <label class="wf-label" for="wf-description">Описание обучения <span class="wf-req" aria-hidden="true">*</span></label>
+                <textarea class="wf-input wf-textarea" id="wf-description" name="description" rows="3" placeholder="Краткое описание содержания"></textarea>
+              </div>
+              <div class="wf-field">
+                <label class="wf-label" for="wf-category">Категория обучения <span class="wf-req" aria-hidden="true">*</span></label>
+                <select class="wf-input wf-select" id="wf-category" name="category">
+                  <option value="">Выберите категорию</option>
+                </select>
+              </div>
+              <div class="wf-field">
+                <label class="wf-label" for="wf-duration">Время прохождения <span class="wf-req" aria-hidden="true">*</span></label>
+                <select class="wf-input wf-select" id="wf-duration" name="duration">
+                  <option value="">Выберите время</option>
+                  <option value="15 минут">15 минут</option>
+                  <option value="30 минут">30 минут</option>
+                  <option value="1 час">1 час</option>
+                  <option value="1.5 часа">1.5 часа</option>
+                  <option value="2 часа">2 часа</option>
+                  <option value="2.5 часа">2.5 часа</option>
+                  <option value="3 часа">3 часа</option>
+                </select>
+              </div>
+              <div class="wf-field">
+                <label class="wf-label" for="wf-factory">Фабрика <span class="wf-req" aria-hidden="true">*</span></label>
+                <select class="wf-input wf-select" id="wf-factory" name="factory">
+                  <option value="">Выберите фабрику</option>
+                </select>
+              </div>
+              <div class="wf-field wf-field--span2">
+                <label class="wf-label">Обложка <span class="wf-req" aria-hidden="true">*</span></label>
+                <div class="wf-cover" id="wf-cover-area">
+                  <input type="file" id="wf-cover-input" name="cover" accept="image/*" class="sr-only" />
+                  <label for="wf-cover-input" class="wf-cover__label" id="wf-cover-label">
+                    <svg class="wf-cover__upload-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <span class="wf-cover__label-text">
+                      <span class="wf-cover__text">Перетащите изображение сюда</span>
+                      <span class="wf-cover__subtext">или <span class="wf-cover__link">нажмите для выбора файла</span></span>
+                    </span>
+                    <span class="wf-cover__hint">PNG, JPG · до 10 МБ</span>
+                  </label>
+                  <div class="wf-cover__preview-wrap hidden" id="wf-cover-preview-wrap">
+                    <img class="wf-cover__preview" id="wf-cover-preview" alt="Предпросмотр обложки" />
+                    <button type="button" class="wf-cover__clear" id="wf-cover-clear" aria-label="Удалить обложку">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="wf-footer">
+              <p class="wf-note"><span aria-hidden="true">*</span> — обязательные поля</p>
+              <button type="submit" class="btn btn--primary wf-submit" id="wizard-submit-btn" disabled>Подтвердить</button>
+            </div>
+          </form>
+          <aside class="wf-preview">
+            <p class="wf-preview__label">Предпросмотр карточки</p>
+            <article class="card wf-preview__card">
+              <figure class="card__media-wrap">
+                <div class="wf-preview__ph" id="wf-preview-ph">
+                  <span class="wf-preview__ph-icon" aria-hidden="true">🖼</span>
+                  <span>Загрузите обложку</span>
+                </div>
+                <img class="card__media hidden" id="wf-preview-img" alt="Предпросмотр карточки" />
+              </figure>
+              <div class="card__body">
+                <h3 class="card__title" id="wf-preview-title">Название обучения</h3>
+                <div class="card__meta">
+                  <span class="meta-badge" id="wf-preview-duration">—</span>
+                  <span class="card__status is-private">Приватное</span>
+                  <span class="author-icon" id="wf-preview-author" title="" aria-label="">—</span>
+                </div>
+              </div>
+            </article>
+          </aside>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== TEMPLATE CATALOG: выбор шаблона ===== -->
+  <div class="modal-backdrop tmpl-backdrop hidden" id="tmpl-backdrop">
+    <div class="tmpl-catalog" role="dialog" aria-modal="true" aria-labelledby="tmpl-title">
+      <div class="tmpl-catalog__header">
+        <button type="button" class="wizard__back-btn" id="tmpl-back-btn">← Назад</button>
+        <div class="tmpl-catalog__titles">
+          <h2 class="tmpl-catalog__title" id="tmpl-title">Выбор шаблона</h2>
+          <p class="tmpl-catalog__sub" id="tmpl-subtitle">Выберите обучение как основу для нового</p>
+        </div>
+        <button type="button" class="wizard__close-btn" id="tmpl-close-btn" aria-label="Закрыть каталог шаблонов">✕</button>
+      </div>
+      <div class="catalog-grid tmpl-grid" id="tmpl-grid"></div>
+      <div class="empty-state hidden" id="tmpl-empty">
+        <h2>Нет доступных шаблонов</h2>
+        <p>Для выбранного типа обучений пока нет созданных единиц.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

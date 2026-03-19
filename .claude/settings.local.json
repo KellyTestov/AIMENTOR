@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:linear.app)",
+      "WebFetch(domain:www.navbar.gallery)",
+      "WebFetch(domain:supabase-design-system.vercel.app)",
+      "WebFetch(domain:shadcn-svelte.com)",
+      "WebFetch(domain:saas-ui.dev)",
+      "Bash(ls f:/ownerpagementor/*.png)"
+    ]
+  }
+}

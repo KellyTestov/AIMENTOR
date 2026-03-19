@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Конструктор — AI-Ментор</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./builder.css" />
+</head>
+<body>
+  <div class="bld-shell">
+
+    <!-- ══════════ HEADER ══════════ -->
+    <header class="bld-header">
+      <div class="bld-header__left">
+        <a href="../index.html" class="bld-back" id="back-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          Каталог
+        </a>
+        <div class="bld-header__div" aria-hidden="true"></div>
+        <input class="bld-title-input" id="unit-title-input" type="text"
+               placeholder="Название обучения" maxlength="200" autocomplete="off" />
+      </div>
+      <div class="bld-header__right">
+        <button class="bld-btn bld-btn--ghost" id="btn-check" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          Проверить
+        </button>
+        <button class="bld-btn bld-btn--ghost" id="btn-save" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          Сохранить
+        </button>
+        <button class="bld-btn bld-btn--primary" id="btn-publish" type="button">Опубликовать</button>
+        <div class="bld-more-wrap">
+          <button class="bld-btn bld-btn--ghost bld-btn--icon" id="btn-more" type="button"
+                  aria-label="Дополнительные действия" aria-expanded="false" aria-haspopup="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                 fill="currentColor" aria-hidden="true">
+              <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+            </svg>
+          </button>
+          <div class="bld-dropdown hidden" id="more-dropdown" role="menu">
+            <button class="bld-dropdown__item" data-more-action="history" role="menuitem" type="button">
+              История версий
+            </button>
+            <button class="bld-dropdown__item" data-more-action="duplicate" role="menuitem" type="button">
+              Дублировать
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ══════════ BODY ══════════ -->
+    <div class="bld-body">
+
+      <!-- ── LEFT PANEL (structure) ── -->
+      <aside class="bld-left" aria-label="Структура обучения">
+        <div class="bld-left__head">
+          <span class="bld-left__title">Структура</span>
+          <button class="bld-icon-btn" id="add-block-btn" type="button" title="Добавить блок">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+        </div>
+        <nav class="bld-tree-wrap">
+          <ul class="bld-tree" id="bld-tree" role="tree" aria-label="Дерево структуры обучения"></ul>
+        </nav>
+      </aside>
+
+      <!-- ── CENTER (content editor) ── -->
+      <main class="bld-center" id="bld-center" aria-live="polite"></main>
+
+      <!-- ── RIGHT PANEL (inspector) ── -->
+      <aside class="bld-right" aria-label="Настройки выбранного элемента">
+        <div class="bld-right__head">
+          <span class="bld-right__title" id="inspector-title">Инспектор</span>
+        </div>
+        <div class="bld-right__body" id="inspector-body"></div>
+      </aside>
+
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="bld-toast" id="bld-toast" role="status" aria-live="polite" aria-hidden="true"></div>
+
+  <script src="./builder.js"></script>
+</body>
+</html>
