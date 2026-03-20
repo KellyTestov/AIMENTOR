@@ -15,7 +15,7 @@
     <!-- ══════════ HEADER ══════════ -->
     <header class="bld-header">
       <div class="bld-header__left">
-        <a href="../index.html" class="bld-back" id="back-link">
+        <a href="../index.html" class="bld-back" id="back-link" data-catalog-href="../index.html">
           <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <polyline points="15 18 9 12 15 6"/>
@@ -129,6 +129,20 @@
             <span class="bld-modal__option-desc">Опубликовать без дополнительной проверки</span>
           </span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ UNSAVED CHANGES MODAL ══════════ -->
+  <div class="bld-modal-backdrop hidden" id="unsaved-modal-backdrop" role="dialog"
+       aria-modal="true" aria-labelledby="unsaved-modal-title">
+    <div class="bld-modal">
+      <div class="bld-modal__icon" aria-hidden="true">⚠️</div>
+      <h2 class="bld-modal__title" id="unsaved-modal-title">Изменения не сохранены</h2>
+      <p class="bld-modal__desc">Вы внесли изменения в единицу обучения, но не сохранили их. Если перейти в каталог, изменения могут быть потеряны.</p>
+      <div class="bld-modal__actions">
+        <button class="bld-btn bld-btn--ghost" id="unsaved-modal-stay" type="button">Продолжить редактирование</button>
+        <button class="bld-btn bld-btn--danger" id="unsaved-modal-leave" type="button">Перейти в каталог</button>
       </div>
     </div>
   </div>

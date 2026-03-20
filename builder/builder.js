@@ -10,6 +10,8 @@ const BUILDER_KEY = "ai-mentor-builder-data-v1";
 let unit       = null;   // full unit tree
 let selectedId = null;   // selected node id
 const expanded = new Set();
+let isDirty    = false;  // true when unsaved changes exist
+let _initing   = true;   // suppress dirty flag during init
 
 let _seq = Date.now();
 function genId(pfx) { return `${pfx || "n"}-${++_seq}`; }
@@ -44,6 +46,7 @@ function persistUnit() {
   const all = loadAll();
   all[unit.id] = unit;
   saveAll(all);
+  if (!_initing) isDirty = true;
 }
 
 /* ── Node helpers ───────────────────────────────── */
@@ -1414,6 +1417,7 @@ function bindPublishModal() {
     closePublishModal();
     unit.publicationStatus = "published";
     persistUnit();
+    isDirty = false;
     syncStatus();
     toast("✓ Опубликовано");
   });
@@ -1441,7 +1445,7 @@ function bindEvents() {
     persistUnit(); renderTree();
   });
 
-  dom.btnSave.addEventListener("click", () => { persistUnit(); toast("✓ Сохранено"); });
+  dom.btnSave.addEventListener("click", () => { persistUnit(); isDirty = false; toast("✓ Сохранено"); });
   dom.btnCheck.addEventListener("click", checkUnit);
 
   dom.btnPublish.addEventListener("click", () => {
@@ -1475,6 +1479,20 @@ function bindEvents() {
   });
 
   dom.addBlockBtn.addEventListener("click", addTopBlock);
+
+  // Back link — warn if dirty
+  const backLink = document.getElementById("back-link");
+  backLink.addEventListener("click", e => {
+    if (!isDirty) return; // let default navigation proceed
+    e.preventDefault();
+    document.getElementById("unsaved-modal-backdrop").classList.remove("hidden");
+  });
+  document.getElementById("unsaved-modal-stay").addEventListener("click", () => {
+    document.getElementById("unsaved-modal-backdrop").classList.add("hidden");
+  });
+  document.getElementById("unsaved-modal-leave").addEventListener("click", () => {
+    window.location.href = backLink.getAttribute("data-catalog-href");
+  });
 
   // Keyboard shortcuts
   document.addEventListener("keydown", e => {
@@ -1526,6 +1544,7 @@ function init() {
 
   // Select root node
   selectNode(unit.id);
+  _initing = false;
   bindEvents();
 }
 

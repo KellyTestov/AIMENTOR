@@ -1378,6 +1378,23 @@ html, body {
   line-height: 1.4;
 }
 
+.bld-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+.bld-modal__actions .bld-btn {
+  justify-content: center;
+  width: 100%;
+}
+.bld-btn--danger {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+}
+.bld-btn--danger:hover { background: #a81818; }
+
 /* ── Utility ── */
 .hidden { display: none !important; }
 
