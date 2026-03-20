@@ -363,6 +363,7 @@ function startExam() {
   document.getElementById("sb-timer").classList.remove("hidden");
   document.getElementById("btn-show-client").classList.remove("hidden");
   document.getElementById("sb-role-bar").classList.remove("hidden");
+  document.getElementById("sb-role-client-label").textContent = "💬 " + MOCK_CLIENT.name;
   document.getElementById("sb-mode-badge").textContent = "Экзамен";
 
   if (!session.elapsedSeconds) session.elapsedSeconds = 0;
@@ -380,6 +381,7 @@ function resumeExam() {
   document.getElementById("sb-timer").classList.remove("hidden");
   document.getElementById("btn-show-client").classList.remove("hidden");
   document.getElementById("sb-role-bar").classList.remove("hidden");
+  document.getElementById("sb-role-client-label").textContent = "💬 " + MOCK_CLIENT.name;
   document.getElementById("sb-mode-badge").textContent = "Экзамен";
 
   // Сброс флага ошибки — продолжаем
@@ -574,6 +576,7 @@ function init() {
         document.getElementById("sb-timer").classList.remove("hidden");
         document.getElementById("btn-show-client").classList.remove("hidden");
         document.getElementById("sb-role-bar").classList.remove("hidden");
+        document.getElementById("sb-role-client-label").textContent = "💬 " + MOCK_CLIENT.name;
         document.getElementById("sb-mode-badge").textContent = "Экзамен";
         renderTimer(session.elapsedSeconds || 0);
         startTimer();
