@@ -101,6 +101,38 @@
   <!-- Toast notification -->
   <div class="bld-toast" id="bld-toast" role="status" aria-live="polite" aria-hidden="true"></div>
 
+  <!-- ══════════ PUBLISH MODAL ══════════ -->
+  <div class="bld-modal-backdrop hidden" id="publish-modal-backdrop" role="dialog"
+       aria-modal="true" aria-labelledby="publish-modal-title">
+    <div class="bld-modal">
+      <button class="bld-modal__close" id="publish-modal-close" type="button" aria-label="Закрыть">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <div class="bld-modal__icon" aria-hidden="true">📤</div>
+      <h2 class="bld-modal__title" id="publish-modal-title">Публикация обучения</h2>
+      <p class="bld-modal__desc">Выберите режим публикации единицы обучения</p>
+      <div class="bld-modal__options">
+        <button class="bld-modal__option" id="publish-modal-test" type="button">
+          <span class="bld-modal__option-icon" aria-hidden="true">🧪</span>
+          <span class="bld-modal__option-body">
+            <span class="bld-modal__option-title">Тестирование</span>
+            <span class="bld-modal__option-desc">Предварительная проверка единицы обучения с возможностью внесения изменений</span>
+          </span>
+        </button>
+        <button class="bld-modal__option bld-modal__option--primary" id="publish-modal-direct" type="button">
+          <span class="bld-modal__option-icon" aria-hidden="true">🚀</span>
+          <span class="bld-modal__option-body">
+            <span class="bld-modal__option-title">Опубликовать</span>
+            <span class="bld-modal__option-desc">Опубликовать без дополнительной проверки</span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="./builder.js"></script>
 </body>
 </html>

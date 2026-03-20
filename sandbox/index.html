@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Тестовая среда — AI-Ментор</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./sandbox.css" />
+</head>
+<body>
+
+  <!-- ══════════ HEADER ══════════ -->
+  <header class="sb-header">
+    <div class="sb-header__left">
+      <button class="sb-back-btn" id="btn-back-to-builder" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Вернуться в конструктор
+      </button>
+    </div>
+    <div class="sb-header__center">
+      <span class="sb-header__title" id="sb-unit-title">Загрузка...</span>
+    </div>
+    <div class="sb-header__right">
+      <span class="sb-header__badge">Тестовая среда</span>
+    </div>
+  </header>
+
+  <!-- ══════════ BODY ══════════ -->
+  <div class="sb-body">
+    <div class="sb-chat-wrap">
+      <div class="sb-chat" id="sb-chat" aria-live="polite" aria-label="Диалог тестирования"></div>
+      <div class="sb-input-area" id="sb-input-area">
+        <textarea class="sb-input" id="sb-input" rows="1"
+                  placeholder="Введите ответ..." aria-label="Поле ввода"></textarea>
+        <button class="sb-send-btn" id="sb-send-btn" type="button" aria-label="Отправить">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+               stroke-linejoin="round" aria-hidden="true">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ COMPLETION MODAL ══════════ -->
+  <div class="sb-modal-backdrop hidden" id="completion-modal" role="dialog"
+       aria-modal="true" aria-labelledby="completion-modal-title">
+    <div class="sb-modal">
+      <div class="sb-modal__icon" aria-hidden="true">🏁</div>
+      <h2 class="sb-modal__title" id="completion-modal-title">Тестирование завершено</h2>
+      <p class="sb-modal__desc">Выберите дальнейшее действие</p>
+      <div class="sb-modal__actions">
+        <button class="sb-modal__btn sb-modal__btn--secondary" id="completion-back-btn" type="button">
+          Вернуться в конструктор
+        </button>
+        <button class="sb-modal__btn sb-modal__btn--primary" id="completion-publish-btn" type="button">
+          Опубликовать
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ BUSINESS LINE MODAL ══════════ -->
+  <div class="sb-modal-backdrop hidden" id="bizline-modal" role="dialog"
+       aria-modal="true" aria-labelledby="bizline-modal-title">
+    <div class="sb-modal sb-modal--wide">
+      <button class="sb-modal__close" id="bizline-close-btn" type="button" aria-label="Назад">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <div class="sb-modal__icon" aria-hidden="true">🏢</div>
+      <h2 class="sb-modal__title" id="bizline-modal-title">Выберите бизнес-линию</h2>
+      <p class="sb-modal__desc">Единица обучения будет доступна сотрудникам выбранной бизнес-линии</p>
+      <div class="sb-bizline-list" id="bizline-list" role="listbox" aria-label="Бизнес-линии"></div>
+      <button class="sb-modal__btn sb-modal__btn--primary sb-modal__btn--full"
+              id="bizline-confirm-btn" type="button" disabled>
+        Опубликовать
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════ LOADING MODAL ══════════ -->
+  <div class="sb-modal-backdrop hidden" id="loading-modal" role="dialog" aria-modal="true"
+       aria-label="Публикация в процессе">
+    <div class="sb-modal sb-modal--compact">
+      <div class="sb-loader" aria-hidden="true">
+        <div class="sb-loader__ring"></div>
+      </div>
+      <p class="sb-modal__title">Публикуем...</p>
+      <p class="sb-modal__desc">Пожалуйста, подождите</p>
+    </div>
+  </div>
+
+  <!-- ══════════ SUCCESS MODAL ══════════ -->
+  <div class="sb-modal-backdrop hidden" id="success-modal" role="dialog"
+       aria-modal="true" aria-labelledby="success-modal-title">
+    <div class="sb-modal">
+      <div class="sb-modal__icon" aria-hidden="true">✅</div>
+      <h2 class="sb-modal__title" id="success-modal-title">Успешно опубликовано!</h2>
+      <p class="sb-modal__desc">Единица обучения опубликована и доступна сотрудникам выбранной бизнес-линии.</p>
+      <button class="sb-modal__btn sb-modal__btn--primary sb-modal__btn--full"
+              id="success-back-btn" type="button">
+        Вернуться в конструктор
+      </button>
+    </div>
+  </div>
+
+  <script src="./sandbox.js"></script>
+</body>
+</html>

@@ -1392,6 +1392,48 @@ function syncStatus() {
   dom.btnPublish.textContent = pub ? "Снять с публикации" : "Опубликовать";
 }
 
+/* ── Publish modal ──────────────────────────────── */
+const SANDBOX_SESSION_KEY = "ai-mentor-sandbox-session-v1";
+
+function openPublishModal() {
+  document.getElementById("publish-modal-backdrop").classList.remove("hidden");
+}
+
+function closePublishModal() {
+  document.getElementById("publish-modal-backdrop").classList.add("hidden");
+}
+
+function bindPublishModal() {
+  document.getElementById("publish-modal-close").addEventListener("click", closePublishModal);
+
+  document.getElementById("publish-modal-backdrop").addEventListener("click", e => {
+    if (e.target === e.currentTarget) closePublishModal();
+  });
+
+  document.getElementById("publish-modal-direct").addEventListener("click", () => {
+    closePublishModal();
+    unit.publicationStatus = "published";
+    persistUnit();
+    syncStatus();
+    toast("✓ Опубликовано");
+  });
+
+  document.getElementById("publish-modal-test").addEventListener("click", () => {
+    closePublishModal();
+    persistUnit();
+    // Clear any old sandbox session so fresh start (error-recovery sessions
+    // are preserved only if they already exist for THIS unit in localStorage)
+    const existing = (() => {
+      try { return JSON.parse(localStorage.getItem(SANDBOX_SESSION_KEY) || "null"); } catch { return null; }
+    })();
+    // Only keep session if it belongs to the current unit
+    if (!existing || existing.unitId !== unit.id) {
+      localStorage.removeItem(SANDBOX_SESSION_KEY);
+    }
+    window.location.href = `../sandbox/index.html?id=${encodeURIComponent(unit.id)}`;
+  });
+}
+
 /* ── Event binding ──────────────────────────────── */
 function bindEvents() {
   dom.titleInput.addEventListener("input", () => {
@@ -1403,10 +1445,17 @@ function bindEvents() {
   dom.btnCheck.addEventListener("click", checkUnit);
 
   dom.btnPublish.addEventListener("click", () => {
-    unit.publicationStatus = unit.publicationStatus === "published" ? "private" : "published";
-    persistUnit(); syncStatus();
-    toast(unit.publicationStatus === "published" ? "✓ Опубликовано" : "✓ Снято с публикации");
+    if (unit.publicationStatus === "published") {
+      // Unpublish directly
+      unit.publicationStatus = "private";
+      persistUnit(); syncStatus();
+      toast("✓ Снято с публикации");
+    } else {
+      openPublishModal();
+    }
   });
+
+  bindPublishModal();
 
   dom.btnMore.addEventListener("click", e => {
     e.stopPropagation();
