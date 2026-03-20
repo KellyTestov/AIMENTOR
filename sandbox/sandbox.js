@@ -684,6 +684,10 @@ function bindEvents(isExam, isTrainer) {
   document.getElementById("success-back-btn").addEventListener("click", () => {
     goBackToBuilder();
   });
+
+  document.getElementById("success-catalog-btn").addEventListener("click", () => {
+    window.location.href = "../index.html";
+  });
 }
 
 /* ── Карточка клиента ────────────────────────────── */
