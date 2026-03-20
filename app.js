@@ -83,6 +83,52 @@ let allUnits = bootstrap.units || [
   },
 ];
 
+/* ── Слияние единиц из конструктора ─────────────────
+   Читает ai-mentor-builder-data-v1 из localStorage и:
+   - обновляет publicationStatus для уже существующих единиц
+   - добавляет новые опубликованные/созданные единицы в каталог
+──────────────────────────────────────────────────── */
+function mergeBuilderUnits() {
+  try {
+    const stored = JSON.parse(localStorage.getItem("ai-mentor-builder-data-v1") || "{}");
+    const existingIds = new Set(allUnits.map((u) => u.id));
+
+    for (const bu of Object.values(stored)) {
+      if (!bu || !bu.id) continue;
+
+      if (existingIds.has(bu.id)) {
+        // Обновляем статус публикации для уже известных единиц
+        const idx = allUnits.findIndex((u) => u.id === bu.id);
+        if (idx !== -1 && bu.publicationStatus) {
+          allUnits[idx].publicationStatus = bu.publicationStatus;
+        }
+      } else {
+        // Добавляем новую единицу из конструктора в каталог
+        const typeDisplay = bu.type === "trainer" ? "Обучающая" : "Проверяющая";
+        allUnits.push({
+          id:                bu.id,
+          title:             bu.title        || "Без названия",
+          type:              typeDisplay,
+          category:          bu.category     || "",
+          factory:           bu.factory      || "",
+          authorId:          bu.authorId     || currentUser.id,
+          authorName:        bu.authorName   || currentUser.name,
+          createdAt:         bu.createdAt    || new Date().toISOString(),
+          updatedAt:         bu.updatedAt    || new Date().toISOString(),
+          durationLabel:     bu.durationLabel || "",
+          publicationStatus: bu.publicationStatus || "private",
+          coverUrl:          bu.coverDataUrl || bu.coverUrl || null,
+          launchUrl:         `https://example.org/alpha-course/learn/${bu.id}`,
+          editUrl:           `./builder/index.html?id=${bu.id}`,
+        });
+        existingIds.add(bu.id);
+      }
+    }
+  } catch (e) {
+    console.warn("mergeBuilderUnits:", e);
+  }
+}
+
 const promptCovers = [
   encodeURI("./premium.jpg"),
   encodeURI("./premium_2.jpg"),
@@ -264,6 +310,7 @@ function init() {
     return;
   }
 
+  mergeBuilderUnits();
   renderUserBlock();
   renderNav();
   hydrateFilterOptions();
@@ -729,7 +776,7 @@ function getVisibleUnitsForUser() {
   }
 
   const allowed = new Set(currentUser.rights.allowedUnitIds || []);
-  return allUnits.filter((unit) => allowed.has(unit.id));
+  return allUnits.filter((unit) => allowed.has(unit.id) || unit.authorId === currentUser.id);
 }
 
 function canEditUnit(unit) {
