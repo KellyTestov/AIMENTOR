@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
@@ -6,7 +6,7 @@
   <title>AI-Ментор | Главная</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
@@ -34,7 +34,7 @@
       <header class="workspace__header">
         <div>
           <h1 class="workspace__title" id="section-title">Каталог обучения</h1>
-          <p class="workspace__subtitle" id="section-subtitle">Единицы обучения, доступные по вашей роли</p>
+          <p class="workspace__subtitle" id="section-subtitle">Единицы обучения созданные на платформе AI-ментора</p>
         </div>
         <button class="btn btn--primary" id="create-btn" type="button">Создать обучение</button>
       </header>
@@ -44,43 +44,97 @@
           <div class="toolbar-search">
             <label for="search-input">
               <span>Поиск</span>
-              <input id="search-input" type="search" placeholder="По названию обучения" autocomplete="off" />
+              <div class="toolbar-search__wrap">
+                <svg class="toolbar-search__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input id="search-input" type="search" placeholder="По названию обучения" autocomplete="off" />
+              </div>
             </label>
           </div>
 
           <div class="toolbar-controls">
-            <label>
-              <span>Тип</span>
-              <select id="type-filter">
-                <option value="all">Все типы</option>
-              </select>
-            </label>
+            <!-- Скрытые select-прокси для app.js — не удалять -->
+            <select id="type-filter" class="sr-only" aria-hidden="true"><option value="all">Все типы</option></select>
+            <select id="category-filter" class="sr-only" aria-hidden="true"><option value="all">Все категории</option></select>
+            <select id="factory-filter" class="sr-only" aria-hidden="true">
+              <option value="all">Все фабрики</option>
+              <option value="Доставка">Доставка</option>
+              <option value="Урегулирование">Урегулирование</option>
+              <option value="Сервис">Сервис</option>
+              <option value="Эквайринг">Эквайринг</option>
+              <option value="Телемаркетинг">Телемаркетинг</option>
+            </select>
+            <select id="direction-filter" class="sr-only" aria-hidden="true"><option value="all">Все направления</option></select>
+            <select id="sort-select" class="sr-only" aria-hidden="true">
+              <option value="updated_desc">Сначала новые изменения</option>
+              <option value="created_desc">Сначала новые создания</option>
+              <option value="name_asc">По алфавиту А-Я</option>
+            </select>
 
-            <label>
-              <span>Категория</span>
-              <select id="category-filter">
-                <option value="all">Все категории</option>
-              </select>
-            </label>
+            <!-- Тип -->
+            <div class="dd" id="dd-type">
+              <button class="dd__trigger" type="button" id="dd-type-btn">
+                <span id="dd-type-label">Тип</span>
+                <svg class="dd__arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="dd__panel" id="dd-type-panel">
+                <div class="dd__list" id="dd-type-list"></div>
+                <div class="dd__footer"><button class="dd__apply" type="button" id="dd-type-apply">Применить</button></div>
+              </div>
+            </div>
 
-            <label>
-              <span>Фабрика</span>
-              <select id="factory-filter">
-                <option value="all">Все фабрики</option>
-              </select>
-            </label>
+            <!-- Категория -->
+            <div class="dd" id="dd-category">
+              <button class="dd__trigger" type="button" id="dd-category-btn">
+                <span id="dd-category-label">Категория</span>
+                <svg class="dd__arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="dd__panel" id="dd-category-panel">
+                <div class="dd__list" id="dd-category-list"></div>
+                <div class="dd__footer"><button class="dd__apply" type="button" id="dd-category-apply">Применить</button></div>
+              </div>
+            </div>
 
-            <label>
-              <span>Сортировка</span>
-              <select id="sort-select">
-                <option value="updated_desc">Сначала новые изменения</option>
-                <option value="created_desc">Сначала новые создания</option>
-                <option value="name_asc">По алфавиту А-Я</option>
-              </select>
-            </label>
+            <!-- Фабрика -->
+            <div class="dd" id="dd-factory">
+              <button class="dd__trigger" type="button" id="dd-factory-btn">
+                <span id="dd-factory-label">Фабрика</span>
+                <svg class="dd__arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="dd__panel" id="dd-factory-panel">
+                <div class="dd__list" id="dd-factory-list"></div>
+                <div class="dd__footer"><button class="dd__apply" type="button" id="dd-factory-apply">Применить</button></div>
+              </div>
+            </div>
+
+            <!-- Направление -->
+            <div class="dd" id="dd-direction">
+              <button class="dd__trigger" type="button" id="dd-direction-btn">
+                <span id="dd-direction-label">Направление</span>
+                <svg class="dd__arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="dd__panel" id="dd-direction-panel">
+                <div class="dd__list" id="dd-direction-list"></div>
+                <div class="dd__footer"><button class="dd__apply" type="button" id="dd-direction-apply">Применить</button></div>
+              </div>
+            </div>
+
+            <!-- Сортировка -->
+            <div class="dd" id="dd-sort">
+              <button class="dd__trigger" type="button" id="dd-sort-btn">
+                <span id="dd-sort-label">Сортировка</span>
+                <svg class="dd__arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="dd__panel dd__panel--sm" id="dd-sort-panel">
+                <div class="dd__list">
+                  <label class="dd__radio-item"><input type="radio" name="dd-sort" value="updated_desc" checked /> Сначала новые изменения</label>
+                  <label class="dd__radio-item"><input type="radio" name="dd-sort" value="created_desc" /> Сначала новые создания</label>
+                  <label class="dd__radio-item"><input type="radio" name="dd-sort" value="name_asc" /> По алфавиту А-Я</label>
+                </div>
+              </div>
+            </div>
+
+            <button class="btn btn--ghost" id="reset-filters" type="button">Сбросить</button>
           </div>
-
-          <button class="btn btn--ghost" id="reset-filters" type="button">Сбросить</button>
         </div>
 
         <div class="catalog-grid" id="catalog-grid" aria-live="polite"></div>
@@ -268,17 +322,22 @@
                 <input class="wf-input" type="text" id="wf-title" name="title" placeholder="Введите название" />
               </div>
               <div class="wf-field">
-                <label class="wf-label" for="wf-topic">Тема обучения <span class="wf-req" aria-hidden="true">*</span></label>
-                <select class="wf-input wf-select" id="wf-topic" name="topic">
+                <label class="wf-label" for="wfd-topic-btn">Тема обучения <span class="wf-req" aria-hidden="true">*</span></label>
+                <div class="wf-dd" id="wfd-topic">
+                  <button class="wf-dd__trigger" type="button" id="wfd-topic-btn">
+                    <span class="wf-dd__val wf-dd__placeholder" id="wfd-topic-val">Выберите тему</span>
+                    <svg class="dd__arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                  </button>
+                  <div class="wf-dd__panel" id="wfd-topic-panel">
+                    <div class="wf-dd__list" id="wfd-topic-list"></div>
+                  </div>
+                </div>
+                <select class="sr-only" id="wf-topic" name="topic" aria-hidden="true">
                   <option value="">Выберите тему</option>
-                  <option>Продукты банка</option>
-                  <option>Продажи</option>
-                  <option>Коммуникации с клиентами</option>
-                  <option>Кредитование</option>
-                  <option>Карточные продукты</option>
-                  <option>Работа с возражениями</option>
-                  <option>Комплаенс</option>
-                  <option>Управление</option>
+                  <option>Продукты банка</option><option>Продажи</option>
+                  <option>Коммуникации с клиентами</option><option>Кредитование</option>
+                  <option>Карточные продукты</option><option>Работа с возражениями</option>
+                  <option>Комплаенс</option><option>Управление</option>
                 </select>
               </div>
               <div class="wf-field wf-field--span2">
@@ -286,28 +345,70 @@
                 <textarea class="wf-input wf-textarea" id="wf-description" name="description" rows="3" placeholder="Краткое описание содержания"></textarea>
               </div>
               <div class="wf-field">
-                <label class="wf-label" for="wf-category">Категория обучения <span class="wf-req" aria-hidden="true">*</span></label>
-                <select class="wf-input wf-select" id="wf-category" name="category">
+                <label class="wf-label" for="wfd-category-btn">Категория обучения <span class="wf-req" aria-hidden="true">*</span></label>
+                <div class="wf-dd" id="wfd-category">
+                  <button class="wf-dd__trigger" type="button" id="wfd-category-btn">
+                    <span class="wf-dd__val wf-dd__placeholder" id="wfd-category-val">Выберите категорию</span>
+                    <svg class="dd__arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                  </button>
+                  <div class="wf-dd__panel" id="wfd-category-panel">
+                    <div class="wf-dd__list" id="wfd-category-list"></div>
+                  </div>
+                </div>
+                <select class="sr-only" id="wf-category" name="category" aria-hidden="true">
                   <option value="">Выберите категорию</option>
                 </select>
               </div>
               <div class="wf-field">
-                <label class="wf-label" for="wf-duration">Время прохождения <span class="wf-req" aria-hidden="true">*</span></label>
-                <select class="wf-input wf-select" id="wf-duration" name="duration">
+                <label class="wf-label" for="wfd-duration-btn">Время прохождения <span class="wf-req" aria-hidden="true">*</span></label>
+                <div class="wf-dd" id="wfd-duration">
+                  <button class="wf-dd__trigger" type="button" id="wfd-duration-btn">
+                    <span class="wf-dd__val wf-dd__placeholder" id="wfd-duration-val">Выберите время</span>
+                    <svg class="dd__arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                  </button>
+                  <div class="wf-dd__panel" id="wfd-duration-panel">
+                    <div class="wf-dd__list" id="wfd-duration-list"></div>
+                  </div>
+                </div>
+                <select class="sr-only" id="wf-duration" name="duration" aria-hidden="true">
                   <option value="">Выберите время</option>
-                  <option value="15 минут">15 минут</option>
-                  <option value="30 минут">30 минут</option>
-                  <option value="1 час">1 час</option>
-                  <option value="1.5 часа">1.5 часа</option>
-                  <option value="2 часа">2 часа</option>
-                  <option value="2.5 часа">2.5 часа</option>
+                  <option value="15 минут">15 минут</option><option value="30 минут">30 минут</option>
+                  <option value="1 час">1 час</option><option value="1.5 часа">1.5 часа</option>
+                  <option value="2 часа">2 часа</option><option value="2.5 часа">2.5 часа</option>
                   <option value="3 часа">3 часа</option>
                 </select>
               </div>
               <div class="wf-field">
-                <label class="wf-label" for="wf-factory">Фабрика <span class="wf-req" aria-hidden="true">*</span></label>
-                <select class="wf-input wf-select" id="wf-factory" name="factory">
+                <label class="wf-label" for="wfd-factory-btn">Фабрика <span class="wf-req" aria-hidden="true">*</span></label>
+                <div class="wf-dd" id="wfd-factory">
+                  <button class="wf-dd__trigger" type="button" id="wfd-factory-btn">
+                    <span class="wf-dd__val wf-dd__placeholder" id="wfd-factory-val">Выберите фабрику</span>
+                    <svg class="dd__arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                  </button>
+                  <div class="wf-dd__panel" id="wfd-factory-panel">
+                    <div class="wf-dd__list" id="wfd-factory-list"></div>
+                  </div>
+                </div>
+                <select class="sr-only" id="wf-factory" name="factory" aria-hidden="true">
                   <option value="">Выберите фабрику</option>
+                  <option value="Доставка">Доставка</option><option value="Урегулирование">Урегулирование</option>
+                  <option value="Сервис">Сервис</option><option value="Эквайринг">Эквайринг</option>
+                  <option value="Телемаркетинг">Телемаркетинг</option>
+                </select>
+              </div>
+              <div class="wf-field">
+                <label class="wf-label" for="wfd-direction-btn">Направление <span class="wf-req" aria-hidden="true">*</span></label>
+                <div class="wf-dd" id="wfd-direction">
+                  <button class="wf-dd__trigger" type="button" id="wfd-direction-btn">
+                    <span class="wf-dd__val wf-dd__placeholder" id="wfd-direction-val">Выберите направление</span>
+                    <svg class="dd__arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                  </button>
+                  <div class="wf-dd__panel" id="wfd-direction-panel">
+                    <div class="wf-dd__list" id="wfd-direction-list"></div>
+                  </div>
+                </div>
+                <select class="sr-only" id="wf-direction" name="direction" aria-hidden="true">
+                  <option value="">Выберите направление</option>
                 </select>
               </div>
               <div class="wf-field wf-field--span2">
@@ -383,5 +484,273 @@
   </div>
 
   <script src="./app.js"></script>
+  <script>
+  (function () {
+    let activeDD = null;
+
+    function openDD(id) {
+      if (activeDD && activeDD !== id) closeDD(activeDD);
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add('dd--open');
+      activeDD = id;
+    }
+
+    function closeDD(id) {
+      document.getElementById(id)?.classList.remove('dd--open');
+      activeDD = null;
+    }
+
+    // Закрытие по клику вне дропдауна
+    document.addEventListener('click', e => {
+      if (activeDD && !document.getElementById(activeDD)?.contains(e.target)) {
+        closeDD(activeDD);
+      }
+    });
+
+    // Trigger buttons
+    ['dd-type', 'dd-category', 'dd-factory', 'dd-direction', 'dd-sort'].forEach(id => {
+      document.getElementById(id + '-btn')?.addEventListener('click', e => {
+        e.stopPropagation();
+        activeDD === id ? closeDD(id) : openDD(id);
+      });
+    });
+
+    // Фабрики (хардкод) и карта направлений
+    const FACTORIES = ['Доставка', 'Урегулирование', 'Сервис', 'Эквайринг', 'Телемаркетинг'];
+    const DIRECTION_MAP = {
+      'Доставка':      ['Малый и микро бизнес', 'Розничный бизнес'],
+      'Урегулирование':['90-', '90+', 'Выездное'],
+      'Сервис':        ['ФЛ Chat', 'ФЛ Voice', 'ЮЛ Chat', 'ЮЛ Voice', 'СвА', 'Эквайринг'],
+      'Эквайринг':     [],
+      'Телемаркетинг': ['Физ.лица', 'Юр.лица'],
+    };
+    const ALL_DIRECTIONS = [...new Set(Object.values(DIRECTION_MAP).flat())];
+
+    function buildFactoryList() {
+      const list = document.getElementById('dd-factory-list');
+      if (!list) return;
+      list.innerHTML = '';
+      FACTORIES.forEach(name => {
+        const lbl = document.createElement('label');
+        lbl.className = 'dd__check-item';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox'; cb.value = name;
+        lbl.append(cb, document.createTextNode(' ' + name));
+        list.appendChild(lbl);
+      });
+    }
+
+    function buildDirectionList(selectedFactories) {
+      const list = document.getElementById('dd-direction-list');
+      if (!list) return;
+      list.innerHTML = '';
+      const dirs = (!selectedFactories || selectedFactories.length === 0)
+        ? ALL_DIRECTIONS
+        : [...new Set(selectedFactories.flatMap(f => DIRECTION_MAP[f] || []))];
+      dirs.forEach(name => {
+        const lbl = document.createElement('label');
+        lbl.className = 'dd__check-item';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox'; cb.value = name;
+        lbl.append(cb, document.createTextNode(' ' + name));
+        list.appendChild(lbl);
+      });
+    }
+
+    // Build checkbox list from hidden select options
+    function buildList(selectId, listId) {
+      const sel = document.getElementById(selectId);
+      const list = document.getElementById(listId);
+      if (!sel || !list || list.childElementCount > 0) return;
+      list.innerHTML = '';
+      Array.from(sel.options).forEach(opt => {
+        if (!opt.value || opt.value === 'all') return;
+        const lbl = document.createElement('label');
+        lbl.className = 'dd__check-item';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = opt.value;
+        lbl.append(cb, document.createTextNode(' ' + opt.text));
+        list.appendChild(lbl);
+      });
+    }
+
+    // Apply: sync checkboxes → hidden select → fire change
+    function applyFilter(ddId, selectId, labelId, defaultLabel) {
+      const list = document.getElementById(ddId + '-list');
+      const sel = document.getElementById(selectId);
+      const labelEl = document.getElementById(labelId);
+      if (!list || !sel) return;
+      const checked = [...list.querySelectorAll('input:checked')].map(c => c.value);
+      if (checked.length === 0) {
+        sel.value = 'all';
+        if (labelEl) labelEl.textContent = defaultLabel;
+      } else {
+        sel.value = checked[0];
+        if (labelEl) labelEl.textContent = checked.length === 1
+          ? list.querySelector('input:checked').closest('label').textContent.trim()
+          : defaultLabel + ' (' + checked.length + ')';
+      }
+      sel.dispatchEvent(new Event('change'));
+      closeDD(ddId);
+    }
+
+    document.getElementById('dd-type-apply')?.addEventListener('click', () =>
+      applyFilter('dd-type', 'type-filter', 'dd-type-label', 'Тип'));
+    document.getElementById('dd-category-apply')?.addEventListener('click', () =>
+      applyFilter('dd-category', 'category-filter', 'dd-category-label', 'Категория'));
+    document.getElementById('dd-factory-apply')?.addEventListener('click', () => {
+      applyFilter('dd-factory', 'factory-filter', 'dd-factory-label', 'Фабрика');
+      // Перестроить направления по выбранным фабрикам
+      const checkedFactories = [...document.getElementById('dd-factory-list')
+        .querySelectorAll('input:checked')].map(c => c.value);
+      buildDirectionList(checkedFactories);
+      // Сбросить выбор направлений
+      document.getElementById('dd-direction-label').textContent = 'Направление';
+    });
+
+    document.getElementById('dd-direction-apply')?.addEventListener('click', () =>
+      applyFilter('dd-direction', 'direction-filter', 'dd-direction-label', 'Направление'));
+
+    // Sort radios: apply immediately
+    document.querySelectorAll('input[name="dd-sort"]').forEach(r => {
+      r.addEventListener('change', () => {
+        const sel = document.getElementById('sort-select');
+        if (sel) { sel.value = r.value; sel.dispatchEvent(new Event('change')); }
+        closeDD('dd-sort');
+      });
+    });
+
+    // Reset button: clear checkboxes + labels
+    document.getElementById('reset-filters')?.addEventListener('click', () => {
+      ['dd-type-list', 'dd-category-list', 'dd-factory-list', 'dd-direction-list'].forEach(id => {
+        document.getElementById(id)?.querySelectorAll('input').forEach(cb => cb.checked = false);
+      });
+      ['dd-type-label', 'dd-category-label', 'dd-factory-label', 'dd-direction-label', 'dd-sort-label'].forEach((id, i) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = ['Тип', 'Категория', 'Фабрика', 'Направление', 'Сортировка'][i];
+      });
+      buildDirectionList([]);
+      const firstSort = document.querySelector('input[name="dd-sort"]');
+      if (firstSort) firstSort.checked = true;
+    });
+
+    // Wizard custom dropdowns (wf-dd)
+    (function () {
+      const wfDDs = {};
+
+      function closeAllWfDD() {
+        Object.values(wfDDs).forEach(dd => dd.el.classList.remove('wf-dd--open'));
+      }
+
+      document.addEventListener('click', e => {
+        if (!Object.values(wfDDs).some(dd => dd.el.contains(e.target))) closeAllWfDD();
+      });
+
+      function initWfDD(key) {
+        const el = document.getElementById('wfd-' + key);
+        const btn = document.getElementById('wfd-' + key + '-btn');
+        const valEl = document.getElementById('wfd-' + key + '-val');
+        const sel = document.getElementById('wf-' + key);
+        if (!el || !btn) return;
+        wfDDs[key] = { el, valEl, sel, value: '' };
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const isOpen = el.classList.contains('wf-dd--open');
+          closeAllWfDD();
+          if (!isOpen) el.classList.add('wf-dd--open');
+        });
+      }
+
+      function pickWfItem(key, value, label) {
+        const dd = wfDDs[key];
+        if (!dd) return;
+        dd.value = value;
+        dd.valEl.textContent = label;
+        dd.valEl.classList.remove('wf-dd__placeholder');
+        if (dd.sel) { dd.sel.value = value; dd.sel.dispatchEvent(new Event('change')); }
+        dd.el.classList.remove('wf-dd--open');
+
+        // Если выбрана фабрика — сразу перестраиваем направления из wfDDs.factory.value
+        if (key === 'factory') {
+          const dirs = DIRECTION_MAP[value] || [];
+          const emptyMsg = dirs.length === 0 ? 'Нет доступных направлений' : undefined;
+          buildWfItems('direction', dirs.map(d => ({ value: d, label: d })), emptyMsg);
+          const dirDD = wfDDs['direction'];
+          if (dirDD) {
+            dirDD.value = '';
+            dirDD.valEl.textContent = 'Выберите направление';
+            dirDD.valEl.classList.add('wf-dd__placeholder');
+            if (dirDD.sel) dirDD.sel.value = '';
+          }
+        }
+      }
+
+      function buildWfItems(key, items, emptyMsg) {
+        const list = document.getElementById('wfd-' + key + '-list');
+        if (!list) return;
+        list.innerHTML = '';
+        if (!items || items.length === 0) {
+          const msg = document.createElement('div');
+          msg.className = 'wf-dd__empty';
+          msg.textContent = emptyMsg || 'Сначала выберите фабрику';
+          list.appendChild(msg);
+          return;
+        }
+        items.forEach(({ value, label }) => {
+          const btn = document.createElement('button');
+          btn.type = 'button'; btn.className = 'wf-dd__item';
+          btn.textContent = label;
+          btn.addEventListener('click', () => pickWfItem(key, value, label));
+          list.appendChild(btn);
+        });
+      }
+
+      // Инициализация полей
+      ['topic', 'category', 'duration', 'factory', 'direction'].forEach(initWfDD);
+
+      buildWfItems('topic', [
+        'Продукты банка','Продажи','Коммуникации с клиентами','Кредитование',
+        'Карточные продукты','Работа с возражениями','Комплаенс','Управление'
+      ].map(t => ({ value: t, label: t })));
+
+      buildWfItems('duration', [
+        '15 минут','30 минут','1 час','1.5 часа','2 часа','2.5 часа','3 часа'
+      ].map(t => ({ value: t, label: t })));
+
+      buildWfItems('factory', FACTORIES.map(f => ({ value: f, label: f })));
+
+      buildWfItems('direction', []); // пусто пока не выбрана фабрика
+
+
+      // Категория заполняется app.js — ждём
+      let catP = 0;
+      const catPoll = setInterval(() => {
+        const sel = document.getElementById('wf-category');
+        if (sel && sel.options.length > 1) {
+          buildWfItems('category', Array.from(sel.options)
+            .filter(o => o.value).map(o => ({ value: o.value, label: o.text })));
+          clearInterval(catPoll);
+        }
+        if (++catP > 30) clearInterval(catPoll);
+      }, 200);
+    })();
+
+    // Poll until app.js populates the selects, then build checkbox lists
+    let polls = 0;
+    const poll = setInterval(() => {
+      const sel = document.getElementById('type-filter');
+      if (sel && sel.options.length > 1) {
+        buildList('type-filter', 'dd-type-list');
+        buildList('category-filter', 'dd-category-list');
+        buildFactoryList();          // фабрики из хардкода, не из select
+        buildDirectionList([]);      // все направления по умолчанию
+        clearInterval(poll);
+      }
+      if (++polls > 30) clearInterval(poll);
+    }, 200);
+  })();
+  </script>
 </body>
 </html>

@@ -7,7 +7,7 @@ const bootstrap = window.AI_MENTOR_BOOTSTRAP || {};
 
 const currentUser = bootstrap.currentUser || {
   id: "u-101",
-  name: "Роман Плишкин",
+  name: "Плишкин Роман Валерьевич",
   roleName: "Команда сервиса",
   rights: {
     canAccessHome: true,
