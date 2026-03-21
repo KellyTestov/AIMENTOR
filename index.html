@@ -659,7 +659,17 @@
           e.stopPropagation();
           const isOpen = el.classList.contains('wf-dd--open');
           closeAllWfDD();
-          if (!isOpen) el.classList.add('wf-dd--open');
+          if (!isOpen) {
+            // Для категории — перестраиваем список при каждом открытии
+            if (key === 'category') {
+              const catSel = document.getElementById('wf-category');
+              if (catSel && catSel.options.length > 1) {
+                buildWfItems('category', Array.from(catSel.options)
+                  .filter(o => o.value).map(o => ({ value: o.value, label: o.text })));
+              }
+            }
+            el.classList.add('wf-dd--open');
+          }
         });
       }
 
