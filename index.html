@@ -679,7 +679,15 @@
         dd.value = value;
         dd.valEl.textContent = label;
         dd.valEl.classList.remove('wf-dd__placeholder');
-        if (dd.sel) { dd.sel.value = value; dd.sel.dispatchEvent(new Event('change')); }
+        if (dd.sel) {
+          if (!Array.from(dd.sel.options).some(o => o.value === value)) {
+            const opt = document.createElement('option');
+            opt.value = value; opt.text = label;
+            dd.sel.appendChild(opt);
+          }
+          dd.sel.value = value;
+          dd.sel.dispatchEvent(new Event('change'));
+        }
         dd.el.classList.remove('wf-dd--open');
 
         // Если выбрана фабрика — сразу перестраиваем направления из wfDDs.factory.value
