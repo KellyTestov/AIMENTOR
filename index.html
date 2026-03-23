@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -146,24 +147,153 @@
       </section>
 
       <section class="section section--analytics hidden" id="analytics-section" aria-label="Аналитика">
-        <div class="analytics-card">
-          <h2>Аналитика</h2>
-          <p>Статистика по единицам обучения вашего каталога.</p>
-          <div class="analytics-metrics">
-            <div>
-              <span>Всего единиц</span>
-              <strong id="metric-total">0</strong>
+
+        <!-- Панель фильтров — структура как в каталоге -->
+        <div class="catalog-toolbar" id="an-toolbar">
+
+          <!-- Поиск по названию тренажёра — полноширинный, как в каталоге -->
+          <div class="toolbar-search">
+            <label for="an-unit-search">
+              <span>Поиск</span>
+              <div class="toolbar-search__wrap">
+                <svg class="toolbar-search__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input id="an-unit-search" type="search" placeholder="По названию тренажёра" autocomplete="off" />
+              </div>
+            </label>
+          </div>
+
+          <!-- Строка контролов: период + статус + направление + популярность + кнопки -->
+          <div class="toolbar-controls">
+
+            <!-- Период -->
+            <div class="an-period-tabs" id="an-period-tabs">
+              <button class="an-period-tab" type="button" data-period="week">Неделя</button>
+              <button class="an-period-tab is-active" type="button" data-period="month">Месяц</button>
+              <button class="an-period-tab" type="button" data-period="quarter">Квартал</button>
+              <button class="an-period-tab" type="button" data-period="year">Год</button>
+              <button class="an-period-tab" type="button" data-period="custom">Произвольный</button>
             </div>
-            <div>
-              <span>Проверяющих</span>
-              <strong id="metric-assessment">0</strong>
+            <div class="an-daterange hidden" id="an-date-range">
+              <input type="date" id="an-date-from" class="an-date-input" />
+              <span class="an-date-sep">—</span>
+              <input type="date" id="an-date-to" class="an-date-input" />
             </div>
-            <div>
-              <span>Обучающих</span>
-              <strong id="metric-learning">0</strong>
+
+            <!-- Статус -->
+            <div class="dd" id="an-dd-status">
+              <button class="dd__trigger" type="button" id="an-dd-status-btn">
+                <span id="an-dd-status-label">Статус</span>
+                <svg class="dd__arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="dd__panel dd__panel--sm" id="an-dd-status-panel">
+                <div class="dd__list">
+                  <label class="dd__radio-item"><input type="radio" name="an-status" value="all" checked /> Все статусы</label>
+                  <label class="dd__radio-item"><input type="radio" name="an-status" value="assigned" /> Назначен</label>
+                  <label class="dd__radio-item"><input type="radio" name="an-status" value="in_progress" /> В процессе</label>
+                  <label class="dd__radio-item"><input type="radio" name="an-status" value="completed" /> Завершён</label>
+                </div>
+              </div>
             </div>
+
+            <!-- Направление -->
+            <div class="dd" id="an-dd-direction">
+              <button class="dd__trigger" type="button" id="an-dd-direction-btn">
+                <span id="an-dd-direction-label">Направление</span>
+                <svg class="dd__arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="dd__panel" id="an-dd-direction-panel">
+                <div class="dd__list">
+                  <label class="dd__check-item"><input type="checkbox" name="an-dir" value="SME" /> SME</label>
+                  <label class="dd__check-item"><input type="checkbox" name="an-dir" value="ТМ" /> ТМ</label>
+                  <label class="dd__check-item"><input type="checkbox" name="an-dir" value="КЦ" /> КЦ</label>
+                  <label class="dd__check-item"><input type="checkbox" name="an-dir" value="ДКЦ" /> ДКЦ</label>
+                </div>
+                <div class="dd__footer">
+                  <button class="dd__apply" type="button" id="an-dir-apply">Применить</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- По популярности -->
+            <label class="an-popular-label">
+              <input type="checkbox" id="an-sort-popular" />
+              <span>По популярности</span>
+            </label>
+
+            <button class="btn btn--ghost hidden" id="an-reset-btn" type="button">Сбросить</button>
+            <button class="btn btn--primary an-export-btn" id="an-export-btn" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Экспорт
+            </button>
+
           </div>
         </div>
+
+        <!-- Метрики -->
+        <div class="an-metrics">
+          <div class="an-metric">
+            <span class="an-metric__label">Среднее время прохождения</span>
+            <strong class="an-metric__value" id="an-m-avg-time">—</strong>
+          </div>
+          <div class="an-metric an-metric--assigned">
+            <span class="an-metric__label">Назначено</span>
+            <strong class="an-metric__value" id="an-m-assigned">0</strong>
+          </div>
+          <div class="an-metric an-metric--progress">
+            <span class="an-metric__label">В процессе</span>
+            <strong class="an-metric__value" id="an-m-in-progress">0</strong>
+          </div>
+          <div class="an-metric an-metric--done">
+            <span class="an-metric__label">Завершено</span>
+            <strong class="an-metric__value" id="an-m-completed">0</strong>
+          </div>
+          <div class="an-metric">
+            <span class="an-metric__label">Средний балл</span>
+            <strong class="an-metric__value" id="an-m-avg-score">—</strong>
+          </div>
+          <div class="an-metric">
+            <span class="an-metric__label">Среднее кол-во попыток</span>
+            <strong class="an-metric__value" id="an-m-avg-attempts">—</strong>
+          </div>
+        </div>
+
+        <!-- Поиск по сотруднику -->
+        <div class="an-employee-bar">
+          <div class="an-employee-search-wrap">
+            <svg class="an-employee-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input id="an-employee-search" type="search" placeholder="Поиск по ФИО или userID сотрудника" autocomplete="off" />
+            <button class="an-emp-clear hidden" id="an-employee-clear" type="button" aria-label="Сбросить фильтр сотрудника">✕</button>
+          </div>
+          <div class="an-suggestions hidden" id="an-employee-suggestions"></div>
+        </div>
+
+        <!-- Таблица -->
+        <div class="an-table-card">
+          <div class="an-table-wrap">
+            <table class="an-table">
+              <thead>
+                <tr>
+                  <th>ФИО</th>
+                  <th>User</th>
+                  <th>Тренажёр</th>
+                  <th>Направление</th>
+                  <th>Дата начала</th>
+                  <th>Дата завершения</th>
+                  <th>Активное время</th>
+                  <th>Статус</th>
+                  <th>Балл</th>
+                  <th>Попытки</th>
+                </tr>
+              </thead>
+              <tbody id="an-table-body"></tbody>
+            </table>
+          </div>
+          <div class="empty-state hidden" id="an-empty-analytics">
+            <h2>Нет данных</h2>
+            <p>По заданным параметрам не найдено ни одной записи. <button type="button" class="an-inline-reset">Сбросить фильтры</button></p>
+          </div>
+        </div>
+
       </section>
 
       <section class="section section--admin hidden" id="admin-section" aria-label="Админ-панель">

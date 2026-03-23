@@ -129,6 +129,74 @@ function mergeBuilderUnits() {
   }
 }
 
+// ─── ANALYTICS MOCK DATA ─────────────────────────────────────────────────────
+
+const ANALYTICS_SESSIONS = bootstrap.analyticsSessions || (function () {
+  function s(id, unitId, unitTitle, dir, empId, empName, status, assignedDate, startDate, endDate, activeMin, score, attempts) {
+    return { id, unitId, unitTitle, direction: dir, employeeId: empId, employeeName: empName, status, assignedDate, startDate, endDate, activeTimeMinutes: activeMin, score, attempts };
+  }
+  return [
+    // Январь 2026
+    s("s01","edu-001","Тренажер по кредитным картам","КЦ","U_QD7RZ","Рожков Александр Игоревич","completed","2026-01-18T08:00:00Z","2026-01-20T09:15:00Z","2026-01-20T10:20:00Z",65,null,1),
+    s("s02","edu-003","Экзамен Basic1","ДКЦ","U_W2K9M","Савельева Мария Сергеевна","completed","2026-01-10T08:00:00Z","2026-01-15T10:00:00Z","2026-01-15T10:50:00Z",50,72,2),
+    s("s03","edu-004","Экзамен Optimum","SME","U_FH18Q","Игнатов Павел Андреевич","completed","2026-01-05T08:00:00Z","2026-01-08T14:00:00Z","2026-01-08T14:38:00Z",38,91,1),
+    s("s04","edu-004","Экзамен Optimum","SME","U_Z8P3D","Новикова Валерия Олеговна","completed","2026-01-22T08:00:00Z","2026-01-25T11:00:00Z","2026-01-25T11:33:00Z",33,85,1),
+    s("s05","edu-002","Тренажер по лояльности с клиентами","ТМ","U_J3R8P","Орлова Софья Артёмовна","completed","2026-01-08T08:00:00Z","2026-01-12T09:00:00Z","2026-01-12T09:58:00Z",58,null,1),
+    // Февраль 2026
+    s("s06","edu-002","Тренажер по лояльности с клиентами","ТМ","U_QD7RZ","Рожков Александр Игоревич","completed","2026-02-10T08:00:00Z","2026-02-14T09:00:00Z","2026-02-14T09:48:00Z",48,null,2),
+    s("s07","edu-003","Экзамен Basic1","ДКЦ","U_QD7RZ","Рожков Александр Игоревич","completed","2026-02-16T08:00:00Z","2026-02-20T10:00:00Z","2026-02-20T10:42:00Z",42,88,1),
+    s("s08","edu-001","Тренажер по кредитным картам","КЦ","U_W2K9M","Савельева Мария Сергеевна","completed","2026-02-06T08:00:00Z","2026-02-10T09:30:00Z","2026-02-10T10:40:00Z",70,null,1),
+    s("s09","edu-001","Тренажер по кредитным картам","КЦ","U_M0T5B","Королев Денис Владимирович","completed","2026-02-04T08:00:00Z","2026-02-08T13:00:00Z","2026-02-08T14:00:00Z",60,null,1),
+    s("s10","edu-002","Тренажер по лояльности с клиентами","ТМ","U_K4V1S","Баранов Олег Михайлович","completed","2026-02-12T08:00:00Z","2026-02-16T09:00:00Z","2026-02-16T09:55:00Z",55,null,1),
+    s("s11","edu-003","Экзамен Basic1","ДКЦ","U_K4V1S","Баранов Олег Михайлович","completed","2026-02-18T08:00:00Z","2026-02-22T10:00:00Z","2026-02-22T10:51:00Z",51,94,1),
+    s("s12","edu-003","Экзамен Basic1","ДКЦ","U_H9C7L","Пахомов Евгений Александрович","completed","2026-02-08T08:00:00Z","2026-02-12T10:00:00Z","2026-02-12T10:46:00Z",46,83,1),
+    s("s13","edu-001","Тренажер по кредитным картам","КЦ","U_J3R8P","Орлова Софья Артёмовна","completed","2026-02-14T08:00:00Z","2026-02-18T10:00:00Z","2026-02-18T11:07:00Z",67,null,1),
+    s("s14","edu-003","Экзамен Basic1","ДКЦ","U_B5U0K","Елисеев Артем Константинович","completed","2026-02-20T08:00:00Z","2026-02-24T10:00:00Z","2026-02-24T10:44:00Z",44,76,2),
+    s("s15","edu-002","Тренажер по лояльности с клиентами","ТМ","U_P7E4J","Егорова Татьяна Борисовна","completed","2026-02-02T08:00:00Z","2026-02-06T09:00:00Z","2026-02-06T09:45:00Z",45,null,1),
+    s("s16","edu-001","Тренажер по кредитным картам","КЦ","U_FH18Q","Игнатов Павел Андреевич","in_progress","2026-02-22T08:00:00Z","2026-02-25T11:00:00Z",null,35,null,1),
+    // Март 2026 (1–16)
+    s("s17","edu-004","Экзамен Optimum","SME","U_QD7RZ","Рожков Александр Игоревич","in_progress","2026-03-08T08:00:00Z","2026-03-10T14:00:00Z",null,20,null,1),
+    s("s18","edu-001","Тренажер по кредитным картам","КЦ","U_Q6Y2N","Филатова Наталья Юрьевна","completed","2026-03-01T08:00:00Z","2026-03-03T10:00:00Z","2026-03-03T11:03:00Z",63,null,1),
+    s("s19","edu-002","Тренажер по лояльности с клиентами","ТМ","U_M0T5B","Королев Денис Владимирович","completed","2026-03-03T08:00:00Z","2026-03-05T09:00:00Z","2026-03-05T09:52:00Z",52,null,1),
+    s("s20","edu-001","Тренажер по кредитным картам","КЦ","U_T1M6V","Громова Ксения Дмитриевна","completed","2026-03-02T08:00:00Z","2026-03-04T10:00:00Z","2026-03-04T11:01:00Z",61,null,1),
+    s("s21","edu-001","Тренажер по кредитным картам","КЦ","U_P7E4J","Егорова Татьяна Борисовна","completed","2026-03-04T08:00:00Z","2026-03-06T09:00:00Z","2026-03-06T09:59:00Z",59,null,1),
+    s("s22","edu-004","Экзамен Optimum","SME","U_H9C7L","Пахомов Евгений Александрович","completed","2026-03-05T08:00:00Z","2026-03-07T10:00:00Z","2026-03-07T10:40:00Z",40,70,2),
+    s("s23","edu-004","Экзамен Optimum","SME","U_P7E4J","Егорова Татьяна Борисовна","completed","2026-03-06T08:00:00Z","2026-03-08T10:00:00Z","2026-03-08T10:41:00Z",41,81,1),
+    s("s24","edu-001","Тренажер по кредитным картам","КЦ","U_Z8P3D","Новикова Валерия Олеговна","in_progress","2026-03-06T08:00:00Z","2026-03-08T11:00:00Z",null,28,null,1),
+    s("s25","edu-001","Тренажер по кредитным картам","КЦ","U_H9C7L","Пахомов Евгений Александрович","in_progress","2026-03-07T08:00:00Z","2026-03-09T09:00:00Z",null,30,null,1),
+    s("s26","edu-001","Тренажер по кредитным картам","КЦ","U_N2A9F","Чернов Роман Евгеньевич","in_progress","2026-03-08T08:00:00Z","2026-03-10T10:00:00Z",null,15,null,1),
+    s("s27","edu-004","Экзамен Optimum","SME","U_Q6Y2N","Филатова Наталья Юрьевна","in_progress","2026-03-09T08:00:00Z","2026-03-11T14:00:00Z",null,18,null,1),
+    s("s28","edu-002","Тренажер по лояльности с клиентами","ТМ","U_T1M6V","Громова Ксения Дмитриевна","in_progress","2026-03-10T08:00:00Z","2026-03-12T11:00:00Z",null,22,null,1),
+    s("s29","edu-003","Экзамен Basic1","ДКЦ","U_M0T5B","Королев Денис Владимирович","assigned","2026-03-14T08:00:00Z",null,null,null,null,0),
+    s("s30","edu-003","Экзамен Basic1","ДКЦ","U_J3R8P","Орлова Софья Артёмовна","assigned","2026-03-13T08:00:00Z",null,null,null,null,0),
+    s("s31","edu-001","Тренажер по кредитным картам","КЦ","U_K4V1S","Баранов Олег Михайлович","assigned","2026-03-14T08:00:00Z",null,null,null,null,0),
+    s("s32","edu-002","Тренажер по лояльности с клиентами","ТМ","U_W2K9M","Савельева Мария Сергеевна","assigned","2026-03-15T08:00:00Z",null,null,null,null,0),
+    s("s33","edu-002","Тренажер по лояльности с клиентами","ТМ","U_FH18Q","Игнатов Павел Андреевич","assigned","2026-03-12T08:00:00Z",null,null,null,null,0),
+    s("s34","edu-004","Экзамен Optimum","SME","U_N2A9F","Чернов Роман Евгеньевич","assigned","2026-03-16T08:00:00Z",null,null,null,null,0),
+    s("s35","edu-002","Тренажер по лояльности с клиентами","ТМ","U_Q6Y2N","Филатова Наталья Юрьевна","assigned","2026-03-16T08:00:00Z",null,null,null,null,0),
+    // Текущая неделя (17–23 марта 2026)
+    s("s36","edu-003","Экзамен Basic1","ДКЦ","U_R7N4X","Климова Ирина Николаевна","completed","2026-03-16T08:00:00Z","2026-03-18T10:00:00Z","2026-03-18T10:44:00Z",44,65,3),
+    s("s37","edu-004","Экзамен Optimum","SME","U_R7N4X","Климова Ирина Николаевна","completed","2026-03-18T08:00:00Z","2026-03-20T10:00:00Z","2026-03-20T10:36:00Z",36,79,1),
+    s("s38","edu-003","Экзамен Basic1","ДКЦ","U_Z8P3D","Новикова Валерия Олеговна","completed","2026-03-17T08:00:00Z","2026-03-19T10:00:00Z","2026-03-19T10:48:00Z",48,77,2),
+    s("s39","edu-004","Экзамен Optimum","SME","U_B5U0K","Елисеев Артем Константинович","completed","2026-03-19T08:00:00Z","2026-03-21T10:00:00Z","2026-03-21T10:35:00Z",35,88,1),
+    s("s40","edu-003","Экзамен Basic1","ДКЦ","U_N2A9F","Чернов Роман Евгеньевич","completed","2026-03-20T08:00:00Z","2026-03-22T10:00:00Z","2026-03-22T10:49:00Z",49,92,1),
+  ];
+}());
+
+const defaultAnalyticsState = {
+  period: "month",
+  customFrom: "",
+  customTo: "",
+  status: "all",
+  directions: [],
+  unitSearch: "",
+  sortByPopularity: false,
+  selectedEmployeeId: null,
+  employeeSearchText: "",
+};
+
+let analyticsState = { ...defaultAnalyticsState };
+
 const promptCovers = [
   encodeURI("./premium.jpg"),
   encodeURI("./premium_2.jpg"),
@@ -222,9 +290,31 @@ const dom = {
   userAvatar: document.getElementById("user-avatar"),
   userName: document.getElementById("user-name"),
   userRole: document.getElementById("user-role"),
-  metricTotal: document.getElementById("metric-total"),
-  metricAssessment: document.getElementById("metric-assessment"),
-  metricLearning: document.getElementById("metric-learning"),
+  // Analytics elements
+  anPeriodTabs: document.getElementById("an-period-tabs"),
+  anDateRange: document.getElementById("an-date-range"),
+  anDateFrom: document.getElementById("an-date-from"),
+  anDateTo: document.getElementById("an-date-to"),
+  anDdStatus: document.getElementById("an-dd-status"),
+  anDdStatusLabel: document.getElementById("an-dd-status-label"),
+  anDdDirection: document.getElementById("an-dd-direction"),
+  anDdDirectionLabel: document.getElementById("an-dd-direction-label"),
+  anDirApply: document.getElementById("an-dir-apply"),
+  anUnitSearch: document.getElementById("an-unit-search"),
+  anSortPopular: document.getElementById("an-sort-popular"),
+  anResetBtn: document.getElementById("an-reset-btn"),
+  anExportBtn: document.getElementById("an-export-btn"),
+  anMAvgTime: document.getElementById("an-m-avg-time"),
+  anMAssigned: document.getElementById("an-m-assigned"),
+  anMInProgress: document.getElementById("an-m-in-progress"),
+  anMCompleted: document.getElementById("an-m-completed"),
+  anMAvgScore: document.getElementById("an-m-avg-score"),
+  anMAvgAttempts: document.getElementById("an-m-avg-attempts"),
+  anEmployeeSearch: document.getElementById("an-employee-search"),
+  anEmployeeClear: document.getElementById("an-employee-clear"),
+  anEmployeeSuggestions: document.getElementById("an-employee-suggestions"),
+  anTableBody: document.getElementById("an-table-body"),
+  anEmptyAnalytics: document.getElementById("an-empty-analytics"),
   deleteModalBackdrop: document.getElementById("delete-modal-backdrop"),
   deleteUnitTitle: document.getElementById("delete-unit-title"),
   deleteCancelBtn: document.getElementById("delete-cancel-btn"),
@@ -317,6 +407,7 @@ function init() {
   bindEvents();
   bindWizardEvents();
   bindCropEvents();
+  bindAnalyticsEvents();
   applyStateToInputs();
   refreshView();
 }
@@ -560,10 +651,23 @@ function refreshView() {
 }
 
 function refreshAnalytics() {
-  const visibleUnits = getVisibleUnitsForUser();
-  dom.metricTotal.textContent = String(visibleUnits.length);
-  dom.metricAssessment.textContent = String(visibleUnits.filter((u) => u.type === "Проверяющая").length);
-  dom.metricLearning.textContent = String(visibleUnits.filter((u) => u.type === "Обучающая").length);
+  if (!currentUser.rights.canViewAnalytics) {
+    dom.analyticsSection.innerHTML = `<div class="an-access-denied"><p>Недостаточно прав для просмотра аналитики.</p></div>`;
+    return;
+  }
+
+  const sessions = filterAnalyticsSessions();
+  const metrics = computeAnalyticsMetrics(sessions);
+
+  dom.anMAvgTime.textContent = formatMinutes(metrics.avgTime);
+  dom.anMAssigned.textContent = String(metrics.assigned);
+  dom.anMInProgress.textContent = String(metrics.inProgress);
+  dom.anMCompleted.textContent = String(metrics.completed);
+  dom.anMAvgScore.textContent = metrics.avgScore != null ? String(metrics.avgScore) : "—";
+  dom.anMAvgAttempts.textContent = metrics.avgAttempts != null ? String(metrics.avgAttempts) : "—";
+
+  renderAnalyticsTable(sessions);
+  syncAnalyticsResetBtn();
 }
 
 function refreshCatalog() {
@@ -1567,6 +1671,405 @@ function bindCropEvents() {
   cropDom.applyBtn.addEventListener("click", applyCrop);
   cropDom.backdrop.addEventListener("click", (e) => {
     if (e.target === cropDom.backdrop) closeCropModal();
+  });
+}
+
+// ─── ANALYTICS ───────────────────────────────────────────────────────────────
+
+function getAnalyticsDateRange() {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const to = new Date(today);
+  to.setHours(23, 59, 59, 999);
+
+  if (analyticsState.period === "custom") {
+    const from = analyticsState.customFrom ? new Date(analyticsState.customFrom) : null;
+    const toCustom = analyticsState.customTo ? new Date(analyticsState.customTo + "T23:59:59") : null;
+    return { from, to: toCustom };
+  }
+
+  let from;
+  switch (analyticsState.period) {
+    case "week":
+      from = new Date(today);
+      from.setDate(from.getDate() - 6);
+      break;
+    case "month":
+      from = new Date(today.getFullYear(), today.getMonth(), 1);
+      break;
+    case "quarter": {
+      const q = Math.floor(today.getMonth() / 3);
+      from = new Date(today.getFullYear(), q * 3, 1);
+      break;
+    }
+    case "year":
+      from = new Date(today.getFullYear(), 0, 1);
+      break;
+    default:
+      from = null;
+  }
+  return { from, to };
+}
+
+function getSessionDate(session) {
+  if (session.startDate) return new Date(session.startDate);
+  if (session.assignedDate) return new Date(session.assignedDate);
+  return null;
+}
+
+function filterAnalyticsSessions() {
+  let sessions = ANALYTICS_SESSIONS.slice();
+  const { from, to } = getAnalyticsDateRange();
+
+  if (from || to) {
+    sessions = sessions.filter((s) => {
+      const d = getSessionDate(s);
+      if (!d) return false;
+      if (from && d < from) return false;
+      if (to && d > to) return false;
+      return true;
+    });
+  }
+
+  if (analyticsState.status !== "all") {
+    sessions = sessions.filter((s) => s.status === analyticsState.status);
+  }
+
+  if (analyticsState.directions.length > 0) {
+    sessions = sessions.filter((s) => analyticsState.directions.includes(s.direction));
+  }
+
+  if (analyticsState.unitSearch) {
+    const q = analyticsState.unitSearch.toLowerCase();
+    sessions = sessions.filter((s) => s.unitTitle.toLowerCase().includes(q));
+  }
+
+  if (analyticsState.selectedEmployeeId) {
+    sessions = sessions.filter((s) => s.employeeId === analyticsState.selectedEmployeeId);
+  }
+
+  if (analyticsState.sortByPopularity) {
+    const popularity = {};
+    ANALYTICS_SESSIONS.forEach((s) => {
+      popularity[s.unitId] = (popularity[s.unitId] || 0) + (s.attempts || 0);
+    });
+    sessions.sort((a, b) => (popularity[b.unitId] || 0) - (popularity[a.unitId] || 0));
+  }
+
+  return sessions;
+}
+
+function computeAnalyticsMetrics(sessions) {
+  const assigned = sessions.filter((s) => s.status === "assigned").length;
+  const inProgress = sessions.filter((s) => s.status === "in_progress").length;
+  const completed = sessions.filter((s) => s.status === "completed").length;
+
+  const activeSessions = sessions.filter((s) => s.activeTimeMinutes != null && s.activeTimeMinutes > 0);
+  const avgTime = activeSessions.length > 0
+    ? activeSessions.reduce((sum, s) => sum + s.activeTimeMinutes, 0) / activeSessions.length
+    : null;
+
+  const scoredSessions = sessions.filter((s) => s.score != null);
+  const avgScore = scoredSessions.length > 0
+    ? Math.round(scoredSessions.reduce((sum, s) => sum + s.score, 0) / scoredSessions.length)
+    : null;
+
+  const attemptedSessions = sessions.filter((s) => s.attempts != null && s.attempts > 0);
+  const avgAttempts = attemptedSessions.length > 0
+    ? (attemptedSessions.reduce((sum, s) => sum + s.attempts, 0) / attemptedSessions.length).toFixed(1)
+    : null;
+
+  return { assigned, inProgress, completed, avgTime, avgScore, avgAttempts };
+}
+
+function formatMinutes(minutes) {
+  if (minutes == null) return "—";
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes % 60);
+  if (h > 0) return m > 0 ? `${h} ч ${m} мин` : `${h} ч`;
+  return `${m} мин`;
+}
+
+function formatDate(isoString) {
+  if (!isoString) return "—";
+  return new Date(isoString).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+function getStatusLabel(status) {
+  const map = { assigned: "Назначен", in_progress: "В процессе", completed: "Завершён" };
+  return map[status] || status;
+}
+
+function getStatusClass(status) {
+  const map = { assigned: "an-status--assigned", in_progress: "an-status--progress", completed: "an-status--done" };
+  return map[status] || "";
+}
+
+function renderAnalyticsTable(sessions) {
+  dom.anTableBody.innerHTML = "";
+
+  if (sessions.length === 0) {
+    dom.anEmptyAnalytics.classList.remove("hidden");
+    return;
+  }
+
+  dom.anEmptyAnalytics.classList.add("hidden");
+
+  sessions.forEach((s) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${escapeHtml(s.employeeName)}</td>
+      <td><code>${escapeHtml(s.employeeId)}</code></td>
+      <td class="an-unit-cell">${escapeHtml(s.unitTitle)}</td>
+      <td><span class="an-direction-badge">${escapeHtml(s.direction)}</span></td>
+      <td>${s.startDate ? formatDate(s.startDate) : formatDate(s.assignedDate)}</td>
+      <td>${formatDate(s.endDate)}</td>
+      <td>${s.activeTimeMinutes != null && s.activeTimeMinutes > 0 ? formatMinutes(s.activeTimeMinutes) : "—"}</td>
+      <td><span class="an-status ${getStatusClass(s.status)}">${escapeHtml(getStatusLabel(s.status))}</span></td>
+      <td>${s.score != null ? s.score : "—"}</td>
+      <td>${s.attempts != null && s.attempts > 0 ? s.attempts : "—"}</td>
+    `;
+    dom.anTableBody.appendChild(tr);
+  });
+}
+
+function isAnalyticsDefault() {
+  return analyticsState.period === "month" &&
+    analyticsState.status === "all" &&
+    analyticsState.directions.length === 0 &&
+    !analyticsState.unitSearch &&
+    !analyticsState.sortByPopularity &&
+    !analyticsState.selectedEmployeeId;
+}
+
+function syncAnalyticsResetBtn() {
+  dom.anResetBtn.classList.toggle("hidden", isAnalyticsDefault());
+}
+
+function resetAnalytics() {
+  analyticsState = { ...defaultAnalyticsState };
+
+  document.querySelectorAll("#an-period-tabs .an-period-tab").forEach((btn) => {
+    btn.classList.toggle("is-active", btn.dataset.period === "month");
+  });
+  dom.anDateRange.classList.add("hidden");
+  dom.anDateFrom.value = "";
+  dom.anDateTo.value = "";
+
+  const allRadio = document.querySelector('input[name="an-status"][value="all"]');
+  if (allRadio) allRadio.checked = true;
+  dom.anDdStatusLabel.textContent = "Статус";
+
+  document.querySelectorAll('input[name="an-dir"]').forEach((cb) => { cb.checked = false; });
+  dom.anDdDirectionLabel.textContent = "Направление";
+
+  dom.anUnitSearch.value = "";
+  dom.anSortPopular.checked = false;
+
+  dom.anEmployeeSearch.value = "";
+  dom.anEmployeeClear.classList.add("hidden");
+  dom.anEmployeeSuggestions.classList.add("hidden");
+
+  closeAllAnalyticsDds();
+  refreshAnalytics();
+}
+
+function exportAnalyticsExcel() {
+  const sessions = filterAnalyticsSessions();
+
+  if (sessions.length === 0) {
+    // eslint-disable-next-line no-alert
+    alert("Нет данных для экспорта по текущим фильтрам.");
+    return;
+  }
+
+  const headers = ["ФИО", "User", "Тренажёр", "Направление", "Дата начала", "Дата завершения", "Активное время (мин)", "Статус", "Балл", "Попытки"];
+  const rows = sessions.map((s) => [
+    s.employeeName,
+    s.employeeId,
+    s.unitTitle,
+    s.direction,
+    s.startDate ? formatDate(s.startDate) : (s.assignedDate ? formatDate(s.assignedDate) : ""),
+    s.endDate ? formatDate(s.endDate) : "",
+    s.activeTimeMinutes != null && s.activeTimeMinutes > 0 ? s.activeTimeMinutes : "",
+    getStatusLabel(s.status),
+    s.score != null ? s.score : "",
+    s.attempts != null && s.attempts > 0 ? s.attempts : "",
+  ]);
+
+  if (typeof XLSX !== "undefined") {
+    const wsData = [headers, ...rows];
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws["!cols"] = [
+      { wch: 30 }, { wch: 12 }, { wch: 35 }, { wch: 10 },
+      { wch: 13 }, { wch: 16 }, { wch: 18 }, { wch: 12 },
+      { wch: 8 }, { wch: 10 },
+    ];
+    XLSX.utils.book_append_sheet(wb, ws, "Аналитика");
+    XLSX.writeFile(wb, "analytics.xlsx");
+  } else {
+    // Fallback: CSV with UTF-8 BOM
+    const csvRows = [headers, ...rows].map((row) =>
+      row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
+    );
+    const blob = new Blob(["\uFEFF" + csvRows.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "analytics.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+}
+
+function getAnalyticsEmployeeSuggestions(query) {
+  if (!query || query.length < 2) return [];
+  const q = query.toLowerCase();
+  const seen = new Set();
+  const results = [];
+  ANALYTICS_SESSIONS.forEach((s) => {
+    if (!seen.has(s.employeeId) &&
+        (s.employeeName.toLowerCase().includes(q) || s.employeeId.toLowerCase().includes(q))) {
+      seen.add(s.employeeId);
+      results.push({ id: s.employeeId, name: s.employeeName });
+    }
+  });
+  return results.slice(0, 6);
+}
+
+function showEmployeeSuggestions(suggestions) {
+  if (suggestions.length === 0) {
+    dom.anEmployeeSuggestions.classList.add("hidden");
+    return;
+  }
+  dom.anEmployeeSuggestions.innerHTML = suggestions.map((emp) =>
+    `<button type="button" class="an-suggestion-item" data-empid="${escapeHtml(emp.id)}">${escapeHtml(emp.name)}<span class="an-sug-userid">${escapeHtml(emp.id)}</span></button>`
+  ).join("");
+  dom.anEmployeeSuggestions.classList.remove("hidden");
+}
+
+function selectAnalyticsEmployee(empId) {
+  const session = ANALYTICS_SESSIONS.find((s) => s.employeeId === empId);
+  if (!session) return;
+  analyticsState.selectedEmployeeId = empId;
+  dom.anEmployeeSearch.value = session.employeeName;
+  dom.anEmployeeSuggestions.classList.add("hidden");
+  dom.anEmployeeClear.classList.remove("hidden");
+  refreshAnalytics();
+}
+
+function clearAnalyticsEmployee() {
+  analyticsState.selectedEmployeeId = null;
+  analyticsState.employeeSearchText = "";
+  dom.anEmployeeSearch.value = "";
+  dom.anEmployeeClear.classList.add("hidden");
+  dom.anEmployeeSuggestions.classList.add("hidden");
+  refreshAnalytics();
+}
+
+function closeAllAnalyticsDds() {
+  document.querySelectorAll("#an-toolbar .dd--open").forEach((d) => d.classList.remove("dd--open"));
+}
+
+function bindAnalyticsDd(ddEl) {
+  const trigger = ddEl.querySelector(".dd__trigger");
+  if (!trigger) return;
+  trigger.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = ddEl.classList.contains("dd--open");
+    closeAllAnalyticsDds();
+    if (!isOpen) ddEl.classList.add("dd--open");
+  });
+}
+
+function bindAnalyticsEvents() {
+  [dom.anDdStatus, dom.anDdDirection].forEach(bindAnalyticsDd);
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".an-toolbar .dd")) closeAllAnalyticsDds();
+  });
+
+  dom.anPeriodTabs.addEventListener("click", (e) => {
+    const tab = e.target.closest(".an-period-tab");
+    if (!tab) return;
+    document.querySelectorAll(".an-period-tab").forEach((t) => t.classList.remove("is-active"));
+    tab.classList.add("is-active");
+    analyticsState.period = tab.dataset.period;
+    dom.anDateRange.classList.toggle("hidden", analyticsState.period !== "custom");
+    if (analyticsState.period !== "custom") refreshAnalytics();
+  });
+
+  dom.anDateFrom.addEventListener("change", () => {
+    analyticsState.customFrom = dom.anDateFrom.value;
+    if (analyticsState.period === "custom" && analyticsState.customFrom && analyticsState.customTo) refreshAnalytics();
+  });
+
+  dom.anDateTo.addEventListener("change", () => {
+    analyticsState.customTo = dom.anDateTo.value;
+    if (analyticsState.period === "custom" && analyticsState.customFrom && analyticsState.customTo) refreshAnalytics();
+  });
+
+  document.querySelectorAll('input[name="an-status"]').forEach((radio) => {
+    radio.addEventListener("change", () => {
+      analyticsState.status = radio.value;
+      const labels = { all: "Статус", assigned: "Назначен", in_progress: "В процессе", completed: "Завершён" };
+      dom.anDdStatusLabel.textContent = labels[radio.value] || "Статус";
+      closeAllAnalyticsDds();
+      refreshAnalytics();
+    });
+  });
+
+  dom.anDirApply.addEventListener("click", () => {
+    analyticsState.directions = [...document.querySelectorAll('input[name="an-dir"]:checked')].map((cb) => cb.value);
+    const label = analyticsState.directions.length > 0
+      ? analyticsState.directions.join(", ")
+      : "Направление";
+    dom.anDdDirectionLabel.textContent = label.length > 15 ? label.slice(0, 13) + "…" : label;
+    closeAllAnalyticsDds();
+    refreshAnalytics();
+  });
+
+  dom.anUnitSearch.addEventListener("input", () => {
+    analyticsState.unitSearch = dom.anUnitSearch.value.trim();
+    refreshAnalytics();
+  });
+
+  dom.anSortPopular.addEventListener("change", () => {
+    analyticsState.sortByPopularity = dom.anSortPopular.checked;
+    refreshAnalytics();
+  });
+
+  dom.anResetBtn.addEventListener("click", resetAnalytics);
+  dom.anExportBtn.addEventListener("click", exportAnalyticsExcel);
+
+  dom.anEmployeeSearch.addEventListener("input", () => {
+    const q = dom.anEmployeeSearch.value.trim();
+    if (!q) {
+      clearAnalyticsEmployee();
+      return;
+    }
+    analyticsState.employeeSearchText = q;
+    showEmployeeSuggestions(getAnalyticsEmployeeSuggestions(q));
+    dom.anEmployeeClear.classList.toggle("hidden", !q);
+  });
+
+  dom.anEmployeeSuggestions.addEventListener("click", (e) => {
+    const item = e.target.closest(".an-suggestion-item");
+    if (!item) return;
+    selectAnalyticsEmployee(item.dataset.empid);
+  });
+
+  dom.anEmployeeClear.addEventListener("click", clearAnalyticsEmployee);
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".an-employee-bar")) {
+      dom.anEmployeeSuggestions.classList.add("hidden");
+    }
+  });
+
+  dom.anEmptyAnalytics.addEventListener("click", (e) => {
+    if (e.target.closest(".an-inline-reset")) resetAnalytics();
   });
 }
 
