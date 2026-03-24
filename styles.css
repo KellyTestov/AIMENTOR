@@ -853,24 +853,9 @@ body {
   font-size: 15px;
 }
 
-/* Toolbar */
-.an-toolbar {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 16px 18px;
-  margin-bottom: 16px;
-}
-
-/* Period row */
-.an-period-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
+/* Analytics toolbar spacing inside section card */
+#an-toolbar {
+  margin-bottom: 18px;
 }
 
 .an-period-tabs {
@@ -933,14 +918,6 @@ body {
   color: var(--muted);
   font-size: 14px;
   flex-shrink: 0;
-}
-
-/* Filters row */
-.an-filters-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
 }
 
 .an-popular-label {
@@ -1623,11 +1600,6 @@ body {
 
   .an-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .an-filters-row {
-    flex-direction: column;
-    align-items: stretch;
   }
 
   .an-export-btn {

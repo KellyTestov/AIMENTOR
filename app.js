@@ -1987,7 +1987,7 @@ function bindAnalyticsEvents() {
   [dom.anDdStatus, dom.anDdDirection].forEach(bindAnalyticsDd);
 
   document.addEventListener("click", (e) => {
-    if (!e.target.closest(".an-toolbar .dd")) closeAllAnalyticsDds();
+    if (!e.target.closest("#an-toolbar .dd")) closeAllAnalyticsDds();
   });
 
   dom.anPeriodTabs.addEventListener("click", (e) => {
