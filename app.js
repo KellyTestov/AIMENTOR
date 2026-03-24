@@ -188,6 +188,7 @@ const defaultAnalyticsState = {
   customFrom: "",
   customTo: "",
   status: "all",
+  factories: [],
   directions: [],
   unitSearch: "",
   sortByPopularity: false,
@@ -196,6 +197,16 @@ const defaultAnalyticsState = {
 };
 
 let analyticsState = { ...defaultAnalyticsState };
+
+const FACTORIES = ['Доставка', 'Урегулирование', 'Сервис', 'Телемаркетинг'];
+const DIRECTION_MAP = {
+  'Доставка':       ['Малый и микро бизнес', 'Розничный бизнес'],
+  'Урегулирование': ['90-', '90+', 'Выездное'],
+  'Сервис':         ['ФЛ Chat', 'ФЛ Voice', 'ЮЛ Chat', 'ЮЛ Voice', 'СвА', 'Эквайринг'],
+
+  'Телемаркетинг':  ['Физ.лица', 'Юр.лица'],
+};
+const ALL_DIRECTIONS = [...new Set(Object.values(DIRECTION_MAP).flat())];
 
 const promptCovers = [
   encodeURI("./premium.jpg"),
@@ -297,6 +308,10 @@ const dom = {
   anDateTo: document.getElementById("an-date-to"),
   anDdStatus: document.getElementById("an-dd-status"),
   anDdStatusLabel: document.getElementById("an-dd-status-label"),
+  anDdFactory: document.getElementById("an-dd-factory"),
+  anDdFactoryLabel: document.getElementById("an-dd-factory-label"),
+  anDdFactoryList: document.getElementById("an-dd-factory-list"),
+  anFactoryApply: document.getElementById("an-factory-apply"),
   anDdDirection: document.getElementById("an-dd-direction"),
   anDdDirectionLabel: document.getElementById("an-dd-direction-label"),
   anDirApply: document.getElementById("an-dir-apply"),
@@ -1735,6 +1750,13 @@ function filterAnalyticsSessions() {
     sessions = sessions.filter((s) => s.status === analyticsState.status);
   }
 
+  if (analyticsState.factories.length > 0) {
+    const unitIdsInFactory = allUnits
+      .filter((u) => analyticsState.factories.includes(u.factory))
+      .map((u) => u.id);
+    sessions = sessions.filter((s) => unitIdsInFactory.includes(s.unitId));
+  }
+
   if (analyticsState.directions.length > 0) {
     sessions = sessions.filter((s) => analyticsState.directions.includes(s.direction));
   }
@@ -1836,6 +1858,7 @@ function renderAnalyticsTable(sessions) {
 function isAnalyticsDefault() {
   return analyticsState.period === "month" &&
     analyticsState.status === "all" &&
+    analyticsState.factories.length === 0 &&
     analyticsState.directions.length === 0 &&
     !analyticsState.unitSearch &&
     !analyticsState.sortByPopularity &&
@@ -1860,7 +1883,10 @@ function resetAnalytics() {
   if (allRadio) allRadio.checked = true;
   dom.anDdStatusLabel.textContent = "Статус";
 
-  document.querySelectorAll('input[name="an-dir"]').forEach((cb) => { cb.checked = false; });
+  document.querySelectorAll('#an-dd-factory-list input').forEach((cb) => { cb.checked = false; });
+  dom.anDdFactoryLabel.textContent = "Фабрика";
+
+  populateAnDirectionList([]);
   dom.anDdDirectionLabel.textContent = "Направление";
 
   dom.anUnitSearch.value = "";
@@ -1983,8 +2009,41 @@ function bindAnalyticsDd(ddEl) {
   });
 }
 
+function populateAnFactoryList() {
+  dom.anDdFactoryList.innerHTML = FACTORIES.map((f) =>
+    `<label class="dd__check-item"><input type="checkbox" name="an-factory" value="${escapeHtml(f)}" /> ${escapeHtml(f)}</label>`
+  ).join("");
+}
+
+function populateAnDirectionList(selectedFactories) {
+  const dirs = (!selectedFactories || selectedFactories.length === 0)
+    ? ALL_DIRECTIONS
+    : [...new Set(selectedFactories.flatMap((f) => DIRECTION_MAP[f] || []))];
+  const list = document.getElementById("an-dd-direction-list");
+  if (!list) return;
+  list.innerHTML = dirs.map((d) =>
+    `<label class="dd__check-item"><input type="checkbox" name="an-dir" value="${escapeHtml(d)}" /> ${escapeHtml(d)}</label>`
+  ).join("");
+}
+
 function bindAnalyticsEvents() {
-  [dom.anDdStatus, dom.anDdDirection].forEach(bindAnalyticsDd);
+  [dom.anDdStatus, dom.anDdFactory, dom.anDdDirection].forEach(bindAnalyticsDd);
+
+  populateAnFactoryList();
+  populateAnDirectionList([]);
+
+  dom.anFactoryApply.addEventListener("click", () => {
+    analyticsState.factories = [...document.querySelectorAll('input[name="an-factory"]:checked')].map((cb) => cb.value);
+    const label = analyticsState.factories.length > 0 ? analyticsState.factories.join(", ") : "Фабрика";
+    dom.anDdFactoryLabel.textContent = label.length > 15 ? label.slice(0, 13) + "…" : label;
+    // Перестраиваем список направлений под выбранные фабрики и сбрасываем их выбор
+    populateAnDirectionList(analyticsState.factories);
+    analyticsState.directions = [];
+    dom.anDdDirectionLabel.textContent = "Направление";
+    closeAllAnalyticsDds();
+    refreshAnalytics();
+    syncAnalyticsResetBtn();
+  });
 
   document.addEventListener("click", (e) => {
     if (!e.target.closest("#an-toolbar .dd")) closeAllAnalyticsDds();

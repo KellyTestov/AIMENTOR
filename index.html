@@ -61,7 +61,6 @@
               <option value="Доставка">Доставка</option>
               <option value="Урегулирование">Урегулирование</option>
               <option value="Сервис">Сервис</option>
-              <option value="Эквайринг">Эквайринг</option>
               <option value="Телемаркетинг">Телемаркетинг</option>
             </select>
             <select id="direction-filter" class="sr-only" aria-hidden="true"><option value="all">Все направления</option></select>
@@ -195,6 +194,18 @@
               </div>
             </div>
 
+            <!-- Фабрика -->
+            <div class="dd" id="an-dd-factory">
+              <button class="dd__trigger" type="button" id="an-dd-factory-btn">
+                <span id="an-dd-factory-label">Фабрика</span>
+                <svg class="dd__arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="dd__panel" id="an-dd-factory-panel">
+                <div class="dd__list" id="an-dd-factory-list"></div>
+                <div class="dd__footer"><button class="dd__apply" type="button" id="an-factory-apply">Применить</button></div>
+              </div>
+            </div>
+
             <!-- Направление -->
             <div class="dd" id="an-dd-direction">
               <button class="dd__trigger" type="button" id="an-dd-direction-btn">
@@ -202,12 +213,7 @@
                 <svg class="dd__arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
               </button>
               <div class="dd__panel" id="an-dd-direction-panel">
-                <div class="dd__list">
-                  <label class="dd__check-item"><input type="checkbox" name="an-dir" value="SME" /> SME</label>
-                  <label class="dd__check-item"><input type="checkbox" name="an-dir" value="ТМ" /> ТМ</label>
-                  <label class="dd__check-item"><input type="checkbox" name="an-dir" value="КЦ" /> КЦ</label>
-                  <label class="dd__check-item"><input type="checkbox" name="an-dir" value="ДКЦ" /> ДКЦ</label>
-                </div>
+                <div class="dd__list" id="an-dd-direction-list"></div>
                 <div class="dd__footer">
                   <button class="dd__apply" type="button" id="an-dir-apply">Применить</button>
                 </div>
@@ -522,8 +528,7 @@
                 <select class="sr-only" id="wf-factory" name="factory" aria-hidden="true">
                   <option value="">Выберите фабрику</option>
                   <option value="Доставка">Доставка</option><option value="Урегулирование">Урегулирование</option>
-                  <option value="Сервис">Сервис</option><option value="Эквайринг">Эквайринг</option>
-                  <option value="Телемаркетинг">Телемаркетинг</option>
+                  <option value="Сервис">Сервис</option><option value="Телемаркетинг">Телемаркетинг</option>
                 </select>
               </div>
               <div class="wf-field">
@@ -646,16 +651,7 @@
       });
     });
 
-    // Фабрики (хардкод) и карта направлений
-    const FACTORIES = ['Доставка', 'Урегулирование', 'Сервис', 'Эквайринг', 'Телемаркетинг'];
-    const DIRECTION_MAP = {
-      'Доставка':      ['Малый и микро бизнес', 'Розничный бизнес'],
-      'Урегулирование':['90-', '90+', 'Выездное'],
-      'Сервис':        ['ФЛ Chat', 'ФЛ Voice', 'ЮЛ Chat', 'ЮЛ Voice', 'СвА', 'Эквайринг'],
-      'Эквайринг':     [],
-      'Телемаркетинг': ['Физ.лица', 'Юр.лица'],
-    };
-    const ALL_DIRECTIONS = [...new Set(Object.values(DIRECTION_MAP).flat())];
+    // Берём FACTORIES / DIRECTION_MAP / ALL_DIRECTIONS из app.js (они объявлены там глобально)
 
     function buildFactoryList() {
       const list = document.getElementById('dd-factory-list');
