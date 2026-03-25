@@ -29,6 +29,17 @@
         </svg>
         <span id="sb-timer-val">00:00:00</span>
       </div>
+      <!-- Таймер текущего вопроса (только для режима экзамена) -->
+      <div class="sb-timer sb-qtimer hidden" id="sb-qtimer" aria-live="polite" aria-label="Таймер текущего вопроса">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20z"/>
+          <path d="M12 8v4l2 2"/>
+          <line x1="12" y1="2" x2="12" y2="4"/>
+        </svg>
+        <span class="sb-qtimer__label">вопрос</span>
+        <span id="sb-qtimer-val">00:00</span>
+      </div>
     </div>
     <div class="sb-header__center">
       <div class="sb-header__unit-label">Название единицы обучения</div>

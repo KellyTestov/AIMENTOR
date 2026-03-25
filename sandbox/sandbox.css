@@ -85,6 +85,18 @@ html, body {
   0%, 100% { opacity: 1; } 50% { opacity: .7; }
 }
 
+/* Таймер вопроса */
+.sb-qtimer { gap: 4px; }
+.sb-qtimer__label {
+  font: 500 10px/1 Manrope, sans-serif;
+  opacity: .65; letter-spacing: .03em; text-transform: lowercase;
+}
+.sb-qtimer--neutral { color: #374151; background: #f3f4f6; border-color: #d1d5db; }
+.sb-qtimer--warn    { color: #92400e; background: #fffbeb; border-color: #fcd34d;
+                      animation: timerPulse 1.5s ease-in-out infinite; }
+.sb-qtimer--over    { color: #991b1b; background: #fef2f2; border-color: #fca5a5;
+                      animation: timerPulse .8s ease-in-out infinite; }
+
 /* ── Кнопка данных клиента ──────────────────────── */
 .sb-client-btn {
   display: inline-flex; align-items: center; gap: 5px;
@@ -144,7 +156,7 @@ html, body {
   border-bottom-left-radius: 4px;
 }
 .sb-msg--client::before {
-  content: "Клиент";
+  content: var(--client-bubble-label, "Клиент");
   display: block; font-size: 10px; font-weight: 700;
   letter-spacing: .05em; text-transform: uppercase;
   color: #3b82f6; margin-bottom: 4px;

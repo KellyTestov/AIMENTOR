@@ -46,6 +46,9 @@ let session = null;
 let unitId  = null;
 let isBusy  = false;
 let timerInterval     = null;
+let inactivityTimeout = null;
+let questionTimerInterval = null;
+let questionElapsed       = 0;
 
 /* ── Утилиты ─────────────────────────────────────── */
 function esc(s) {
@@ -144,6 +147,35 @@ function renderTimer(sec) {
   if (wrap) {
     wrap.className = "sb-timer " +
       (sec < 1201 ? "sb-timer--green" : sec < 2401 ? "sb-timer--blue" : "sb-timer--red");
+  }
+}
+
+/* ── Таймер текущего вопроса (только экзамен) ── */
+function startQuestionTimer() {
+  stopQuestionTimer();
+  questionElapsed = 0;
+  renderQuestionTimer(0);
+  document.getElementById("sb-qtimer").classList.remove("hidden");
+  questionTimerInterval = setInterval(() => {
+    questionElapsed++;
+    renderQuestionTimer(questionElapsed);
+  }, 1000);
+}
+
+function stopQuestionTimer() {
+  if (questionTimerInterval) { clearInterval(questionTimerInterval); questionTimerInterval = null; }
+}
+
+function renderQuestionTimer(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  const el = document.getElementById("sb-qtimer-val");
+  const wrap = document.getElementById("sb-qtimer");
+  if (el) el.textContent = `${pad(m)}:${pad(s)}`;
+  if (wrap) {
+    // 0-2:30 нейтральный, 2:30-3:00 предупреждение, 3:00+ красный
+    wrap.className = "sb-timer sb-qtimer " +
+      (sec < 150 ? "sb-qtimer--neutral" : sec < 180 ? "sb-qtimer--warn" : "sb-qtimer--over");
   }
 }
 function pad(n) { return String(n).padStart(2, "0"); }
@@ -364,6 +396,8 @@ function startExam() {
   document.getElementById("btn-show-client").classList.remove("hidden");
   document.getElementById("sb-role-bar").classList.remove("hidden");
   document.getElementById("sb-role-client-label").textContent = "💬 " + MOCK_CLIENT.name;
+  const _nameParts = MOCK_CLIENT.name.split(" ");
+  document.documentElement.style.setProperty("--client-bubble-label", `"${(_nameParts[1] || "") + (_nameParts[2] ? " " + _nameParts[2] : "")}"`);
   document.getElementById("sb-mode-badge").textContent = "Экзамен";
 
   if (!session.elapsedSeconds) session.elapsedSeconds = 0;
@@ -382,6 +416,8 @@ function resumeExam() {
   document.getElementById("btn-show-client").classList.remove("hidden");
   document.getElementById("sb-role-bar").classList.remove("hidden");
   document.getElementById("sb-role-client-label").textContent = "💬 " + MOCK_CLIENT.name;
+  const _nameParts = MOCK_CLIENT.name.split(" ");
+  document.documentElement.style.setProperty("--client-bubble-label", `"${(_nameParts[1] || "") + (_nameParts[2] ? " " + _nameParts[2] : "")}"`);
   document.getElementById("sb-mode-badge").textContent = "Экзамен";
 
   // Сброс флага ошибки — продолжаем
@@ -392,6 +428,22 @@ function resumeExam() {
   renderTimer(session.elapsedSeconds || 0);
   setInputLocked(false);
   examAskQuestion();
+}
+
+function startInactivityTimer() {
+  clearInactivityTimer();
+  inactivityTimeout = setTimeout(async () => {
+    if (session && session.phase === "running") {
+      await botSay("<p>Алло! Когда ждать ответ?</p>", 400);
+    }
+  }, 3 * 60 * 1000);
+}
+
+function clearInactivityTimer() {
+  if (inactivityTimeout) {
+    clearTimeout(inactivityTimeout);
+    inactivityTimeout = null;
+  }
 }
 
 async function examAskQuestion() {
@@ -411,16 +463,23 @@ async function examAskQuestion() {
   html += `<p>${esc(q.content && q.content.text || "(вопрос не заполнен)")}</p>`;
 
   await botSay(html, 600);
+  startQuestionTimer();
+  startInactivityTimer();
 }
 
-async function examHandleAnswer(text) {
+async function examHandleAnswer(_text) {
   // Экзамен: просто переходим к следующему вопросу, без обратной связи (FR-04)
+  stopQuestionTimer();
+  clearInactivityTimer();
   session.questionIndex++;
   saveSession();
   await examAskQuestion();
 }
 
 async function examFinish() {
+  clearInactivityTimer();
+  stopQuestionTimer();
+  document.getElementById("sb-qtimer").classList.add("hidden");
   stopTimer();
   session.phase = "done";
   saveSession();
@@ -577,6 +636,8 @@ function init() {
         document.getElementById("btn-show-client").classList.remove("hidden");
         document.getElementById("sb-role-bar").classList.remove("hidden");
         document.getElementById("sb-role-client-label").textContent = "💬 " + MOCK_CLIENT.name;
+  const _nameParts = MOCK_CLIENT.name.split(" ");
+  document.documentElement.style.setProperty("--client-bubble-label", `"${(_nameParts[1] || "") + (_nameParts[2] ? " " + _nameParts[2] : "")}"`);
         document.getElementById("sb-mode-badge").textContent = "Экзамен";
         renderTimer(session.elapsedSeconds || 0);
         startTimer();
