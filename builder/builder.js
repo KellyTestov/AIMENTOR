@@ -6,6 +6,18 @@
 
 const BUILDER_KEY = "ai-mentor-builder-data-v1";
 
+/* ── Unit metadata option lists ─────────────────── */
+const DIRECTION_MAP = {
+  "Доставка":       ["Малый и микро бизнес", "Розничный бизнес"],
+  "Урегулирование": ["90-", "90+", "Выездное"],
+  "Сервис":         ["ФЛ Chat", "ФЛ Voice", "ЮЛ Chat", "ЮЛ Voice", "СвА", "Эквайринг"],
+  "Телемаркетинг":  ["Физ.лица", "Юр.лица"],
+};
+const UNIT_TOPICS     = ["Продукты банка","Продажи","Коммуникации с клиентами","Кредитование","Карточные продукты","Работа с возражениями","Комплаенс","Управление"];
+const UNIT_CATEGORIES = ["Продукты","Коммуникации","Продажи","Экзамены","Операционные процессы"];
+const UNIT_FACTORIES  = ["Доставка","Урегулирование","Сервис","Телемаркетинг"];
+const UNIT_DURATIONS  = ["15 минут","30 минут","1 час","1.5 часа","2 часа","2.5 часа","3 часа"];
+
 /* ── State ─────────────────────────────────────── */
 let unit       = null;   // full unit tree
 let selectedId = null;   // selected node id
@@ -80,6 +92,8 @@ function buildScaffold(meta) {
     description:      meta.description      || "",
     category:         meta.category         || "",
     factory:          meta.factory          || "",
+    topic:            meta.topic            || "",
+    direction:        meta.direction        || "",
     durationLabel:    meta.durationLabel     || "",
     coverDataUrl:     meta.coverDataUrl      || null,
     publicationStatus: "private",
@@ -104,16 +118,17 @@ function buildScaffold(meta) {
     const q1     = makeNode("question", "Вопрос 1",  [], { text: "", refAnswer: "", hints: [], feedback: "" });
     const case1  = makeNode("case",     "Кейс 1",    [q1],    { description: "" });
     const sec1   = makeNode("section",  "Раздел 1",  [case1], {});
-    const prac   = makeNode("practice", "Практика",  [sec1],  {});
+    const prac   = makeNode("practice", "Практический блок", [sec1], {});
     const th1    = makeNode("theory",   "Теория 1",  [], { elements: [{ id: genId("el"), heading: "", text: "" }] });
-    const tBlock = makeNode("theory_block", "Теоретический блок", [th1, prac], {});
+    const tBlock = makeNode("theory_block", "Теоретический блок", [th1], {});
     u.children.push(tBlock);
+    u.children.push(prac);
   } else {
     const mkQ = () => makeNode("question", "Вопрос 1", [], { text: "", refAnswer: "", hints: [], feedback: "" });
     const mkC = (q) => makeNode("case",    "Кейс 1",   [q], { description: "" });
     const s1   = makeNode("section", "Раздел 1", [mkC(mkQ())], {});
     const s2   = makeNode("section", "Раздел 2", [mkC(mkQ())], {});
-    const prac = makeNode("practice", "Практика", [s1, s2], {});
+    const prac = makeNode("practice", "Практический блок", [s1, s2], {});
     u.children.push(prac);
   }
 
@@ -140,6 +155,58 @@ function findParent(root, id) {
     if (p) return p;
   }
   return null;
+}
+
+function findPath(root, id) {
+  if (root.id === id) return [root];
+  for (const c of (root.children || [])) {
+    const p = findPath(c, id);
+    if (p) return [root, ...p];
+  }
+  return null;
+}
+
+function breadcrumbHtml(nodeId) {
+  const path = findPath(unit, nodeId);
+  if (!path || path.length <= 2) return ""; // skip if only unit→node
+
+  const target = path[path.length - 1];
+  let crumbs = path.slice(1); // drop unit root
+
+  // For theory nodes: insert preceding sibling theories as sequential steps
+  if (target.type === "theory" && path.length >= 3) {
+    const parent  = path[path.length - 2]; // theory_block
+    const theories = (parent.children || []).filter(c => c.type === "theory");
+    const idx      = theories.findIndex(c => c.id === target.id);
+    if (idx > 0) {
+      const ancestors = path.slice(1, -1);          // [theory_block, ...]
+      const preceding = theories.slice(0, idx);     // theories before current
+      crumbs = [...ancestors, ...preceding, target];
+    }
+  }
+
+  return `<div class="cv-breadcrumbs">${
+    crumbs.map((n, i) => {
+      const isLast = i === crumbs.length - 1;
+      return isLast
+        ? `<span class="cv-crumb cv-crumb--current">${esc(n.title)}</span>`
+        : `<button class="cv-crumb" data-crumb-id="${esc(n.id)}">${esc(n.title)}</button><span class="cv-crumb__sep">›</span>`;
+    }).join("")
+  }</div>`;
+}
+
+function bindBreadcrumbs() {
+  dom.center.querySelectorAll("[data-crumb-id]").forEach(btn => {
+    btn.addEventListener("click", () => selectNode(btn.dataset.crumbId));
+  });
+}
+
+function bindNodeTitleInp(node) {
+  document.getElementById("node-title-inp")?.addEventListener("input", e => {
+    node.title = e.target.value;
+    persistUnit();
+    renderTree();
+  });
 }
 
 function countType(node, type) {
@@ -180,6 +247,13 @@ function pencilSvg() {
     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
   </svg>`;
 }
+function dupSvg() {
+  return `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+  </svg>`;
+}
 
 function renderTree() {
   if (expanded.size === 0) expandAll(unit);
@@ -188,7 +262,6 @@ function renderTree() {
 }
 
 function nodeHtml(node, depth, isRoot) {
-  const isUnit     = isRoot;
   const sel        = selectedId === node.id;
   const exp        = expanded.has(node.id);
   const hasKids    = node.children && node.children.length > 0;
@@ -205,6 +278,7 @@ function nodeHtml(node, depth, isRoot) {
     actions += `<button class="tree-act-btn" data-tree-rename="${node.id}" title="Переименовать">${pencilSvg()}</button>`;
   }
   if (!isRoot && !isProtect) {
+    actions += `<button class="tree-act-btn" data-tree-dup="${node.id}" title="Дублировать">${dupSvg()}</button>`;
     actions += `<button class="tree-act-btn tree-act-btn--del" data-tree-del="${node.id}" title="Удалить">${xSvg()}</button>`;
   }
 
@@ -232,7 +306,7 @@ function bindTreeEvents() {
   // Select
   dom.tree.querySelectorAll("[data-tree-sel]").forEach(el => {
     el.addEventListener("click", e => {
-      if (e.target.closest("[data-tree-tog],[data-tree-add],[data-tree-del],[data-tree-rename]")) return;
+      if (e.target.closest("[data-tree-tog],[data-tree-add],[data-tree-del],[data-tree-rename],[data-tree-dup]")) return;
       selectNode(el.dataset.treeSel);
     });
   });
@@ -295,6 +369,13 @@ function bindTreeEvents() {
       deleteNodeById(btn.dataset.treeDel);
     });
   });
+  // Duplicate
+  dom.tree.querySelectorAll("[data-tree-dup]").forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      duplicateNode(btn.dataset.treeDup);
+    });
+  });
 }
 
 /* ── Node operations ────────────────────────────── */
@@ -306,7 +387,7 @@ const CHILD_TYPES = {
   case:         "question",
 };
 const CHILD_TITLES = {
-  practice: "Практика",
+  practice: "Практический блок",
   theory:   "Теория",
   section:  "Раздел",
   case:     "Кейс",
@@ -320,16 +401,14 @@ function addChildTo(parentId) {
   const childType = CHILD_TYPES[parent.type];
   if (!childType) return;
 
-  // theory_block: count only theory children, limit 3, insert before practice
+  // theory_block: only theory children, limit 3
   if (parent.type === "theory_block") {
     const theoryKids = parent.children.filter(c => c.type === "theory");
     if (theoryKids.length >= 3) { toast("Максимум 3 теории в одном блоке"); return; }
     const num     = theoryKids.length + 1;
     const newNode = makeNode("theory", `Теория ${num}`, [],
       { elements: [{ id: genId("el"), heading: "", text: "" }] });
-    const practiceIdx = parent.children.findIndex(c => c.type === "practice");
-    if (practiceIdx >= 0) parent.children.splice(practiceIdx, 0, newNode);
-    else                  parent.children.push(newNode);
+    parent.children.push(newNode);
     expanded.add(parentId);
     persistUnit(); renderTree(); selectNode(newNode.id);
     return;
@@ -366,13 +445,42 @@ function deleteNodeById(id) {
   renderInspector();
 }
 
+function duplicateNode(id) {
+  const parent = findParent(unit, id);
+  if (!parent) return;
+  const idx = parent.children.findIndex(c => c.id === id);
+  if (idx < 0) return;
+
+  function reId(n) {
+    n.id = genId(n.type);
+    (n.children || []).forEach(reId);
+    if (n.content && n.content.elements) {
+      n.content.elements.forEach(el => { el.id = genId("el"); });
+    }
+    if (n.content && n.content.queries) {
+      n.content.queries.forEach(q => { q.id = genId("q"); });
+    }
+  }
+
+  const cloned = JSON.parse(JSON.stringify(parent.children[idx]));
+  reId(cloned);
+  cloned.title = cloned.title + " (копия)";
+
+  parent.children.splice(idx + 1, 0, cloned);
+  expanded.add(parent.id);
+  persistUnit();
+  renderTree();
+  selectNode(cloned.id);
+  toast("✓ Дублировано");
+}
+
 function addTopBlock() {
   // Insert a new practice block before "completion"
   const num  = unit.children.filter(c => !["onboarding","completion"].includes(c.type)).length + 1;
   const q    = makeNode("question", "Вопрос 1",  [], { text: "", refAnswer: "", hints: [], feedback: "" });
   const c    = makeNode("case",     "Кейс 1",    [q],    { description: "" });
   const s    = makeNode("section",  "Раздел 1",  [c],    {});
-  const blk  = makeNode("practice", `Практика ${num}`, [s], {});
+  const blk  = makeNode("practice", `Практический блок ${num}`, [s], {});
   const ci   = unit.children.findIndex(ch => ch.type === "completion");
   if (ci >= 0) unit.children.splice(ci, 0, blk);
   else         unit.children.push(blk);
@@ -426,30 +534,120 @@ function renderCUnit() {
   const typeLabel = unit.type === "trainer" ? "Тренажёр" : "Экзамен";
 
   const coverHtml = unit.coverDataUrl
-    ? `<img src="${esc(unit.coverDataUrl)}" alt="Обложка ${esc(unit.title)}" />`
+    ? `<img src="${esc(unit.coverDataUrl)}" alt="Обложка" />`
     : `<div class="cu-cover-ph">🖼️</div>`;
+
+  function opts(arr, val, placeholder) {
+    const ph = placeholder ? `<option value="">${esc(placeholder)}</option>` : "";
+    return ph + arr.map(v => `<option value="${esc(v)}"${val === v ? " selected" : ""}>${esc(v)}</option>`).join("");
+  }
+
+  const curFactory = unit.factory || "";
+  const dirOptions = (DIRECTION_MAP[curFactory] || []);
+  const dirDisabled = dirOptions.length === 0;
 
   dom.center.innerHTML = `
 <div class="cv">
-  <div class="cu-cover">${coverHtml}</div>
-  <h1 class="cu-title">${esc(unit.title)}</h1>
-  <div class="cu-meta">
-    <span class="cu-badge">${typeLabel}</span>
-    ${unit.category    ? `<span class="cu-badge">${esc(unit.category)}</span>` : ""}
-    ${unit.factory     ? `<span class="cu-badge">Фабрика: ${esc(unit.factory)}</span>` : ""}
-    ${unit.durationLabel ? `<span class="cu-badge">${esc(unit.durationLabel)}</span>` : ""}
+  <div class="cu-cover cu-cover--edit" id="cu-cover-wrap" title="Нажмите для изменения обложки">
+    ${coverHtml}
+    <div class="cu-cover-overlay">
+      <span class="cu-cover-overlay__icon">📷</span>
+      <span class="cu-cover-overlay__text">${unit.coverDataUrl ? "Изменить обложку" : "Загрузить обложку"}</span>
+    </div>
+    <input type="file" id="cu-cover-input" accept="image/*" style="display:none" />
   </div>
-  ${unit.description ? `
-  <div class="cu-card">
-    <div class="cu-card__lbl">Описание</div>
-    <p class="cu-card__text">${esc(unit.description)}</p>
-  </div>` : ""}
+
+  <div class="cu-type-row">
+    <span class="cu-badge">${typeLabel}</span>
+    <span class="cu-pub-badge cu-pub-badge--${unit.publicationStatus === "published" ? "pub" : "priv"}">
+      ${unit.publicationStatus === "published" ? "Опубликовано" : "Черновик"}
+    </span>
+  </div>
+
+  <div class="cu-edit-section">
+    <div class="cu-edit-row">
+      <div class="cu-edit-field cu-edit-field--half">
+        <label class="cu-edit-lbl" for="cu-factory">Фабрика</label>
+        <select class="cu-edit-input" id="cu-factory">
+          ${opts(UNIT_FACTORIES, unit.factory || "", "Не выбрана")}
+        </select>
+      </div>
+      <div class="cu-edit-field cu-edit-field--half">
+        <label class="cu-edit-lbl" for="cu-direction">Направление</label>
+        <select class="cu-edit-input" id="cu-direction"${dirDisabled ? " disabled" : ""}>
+          <option value="">Не выбрано</option>
+          ${dirOptions.map(d => `<option value="${esc(d)}"${unit.direction === d ? " selected" : ""}>${esc(d)}</option>`).join("")}
+        </select>
+      </div>
+    </div>
+    <div class="cu-edit-row">
+      <div class="cu-edit-field cu-edit-field--half">
+        <label class="cu-edit-lbl" for="cu-category">Категория</label>
+        <select class="cu-edit-input" id="cu-category">
+          ${opts(UNIT_CATEGORIES, unit.category || "", "Не выбрана")}
+        </select>
+      </div>
+      <div class="cu-edit-field cu-edit-field--half">
+        <label class="cu-edit-lbl" for="cu-topic">Тема</label>
+        <select class="cu-edit-input" id="cu-topic">
+          ${opts(UNIT_TOPICS, unit.topic || "", "Не выбрана")}
+        </select>
+      </div>
+    </div>
+    <div class="cu-edit-field">
+      <label class="cu-edit-lbl" for="cu-duration">Длительность</label>
+      <select class="cu-edit-input" id="cu-duration">
+        ${opts(UNIT_DURATIONS, unit.durationLabel || "", "Не выбрана")}
+      </select>
+    </div>
+    <div class="cu-edit-field">
+      <label class="cu-edit-lbl" for="cu-desc">Описание</label>
+      <textarea class="cu-edit-input cu-edit-textarea" id="cu-desc" rows="3"
+        placeholder="Краткое описание единицы обучения...">${esc(unit.description || "")}</textarea>
+    </div>
+  </div>
+
   <div class="cu-stats">
     <div class="cu-stat"><span class="cu-stat__num">${sections}</span><span class="cu-stat__label">Разделов</span></div>
     <div class="cu-stat"><span class="cu-stat__num">${cases}</span><span class="cu-stat__label">Кейсов</span></div>
     <div class="cu-stat"><span class="cu-stat__num">${questions}</span><span class="cu-stat__label">Вопросов</span></div>
   </div>
 </div>`;
+
+  // Cover — opens crop modal
+  const coverWrap  = document.getElementById("cu-cover-wrap");
+  const coverInput = document.getElementById("cu-cover-input");
+  coverWrap.addEventListener("click", () => coverInput.click());
+  coverInput.addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    pendingBldCoverFile = file;
+    const reader = new FileReader();
+    reader.onload = ev => openBldCropModal(ev.target.result);
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById("cu-factory").addEventListener("change", e => {
+    unit.factory   = e.target.value;
+    unit.direction = "";
+    persistUnit();
+    renderCenter();
+  });
+  document.getElementById("cu-direction").addEventListener("change", e => {
+    unit.direction = e.target.value; persistUnit();
+  });
+  document.getElementById("cu-category").addEventListener("change", e => {
+    unit.category = e.target.value; persistUnit();
+  });
+  document.getElementById("cu-topic").addEventListener("change", e => {
+    unit.topic = e.target.value; persistUnit();
+  });
+  document.getElementById("cu-duration").addEventListener("change", e => {
+    unit.durationLabel = e.target.value; persistUnit();
+  });
+  document.getElementById("cu-desc").addEventListener("input", e => {
+    unit.description = e.target.value; persistUnit();
+  });
 }
 
 /* ── Block center (onboarding / completion) ── */
@@ -513,6 +711,7 @@ function renderCOnboarding(node) {
   // Ensure at least one element group
   if (els.length === 0) els.push({ id: genId("el"), heading: "", text: "" });
   node.content.elements = els;
+  if (node.content.startBtnText === undefined) node.content.startBtnText = "Начать";
 
   const canAdd = els.length < 2;
 
@@ -555,10 +754,44 @@ function renderCOnboarding(node) {
 
   dom.center.innerHTML = `
 <div class="cv">
-  <h2 class="cv-heading"><span class="cv-heading-icon">🚀</span>${esc(node.title)}</h2>
+  <div class="cv-heading-row">
+    <h2 class="cv-heading"><span class="cv-heading-icon">🚀</span>${esc(node.title)}</h2>
+    <button class="bld-btn bld-btn--ghost" id="ob-preview-btn" type="button" style="flex-shrink:0;font-size:12px;padding:6px 12px">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right:5px">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+      Предпросмотр
+    </button>
+  </div>
   <p class="cv-subheading">Введение в обучение для пользователя, укажите информацию с которой пользователь будет ознакомлен при его запуске</p>
   <div id="ob-el-list">${elHtml}</div>
   ${canAdd ? `<button class="add-dashed" id="add-ob-el" style="margin-top:4px">${plusSvg()} Добавить еще один элемент</button>` : ""}
+
+  <div class="enrich-section" style="margin-top:20px">
+    <div class="enrich-section__title">Кнопка перехода</div>
+    <div class="ob-el-group">
+      <div class="ob-field-wrap ob-field-wrap--last">
+        <div class="ob-lbl-row">
+          <span class="field-lbl">Текст кнопки</span>
+          ${infoIco("После ознакомления с онбордингом пользователь нажимает эту кнопку, чтобы перейти к обучению. По умолчанию — «Начать»")}
+        </div>
+        <input type="text" class="ob-inp" id="ob-start-btn"
+               value="${esc(node.content.startBtnText)}" placeholder="Начать" maxlength="60" />
+      </div>
+      <div class="next-btn-preview">
+        <span class="next-btn-preview__lbl">Предпросмотр</span>
+        <button class="next-btn-demo" disabled>
+          <span id="ob-start-btn-preview">${esc(node.content.startBtnText) || "Начать"}</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>`;
 
   dom.center.querySelectorAll(".ob-heading-inp").forEach(inp => {
@@ -588,28 +821,106 @@ function renderCOnboarding(node) {
       persistUnit(); renderCenter();
     }
   });
+
+  document.getElementById("ob-start-btn")?.addEventListener("input", e => {
+    node.content.startBtnText = e.target.value;
+    const preview = document.getElementById("ob-start-btn-preview");
+    if (preview) preview.textContent = e.target.value || "Начать";
+    persistUnit();
+  });
+
+  document.getElementById("ob-preview-btn")?.addEventListener("click", () => openObPreview(node));
 }
 
 /* ── Theory block center ── */
+function dragHandleSvg() {
+  return `<svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor" aria-hidden="true">
+    <circle cx="2.5" cy="2" r="1.2"/><circle cx="7.5" cy="2" r="1.2"/>
+    <circle cx="2.5" cy="7" r="1.2"/><circle cx="7.5" cy="7" r="1.2"/>
+    <circle cx="2.5" cy="12" r="1.2"/><circle cx="7.5" cy="12" r="1.2"/>
+  </svg>`;
+}
+
 function renderCTheoryBlock(node) {
   const theories = (node.children || []).filter(ch => ch.type === "theory");
-  const items = theories.map(ch => `
-    <div class="item-card" data-goto="${ch.id}">
-      <span class="item-card__icon">${ICONS[ch.type] || "•"}</span>
-      <span class="item-card__title">${esc(ch.title)}</span>
-      <span class="item-card__arrow">›</span>
+  const total    = theories.length;
+
+  const seqHtml = theories.map((ch, idx) => `
+    <div class="th-seq-item" draggable="true" data-th-id="${ch.id}">
+      <div class="th-seq-item__track">
+        <div class="th-seq-item__dot"></div>
+        ${idx < total - 1 ? `<div class="th-seq-item__line"></div>` : ""}
+      </div>
+      <div class="item-card th-seq-item__card" data-goto="${ch.id}">
+        <button class="th-drag-handle" title="Перетащите для изменения порядка" tabindex="-1">${dragHandleSvg()}</button>
+        <span class="item-card__icon">${ICONS[ch.type] || "•"}</span>
+        <span class="item-card__title">${esc(ch.title)}</span>
+        <span class="item-card__arrow">›</span>
+      </div>
     </div>`).join("");
 
   dom.center.innerHTML = `
 <div class="cv">
+  ${breadcrumbHtml(node.id)}
   <h2 class="cv-heading"><span class="cv-heading-icon">📚</span>${esc(node.title)}</h2>
-  <p class="cv-subheading">Структура теоретического блока</p>
-  <div class="item-list">${items || noItems("Нет элементов")}</div>
-  ${theories.length < 3 ? `<button class="add-dashed" id="add-th-btn">${plusSvg()} Добавить теорию</button>` : `<p style="font-size:12px;color:var(--muted-lt);margin:0">Достигнут максимум — 3 теоретических элемента на один блок</p>`}
+  <p class="cv-subheading">Разделы теории следуют друг за другом — перетащите для изменения порядка</p>
+  <div class="th-sequence" id="th-seq-list">
+    ${seqHtml || noItems("Нет элементов")}
+  </div>
+  ${total < 3
+    ? `<button class="add-dashed" id="add-th-btn">${plusSvg()} Добавить теорию</button>`
+    : `<p style="font-size:12px;color:var(--muted-lt);margin:0">Достигнут максимум — 3 теоретических элемента на один блок</p>`}
 </div>`;
 
   gotoCards();
-  document.getElementById("add-th-btn").addEventListener("click", () => addChildTo(node.id));
+  bindBreadcrumbs();
+  document.getElementById("add-th-btn")?.addEventListener("click", () => addChildTo(node.id));
+  bindTheoryDrag(node);
+}
+
+function bindTheoryDrag(node) {
+  const list = document.getElementById("th-seq-list");
+  if (!list) return;
+
+  let draggedId = null;
+
+  list.querySelectorAll(".th-seq-item[draggable]").forEach(item => {
+    item.addEventListener("dragstart", e => {
+      draggedId = item.dataset.thId;
+      item.classList.add("th-dragging");
+      e.dataTransfer.effectAllowed = "move";
+    });
+    item.addEventListener("dragend", () => {
+      draggedId = null;
+      list.querySelectorAll(".th-seq-item").forEach(i =>
+        i.classList.remove("th-dragging", "th-drag-over"));
+    });
+    item.addEventListener("dragover", e => {
+      e.preventDefault();
+      if (item.dataset.thId === draggedId) return;
+      list.querySelectorAll(".th-seq-item").forEach(i => i.classList.remove("th-drag-over"));
+      item.classList.add("th-drag-over");
+    });
+    item.addEventListener("dragleave", () => {
+      item.classList.remove("th-drag-over");
+    });
+    item.addEventListener("drop", e => {
+      e.preventDefault();
+      const targetId = item.dataset.thId;
+      if (!draggedId || draggedId === targetId) return;
+
+      const fromIdx = node.children.findIndex(c => c.id === draggedId);
+      const toIdx   = node.children.findIndex(c => c.id === targetId);
+      if (fromIdx < 0 || toIdx < 0) return;
+
+      const [moved] = node.children.splice(fromIdx, 1);
+      node.children.splice(toIdx, 0, moved);
+
+      persistUnit();
+      renderTree();
+      renderCenter();
+    });
+  });
 }
 
 /* ── Theory center ── */
@@ -619,22 +930,41 @@ function renderCTheory(node) {
   els = els.map(el => ({ id: el.id, heading: el.heading || "", text: el.text || "" }));
   if (els.length === 0) els.push({ id: genId("el"), heading: "", text: "" });
   node.content.elements = els;
-  if (!node.content.queries || node.content.queries.length === 0) {
-    node.content.queries = [{ id: genId("q"), text: "", response: "", approved: false }];
-  }
   if (node.content.nextBtnText === undefined) node.content.nextBtnText = "Ознакомился, далее";
+
+  // Migrate / normalise queries: drop per-query approved, use queriesApproved on content
+  if (!node.content.queries || node.content.queries.length === 0) {
+    node.content.queries = [{ id: genId("q"), text: "", response: "" }];
+  } else {
+    node.content.queries = node.content.queries.map(q => ({
+      id: q.id || genId("q"), text: q.text || "", response: q.response || "",
+    }));
+    // Migrate old per-query approved flag → content level flag
+    if (node.content.queriesApproved === undefined) {
+      node.content.queriesApproved = node.content.queries.some(q => !!q.approved);
+    }
+  }
+  if (node.content.queriesApproved === undefined) node.content.queriesApproved = false;
+  if (node.content.queryPrompt === undefined) node.content.queryPrompt = "";
 
   const el0    = els[0];
   const queries = node.content.queries;
 
-  function infoIco(tip) {
+  // Shared state for the whole query group
+  const isLoading   = loadingQueries.has(node.id);
+  const isApproved  = !!node.content.queriesApproved;
+  const isResponded = !isLoading && !isApproved && !!node.content.queryResponse;
+  const locked      = isLoading || isResponded || isApproved;
+  const allFilled   = queries.every(q => (q.text || "").trim().length > 0);
+
+  function infoIco(tip, wide) {
     return `<span class="info-icon" tabindex="0">
       <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
         <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/>
         <path d="M8 7.5v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         <circle cx="8" cy="4.5" r=".85" fill="currentColor"/>
       </svg>
-      <span class="info-tip">${esc(tip)}</span>
+      <span class="info-tip${wide ? " info-tip--wide" : ""}">${esc(tip)}</span>
     </span>`;
   }
 
@@ -645,58 +975,58 @@ function renderCTheory(node) {
     </svg>`;
   }
 
-  // State per query: idle → loading → responded → approved (or back to idle via "Изменить")
-  const queryHtml = queries.map(q => {
-    const isLoading   = loadingQueries.has(q.id);
-    const isApproved  = !!q.approved;
-    const isResponded = !!q.response && !isLoading && !isApproved;
-    const locked      = isLoading || isResponded || isApproved;
+  const queryItemsHtml = queries.map((q, i) => `
+    <div class="query-item">
+      <div class="query-item__header">
+        <span class="query-item__label">Запрос ${i + 1}</span>
+        ${queries.length > 1 && !locked
+          ? `<button class="query-item__del" data-del-q="${q.id}" title="Удалить запрос">${xSvg()}</button>`
+          : ""}
+      </div>
+      <textarea class="query-textarea${locked ? " query-textarea--locked" : ""}"
+        ${locked ? "disabled" : ""} data-qid="${q.id}"
+        placeholder="Например: Какая комиссия за услугу уведомлений по дебетовой карте">${esc(q.text)}</textarea>
+    </div>`).join("");
 
-    return `
-    <div class="query-card${isApproved ? " query-card--approved" : ""}">
-      <div class="query-card__header">
-        <span class="query-card__title">Тестовый запрос в A-Book ${infoIco("Укажите запрос, который система отправит в A-Book, чтобы получить актуальную информацию для блока теории. После отправки вы сможете посмотреть ответ, затем либо утвердить запрос, либо изменить его. Пока решение по текущему ответу не принято, редактирование запроса будет недоступно.")}</span>
-        ${isApproved ? `<span class="query-approved-badge">
-          <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+  const sharedResponseHtml = (isResponded || isApproved) && node.content.queryResponse ? `
+    <div class="query-response${isApproved ? " query-response--approved" : ""}">
+      <div class="query-response__title">Ответ</div>
+      <div class="query-response__text">${esc(node.content.queryResponse)}</div>
+    </div>` : "";
+
+  const queryFooterHtml = isLoading
+    ? `<div class="query-sending"><span class="query-spinner"></span>Отправляем запросы...</div>`
+    : isApproved
+      ? `<div class="query-approved-note">
+          <svg width="13" height="13" viewBox="0 0 12 12" fill="none" aria-hidden="true">
             <path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          Утверждён</span>` : ""}
-      </div>
-      <div class="query-textarea-wrap">
-        <textarea class="query-textarea${locked ? " query-textarea--locked" : ""}"
-          ${locked ? "disabled" : ""} data-qid="${q.id}"
-          placeholder="Например: Какая комиссия за услугу уведомлений по дебетовой карте">${esc(q.text || "")}</textarea>
-        ${isLoading
-          ? `<div class="query-sending"><span class="query-spinner"></span>Отправляем...</div>`
-          : (!locked ? `<button class="query-send-btn" data-send-q="${q.id}">${planeSvg()} Отправить</button>` : "")}
-      </div>
-      ${(isResponded || isApproved) ? `
-      <div class="query-response${isApproved ? " query-response--approved" : ""}">
-        <div class="query-response__title">Ответ</div>
-        <div class="query-response__text">${esc(q.response)}</div>
-        ${isResponded ? `
-        <div class="query-actions">
-          <button class="query-approve-btn" data-approve-q="${q.id}">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Утвердить запрос
-          </button>
-          <button class="query-change-btn" data-change-q="${q.id}">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-            </svg>
-            Изменить запрос
-          </button>
-        </div>` : ""}
-      </div>` : ""}
-    </div>`;
-  }).join("");
+          Все запросы утверждены
+        </div>`
+      : isResponded
+        ? `<div class="query-actions">
+            <button class="query-approve-btn" id="approve-all-btn">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Утвердить запросы
+            </button>
+            <button class="query-change-btn" id="change-all-btn">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              Изменить запросы
+            </button>
+          </div>`
+        : `<button class="query-send-btn" id="send-all-btn"${allFilled ? "" : " disabled"}>
+            ${planeSvg()} Отправить
+          </button>`;
 
   dom.center.innerHTML = `
 <div class="cv">
+  ${breadcrumbHtml(node.id)}
   <h2 class="cv-heading"><span class="cv-heading-icon">📄</span>${esc(node.title)}</h2>
   <p class="cv-subheading">Обучение сотрудника. Вы можете настроить теорию, которая будет отображена сотруднику</p>
   <div class="cv-section-lbl">Описание</div>
@@ -720,9 +1050,29 @@ function renderCTheory(node) {
   </div>
 
   <div class="enrich-section">
-    <div class="enrich-section__title">Обогащение из базы знаний</div>
-    <p class="enrich-section__desc">В данном элементе настраивается получение информации из A-Book. Вы задаёте запрос, который система будет отправлять в базу знаний во время прохождения сотрудником обучения. Ответ формируется на основе актуальных данных, поэтому может со временем меняться — это позволяет всегда использовать свежую информацию из базы знаний.</p>
-    <div id="query-list">${queryHtml}</div>
+    <div class="enrich-section__title-row">
+      <span class="enrich-section__title">Обогащение из базы знаний</span>
+      ${infoIco("Укажите запросы в A-Book — система будет отправлять их в базу знаний во время прохождения сотрудником обучения. Можно добавить до 5 запросов.", true)}
+    </div>
+    <div class="query-card${isApproved ? " query-card--approved" : ""}">
+      <div class="query-card__header">
+        <span class="query-card__title">Тестовые запросы в A-Book</span>
+      </div>
+      <div class="query-item query-item--prompt">
+        <div class="query-item__header">
+          <span class="query-item__label">Промпт</span>
+        </div>
+        <textarea class="query-textarea${locked ? " query-textarea--locked" : ""}"
+          id="query-prompt-inp" ${locked ? "disabled" : ""}
+          placeholder="Например: Оформи полученную информацию из ABook в виде обучающего текста простым языком">${esc(node.content.queryPrompt)}</textarea>
+      </div>
+      <div id="query-items-list">${queryItemsHtml}</div>
+      ${!locked && queries.length < 5
+        ? `<button class="add-dashed add-dashed--sm" id="add-query-btn" style="margin-top:8px;width:100%">${plusSvg()} Добавить запрос</button>`
+        : ""}
+      ${sharedResponseHtml}
+      <div class="query-footer">${queryFooterHtml}</div>
+    </div>
   </div>
 
   <div class="enrich-section">
@@ -765,6 +1115,12 @@ function renderCTheory(node) {
     dom.center.appendChild(overlay);
   }
 
+  bindBreadcrumbs();
+
+  document.getElementById("query-prompt-inp")?.addEventListener("input", e => {
+    node.content.queryPrompt = e.target.value; persistUnit();
+  });
+
   dom.center.querySelector(".ob-heading-inp")?.addEventListener("input", e => {
     el0.heading = e.target.value; persistUnit();
   });
@@ -779,87 +1135,180 @@ function renderCTheory(node) {
     persistUnit();
   });
 
+  // Query textareas — save + update send button enabled state
+  function updateSendBtn() {
+    const btn = document.getElementById("send-all-btn");
+    if (btn) btn.disabled = !queries.every(q => (q.text || "").trim().length > 0);
+  }
+
   dom.center.querySelectorAll(".query-textarea[data-qid]").forEach(ta => {
     ta.addEventListener("input", () => {
-      const q = node.content.queries.find(q => q.id === ta.dataset.qid);
+      const q = queries.find(q => q.id === ta.dataset.qid);
       if (q) { q.text = ta.value; persistUnit(); }
+      updateSendBtn();
     });
   });
 
-  dom.center.querySelectorAll("[data-send-q]").forEach(btn => {
+  // Delete a query
+  dom.center.querySelectorAll("[data-del-q]").forEach(btn => {
     btn.addEventListener("click", () => {
-      const q = node.content.queries.find(q => q.id === btn.dataset.sendQ);
-      if (!q) return;
-      const ta = btn.closest(".query-textarea-wrap").querySelector(".query-textarea");
-      if (ta) { q.text = ta.value; persistUnit(); }
-      loadingQueries.add(q.id);
-      renderCenter();
-      setTimeout(() => {
-        loadingQueries.delete(q.id);
-        q.response = MOCK_ABOOK_RESP;
+      const idx = queries.findIndex(q => q.id === btn.dataset.delQ);
+      if (idx >= 0 && queries.length > 1) {
+        queries.splice(idx, 1);
         persistUnit(); renderCenter();
-      }, 3000);
+      }
     });
   });
 
-  dom.center.querySelectorAll("[data-approve-q]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const q = node.content.queries.find(q => q.id === btn.dataset.approveQ);
-      if (q) { q.approved = true; persistUnit(); renderCenter(); }
-    });
+  // Add a query
+  document.getElementById("add-query-btn")?.addEventListener("click", () => {
+    if (queries.length < 5) {
+      queries.push({ id: genId("q"), text: "", response: "" });
+      persistUnit(); renderCenter();
+    }
   });
 
-  dom.center.querySelectorAll("[data-change-q]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const q = node.content.queries.find(q => q.id === btn.dataset.changeQ);
-      if (q) { q.response = ""; q.approved = false; persistUnit(); renderCenter(); }
+  // Send all
+  document.getElementById("send-all-btn")?.addEventListener("click", () => {
+    // Sync latest textarea values before sending
+    dom.center.querySelectorAll(".query-textarea[data-qid]").forEach(ta => {
+      const q = queries.find(q => q.id === ta.dataset.qid);
+      if (q) q.text = ta.value;
     });
+    persistUnit();
+    loadingQueries.add(node.id);
+    renderCenter();
+    setTimeout(() => {
+      loadingQueries.delete(node.id);
+      node.content.queryResponse = MOCK_ABOOK_RESP;
+      persistUnit(); renderCenter();
+    }, 3000);
   });
 
+  // Approve all
+  document.getElementById("approve-all-btn")?.addEventListener("click", () => {
+    node.content.queriesApproved = true;
+    persistUnit(); renderCenter();
+  });
+
+  // Change all (reset response)
+  document.getElementById("change-all-btn")?.addEventListener("click", () => {
+    node.content.queryResponse = "";
+    node.content.queriesApproved = false;
+    persistUnit(); renderCenter();
+  });
+
+}
+
+/* ── Generic list drag-to-reorder ── */
+function bindItemListDrag(node, listId) {
+  const list = document.getElementById(listId);
+  if (!list) return;
+  let draggedId = null;
+
+  list.querySelectorAll(".th-seq-item[draggable]").forEach(item => {
+    item.addEventListener("dragstart", e => {
+      draggedId = item.dataset.itemId;
+      item.classList.add("th-dragging");
+      e.dataTransfer.effectAllowed = "move";
+    });
+    item.addEventListener("dragend", () => {
+      draggedId = null;
+      list.querySelectorAll(".th-seq-item").forEach(i =>
+        i.classList.remove("th-dragging", "th-drag-over"));
+    });
+    item.addEventListener("dragover", e => {
+      e.preventDefault();
+      if (item.dataset.itemId === draggedId) return;
+      list.querySelectorAll(".th-seq-item").forEach(i => i.classList.remove("th-drag-over"));
+      item.classList.add("th-drag-over");
+    });
+    item.addEventListener("dragleave", () => item.classList.remove("th-drag-over"));
+    item.addEventListener("drop", e => {
+      e.preventDefault();
+      const targetId = item.dataset.itemId;
+      if (!draggedId || draggedId === targetId) return;
+      const fromIdx = node.children.findIndex(c => c.id === draggedId);
+      const toIdx   = node.children.findIndex(c => c.id === targetId);
+      if (fromIdx < 0 || toIdx < 0) return;
+      const [moved] = node.children.splice(fromIdx, 1);
+      node.children.splice(toIdx, 0, moved);
+      persistUnit();
+      renderTree();
+      renderCenter();
+    });
+  });
 }
 
 /* ── Practice center ── */
 function renderCPractice(node) {
-  const items = (node.children || []).map(s => `
-    <div class="item-card" data-goto="${s.id}">
-      <span class="item-card__icon">📁</span>
-      <span class="item-card__title">${esc(s.title)}</span>
-      <span class="item-card__meta">${countType(s,"case")} кейс · ${countType(s,"question")} вопр.</span>
-      <span class="item-card__arrow">›</span>
+  const total = (node.children || []).length;
+  const seqHtml = (node.children || []).map((s, idx) => `
+    <div class="th-seq-item" draggable="true" data-item-id="${s.id}">
+      <div class="th-seq-item__track">
+        <div class="th-seq-item__dot"></div>
+        ${idx < total - 1 ? `<div class="th-seq-item__line"></div>` : ""}
+      </div>
+      <div class="item-card th-seq-item__card" data-goto="${s.id}">
+        <button class="th-drag-handle" title="Перетащите для изменения порядка" tabindex="-1">${dragHandleSvg()}</button>
+        <span class="item-card__icon">📁</span>
+        <span class="item-card__title">${esc(s.title)}</span>
+        <span class="item-card__meta">${countType(s,"case")} кейс · ${countType(s,"question")} вопр.</span>
+        <span class="item-card__arrow">›</span>
+      </div>
     </div>`).join("");
 
   dom.center.innerHTML = `
 <div class="cv">
+  ${breadcrumbHtml(node.id)}
   <h2 class="cv-heading"><span class="cv-heading-icon">🎯</span>${esc(node.title)}</h2>
-  <p class="cv-subheading">Практические задания</p>
-  <div class="item-list">${items || noItems("Нет разделов")}</div>
+  <p class="cv-subheading">Разделы следуют друг за другом — перетащите для изменения порядка</p>
+  <div class="th-sequence" id="prac-seq-list">${seqHtml || noItems("Нет разделов")}</div>
   <button class="add-dashed" id="add-sec-btn">${plusSvg()} Добавить раздел</button>
 </div>`;
 
   gotoCards();
+  bindBreadcrumbs();
   document.getElementById("add-sec-btn").addEventListener("click", () => addChildTo(node.id));
+  bindItemListDrag(node, "prac-seq-list");
 }
 
 /* ── Section center ── */
 function renderCSection(node) {
-  const items = (node.children || []).map(c => `
-    <div class="item-card" data-goto="${c.id}">
-      <span class="item-card__icon">💼</span>
-      <span class="item-card__title">${esc(c.title)}</span>
-      <span class="item-card__meta">${countType(c,"question")} вопр.</span>
-      <span class="item-card__arrow">›</span>
+  const total = (node.children || []).length;
+  const seqHtml = (node.children || []).map((c, idx) => `
+    <div class="th-seq-item" draggable="true" data-item-id="${c.id}">
+      <div class="th-seq-item__track">
+        <div class="th-seq-item__dot"></div>
+        ${idx < total - 1 ? `<div class="th-seq-item__line"></div>` : ""}
+      </div>
+      <div class="item-card th-seq-item__card" data-goto="${c.id}">
+        <button class="th-drag-handle" title="Перетащите для изменения порядка" tabindex="-1">${dragHandleSvg()}</button>
+        <span class="item-card__icon">💼</span>
+        <span class="item-card__title">${esc(c.title)}</span>
+        <span class="item-card__meta">${countType(c,"question")} вопр.</span>
+        <span class="item-card__arrow">›</span>
+      </div>
     </div>`).join("");
 
   dom.center.innerHTML = `
 <div class="cv">
-  <h2 class="cv-heading"><span class="cv-heading-icon">📁</span>${esc(node.title)}</h2>
-  <p class="cv-subheading">Раздел практической части</p>
-  <div class="item-list">${items || noItems("Нет кейсов")}</div>
+  ${breadcrumbHtml(node.id)}
+  <div class="cv-title-row">
+    <span class="cv-heading-icon">📁</span>
+    <input class="cv-title-inp" id="node-title-inp" type="text"
+           value="${esc(node.title)}" maxlength="120" autocomplete="off" />
+  </div>
+  <p class="cv-subheading">Кейсы следуют друг за другом — перетащите для изменения порядка</p>
+  <div class="th-sequence" id="sec-seq-list">${seqHtml || noItems("Нет кейсов")}</div>
   <button class="add-dashed" id="add-case-btn">${plusSvg()} Добавить кейс</button>
 </div>`;
 
   gotoCards();
+  bindBreadcrumbs();
+  bindNodeTitleInp(node);
   document.getElementById("add-case-btn").addEventListener("click", () => addChildTo(node.id));
+  bindItemListDrag(node, "sec-seq-list");
 }
 
 /* ── Case center ── */
@@ -876,7 +1325,12 @@ function renderCCase(node) {
 
   dom.center.innerHTML = `
 <div class="cv">
-  <h2 class="cv-heading"><span class="cv-heading-icon">💼</span>${esc(node.title)}</h2>
+  ${breadcrumbHtml(node.id)}
+  <div class="cv-title-row">
+    <span class="cv-heading-icon">💼</span>
+    <input class="cv-title-inp" id="node-title-inp" type="text"
+           value="${esc(node.title)}" maxlength="120" autocomplete="off" />
+  </div>
   <p class="cv-subheading">Сценарий кейса и список вопросов</p>
   <div class="field-block">
     <label class="field-lbl" for="case-desc">Описание кейса</label>
@@ -893,6 +1347,8 @@ function renderCCase(node) {
   </div>
 </div>`;
 
+  bindNodeTitleInp(node);
+
   document.getElementById("case-desc").addEventListener("input", e => {
     if (!node.content) node.content = {};
     node.content.description = e.target.value;
@@ -900,6 +1356,7 @@ function renderCCase(node) {
   });
 
   gotoCards();
+  bindBreadcrumbs();
 
   document.getElementById("add-q-btn").addEventListener("click", () => addChildTo(node.id));
 
@@ -928,7 +1385,12 @@ function renderCQuestion(node) {
 
   dom.center.innerHTML = `
 <div class="cv">
-  <h2 class="cv-heading"><span class="cv-heading-icon">❓</span>${esc(node.title)}</h2>
+  ${breadcrumbHtml(node.id)}
+  <div class="cv-title-row">
+    <span class="cv-heading-icon">❓</span>
+    <input class="cv-title-inp" id="node-title-inp" type="text"
+           value="${esc(node.title)}" maxlength="120" autocomplete="off" />
+  </div>
   <p class="cv-subheading">Вопрос к участнику и эталонный ответ</p>
 
   <div class="field-block">
@@ -949,6 +1411,9 @@ function renderCQuestion(node) {
     <button class="add-dashed add-dashed--sm" id="add-hint-btn">${plusSvg()} Добавить подсказку</button>
   </div>
 </div>`;
+
+  bindBreadcrumbs();
+  bindNodeTitleInp(node);
 
   document.getElementById("q-text").addEventListener("input", e => {
     if (!node.content) node.content = {};
@@ -1438,6 +1903,207 @@ function bindPublishModal() {
   });
 }
 
+/* ══════════════════════════════════════════════════
+   ONBOARDING PREVIEW
+   ══════════════════════════════════════════════════ */
+function openObPreview(node) {
+  const frame   = document.getElementById("ob-preview-frame");
+  const els     = (node.content && node.content.elements) || [];
+  const btnText = (node.content && node.content.startBtnText) || "Начать";
+
+  frame.innerHTML = `
+<div class="ob-pv-content">
+  ${els.map(el => `
+    ${el.heading ? `<div class="ob-pv-heading">${esc(el.heading)}</div>` : ""}
+    ${el.text    ? `<div class="ob-pv-text">${esc(el.text)}</div>` : ""}
+  `).join("")}
+  <button class="ob-pv-btn" disabled>${esc(btnText)}
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+    </svg>
+  </button>
+</div>`;
+
+  document.getElementById("ob-preview-backdrop").classList.remove("hidden");
+}
+
+function closeObPreview() {
+  document.getElementById("ob-preview-backdrop").classList.add("hidden");
+}
+
+function bindObPreviewEvents() {
+  document.getElementById("ob-preview-close").addEventListener("click", closeObPreview);
+  document.getElementById("ob-preview-backdrop").addEventListener("click", e => {
+    if (e.target === e.currentTarget) closeObPreview();
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   BUILDER CROP MODAL
+   ══════════════════════════════════════════════════ */
+let pendingBldCoverFile = null;
+
+const bldCropState = {
+  scale: 1, ox: 0, oy: 0,
+  dragging: false, startX: 0, startY: 0, startOx: 0, startOy: 0,
+  naturalW: 0, naturalH: 0, viewW: 0, viewH: 0,
+};
+
+function openBldCropModal(dataUrl) {
+  const vp  = document.getElementById("bld-crop-viewport");
+  const img = document.getElementById("bld-crop-img");
+  const rng = document.getElementById("bld-crop-zoom-range");
+  document.getElementById("bld-crop-backdrop").classList.remove("hidden");
+
+  bldCropState.scale = 1; bldCropState.ox = 0; bldCropState.oy = 0;
+  rng.value = "1";
+  img.onload = () => {
+    bldCropState.naturalW = img.naturalWidth;
+    bldCropState.naturalH = img.naturalHeight;
+    bldCropState.viewW    = vp.clientWidth;
+    bldCropState.viewH    = vp.clientHeight;
+
+    // Fit image to cover the viewport
+    const scaleX = bldCropState.viewW / bldCropState.naturalW;
+    const scaleY = bldCropState.viewH / bldCropState.naturalH;
+    bldCropState.scale = Math.max(scaleX, scaleY);
+    rng.min = String(bldCropState.scale);
+    rng.max = String(bldCropState.scale * 3);
+    rng.value = String(bldCropState.scale);
+    clampBldCrop();
+    applyBldCropTransform();
+  };
+  img.src = dataUrl;
+}
+
+function closeBldCropModal() {
+  document.getElementById("bld-crop-backdrop").classList.add("hidden");
+  pendingBldCoverFile = null;
+}
+
+function clampBldCrop() {
+  const s = bldCropState;
+  const scaledW = s.naturalW * s.scale;
+  const scaledH = s.naturalH * s.scale;
+  const minOx = s.viewW - scaledW;
+  const minOy = s.viewH - scaledH;
+  s.ox = Math.min(0, Math.max(minOx, s.ox));
+  s.oy = Math.min(0, Math.max(minOy, s.oy));
+}
+
+function applyBldCropTransform() {
+  const img = document.getElementById("bld-crop-img");
+  if (!img) return;
+  const s = bldCropState;
+  img.style.transform = `translate(${s.ox}px, ${s.oy}px) scale(${s.scale})`;
+  img.style.transformOrigin = "0 0";
+  img.style.width  = s.naturalW + "px";
+  img.style.height = s.naturalH + "px";
+}
+
+function zoomBldCropCentered(newScale) {
+  const s = bldCropState;
+  const cx = s.viewW / 2;
+  const cy = s.viewH / 2;
+  const ratio = newScale / s.scale;
+  s.ox = cx - ratio * (cx - s.ox);
+  s.oy = cy - ratio * (cy - s.oy);
+  s.scale = newScale;
+  clampBldCrop();
+  applyBldCropTransform();
+}
+
+function applyBldCrop() {
+  const img    = document.getElementById("bld-crop-img");
+  const s      = bldCropState;
+  const canvas = document.createElement("canvas");
+  const W = 1280, H = 720;
+  canvas.width = W; canvas.height = H;
+  const ctx    = canvas.getContext("2d");
+  // Map viewport crop region back to natural image coords
+  const sx = (-s.ox) / s.scale;
+  const sy = (-s.oy) / s.scale;
+  const sw = s.viewW  / s.scale;
+  const sh = s.viewH  / s.scale;
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
+  const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
+  unit.coverDataUrl = dataUrl;
+  persistUnit();
+  closeBldCropModal();
+  renderCenter();
+}
+
+function bindBldCropEvents() {
+  const vp  = document.getElementById("bld-crop-viewport");
+  const rng = document.getElementById("bld-crop-zoom-range");
+
+  document.getElementById("bld-crop-close").addEventListener("click", closeBldCropModal);
+  document.getElementById("bld-crop-cancel").addEventListener("click", closeBldCropModal);
+  document.getElementById("bld-crop-backdrop").addEventListener("click", e => {
+    if (e.target === e.currentTarget) closeBldCropModal();
+  });
+  document.getElementById("bld-crop-apply").addEventListener("click", applyBldCrop);
+
+  document.getElementById("bld-crop-zoom-in").addEventListener("click", () => {
+    const rngEl = document.getElementById("bld-crop-zoom-range");
+    const newS = Math.min(parseFloat(rngEl.max), bldCropState.scale * 1.15);
+    rngEl.value = String(newS);
+    zoomBldCropCentered(newS);
+  });
+  document.getElementById("bld-crop-zoom-out").addEventListener("click", () => {
+    const rngEl = document.getElementById("bld-crop-zoom-range");
+    const newS = Math.max(parseFloat(rngEl.min), bldCropState.scale / 1.15);
+    rngEl.value = String(newS);
+    zoomBldCropCentered(newS);
+  });
+
+  rng.addEventListener("input", () => {
+    zoomBldCropCentered(parseFloat(rng.value));
+  });
+
+  // Drag to pan
+  vp.addEventListener("mousedown", e => {
+    bldCropState.dragging = true;
+    bldCropState.startX   = e.clientX;
+    bldCropState.startY   = e.clientY;
+    bldCropState.startOx  = bldCropState.ox;
+    bldCropState.startOy  = bldCropState.oy;
+    vp.classList.add("bld-crop-viewport--dragging");
+    e.preventDefault();
+  });
+  document.addEventListener("mousemove", e => {
+    if (!bldCropState.dragging) return;
+    bldCropState.ox = bldCropState.startOx + (e.clientX - bldCropState.startX);
+    bldCropState.oy = bldCropState.startOy + (e.clientY - bldCropState.startY);
+    clampBldCrop();
+    applyBldCropTransform();
+  });
+  document.addEventListener("mouseup", () => {
+    if (!bldCropState.dragging) return;
+    bldCropState.dragging = false;
+    document.getElementById("bld-crop-viewport")?.classList.remove("bld-crop-viewport--dragging");
+  });
+
+  // Scroll to zoom
+  vp.addEventListener("wheel", e => {
+    e.preventDefault();
+    const rngEl = document.getElementById("bld-crop-zoom-range");
+    const delta = e.deltaY > 0 ? -0.08 : 0.08;
+    const newS  = Math.min(parseFloat(rngEl.max), Math.max(parseFloat(rngEl.min), bldCropState.scale + delta * bldCropState.scale));
+    const rect  = vp.getBoundingClientRect();
+    const cx    = e.clientX - rect.left;
+    const cy    = e.clientY - rect.top;
+    const ratio = newS / bldCropState.scale;
+    bldCropState.ox = cx - ratio * (cx - bldCropState.ox);
+    bldCropState.oy = cy - ratio * (cy - bldCropState.oy);
+    bldCropState.scale = newS;
+    rngEl.value = String(newS);
+    clampBldCrop();
+    applyBldCropTransform();
+  }, { passive: false });
+}
+
 /* ── Event binding ──────────────────────────────── */
 function bindEvents() {
   dom.titleInput.addEventListener("input", () => {
@@ -1546,6 +2212,8 @@ function init() {
   selectNode(unit.id);
   _initing = false;
   bindEvents();
+  bindBldCropEvents();
+  bindObPreviewEvents();
 }
 
 document.addEventListener("DOMContentLoaded", init);

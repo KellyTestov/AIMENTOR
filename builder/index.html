@@ -147,6 +147,51 @@
     </div>
   </div>
 
+  <!-- ══════════ BUILDER CROP MODAL ══════════ -->
+  <div class="bld-modal-backdrop hidden" id="bld-crop-backdrop" role="dialog"
+       aria-modal="true" aria-labelledby="bld-crop-title">
+    <div class="bld-crop-dialog">
+      <div class="bld-crop-header">
+        <span class="bld-crop-title" id="bld-crop-title">Обложка обучения</span>
+        <button class="bld-modal__close" id="bld-crop-close" type="button" aria-label="Закрыть">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="bld-crop-viewport" id="bld-crop-viewport">
+        <img id="bld-crop-img" src="" alt="" draggable="false" />
+      </div>
+      <div class="bld-crop-zoom-bar">
+        <button class="bld-crop-zoom-btn" id="bld-crop-zoom-out" type="button" aria-label="Уменьшить">−</button>
+        <input class="bld-crop-zoom-range" type="range" id="bld-crop-zoom-range" min="1" max="3" step="0.01" value="1" />
+        <button class="bld-crop-zoom-btn" id="bld-crop-zoom-in" type="button" aria-label="Увеличить">+</button>
+      </div>
+      <div class="bld-crop-actions">
+        <button class="bld-btn bld-btn--ghost" id="bld-crop-cancel" type="button">Отмена</button>
+        <button class="bld-btn bld-btn--primary" id="bld-crop-apply" type="button">Применить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ ONBOARDING PREVIEW MODAL ══════════ -->
+  <div class="bld-modal-backdrop hidden" id="ob-preview-backdrop" role="dialog"
+       aria-modal="true" aria-labelledby="ob-preview-title">
+    <div class="ob-preview-dialog">
+      <div class="ob-preview-header">
+        <span class="ob-preview-title" id="ob-preview-title">Предпросмотр онбординга</span>
+        <button class="bld-modal__close" id="ob-preview-close" type="button" aria-label="Закрыть">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="ob-preview-frame" id="ob-preview-frame"></div>
+    </div>
+  </div>
+
   <script src="./builder.js"></script>
 </body>
 </html>

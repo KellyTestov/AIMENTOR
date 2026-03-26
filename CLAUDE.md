@@ -27,11 +27,19 @@ When adding new static assets (images etc.), add them to the `datas` list in `AI
 
 ## Architecture
 
-Three files are the entire frontend:
+Two independent static sub-apps share no code:
 
-- **`index.html`** — all HTML: sidebar, catalog grid, analytics, admin panel, wizard modal (3 steps), delete confirm modal, admin confirm modal, cover crop modal
-- **`styles.css`** — all styling and responsive layout
-- **`app.js`** — all logic (no framework, no dependencies)
+**Main app** (`index.html` / `styles.css` / `app.js`):
+- Sidebar, catalog grid, analytics, admin panel
+- Wizard modal (3 steps), delete/admin/cover-crop modals
+
+**Sandbox** (`sandbox/index.html` / `sandbox/sandbox.css` / `sandbox/sandbox.js`):
+- AI chat player for training units (тренажёр) and exam units (экзамен)
+- Reads unit data from `localStorage` key `ai-mentor-builder-data-v1` (written by the main app wizard)
+- Persists session progress in `localStorage` key `ai-mentor-sandbox-session-v1`
+- Exam mode: per-question countdown timer (`sb-qtimer`), client data panel, inactivity timeout
+- Training mode: mock AI evaluations with correct/hint feedback, session elapsed timer
+- No `window.AI_MENTOR_BOOTSTRAP` — standalone, launched via `launchUrl` on catalog cards
 
 ### Data flow
 
@@ -79,6 +87,18 @@ Set this before loading `app.js`. Missing fields fall back to demo data.
 - **`NAV_ICONS`** — maps section ids (`catalog`, `analytics`, `admin`) to image paths (`./mortarboard.png`, `./analytics.png`, `./admin-dashboard.png`).
 - **`getUnitById(id)`** — `allUnits.find()` helper; use instead of inline `.find()`.
 - **`syncResetBtn()`** — shows/hides the reset button; call only from filter event handlers and `applyStateToInputs()`, not from `saveState()`.
+
+### Analytics section
+
+Requires `canViewAnalytics` right. State lives in `analyticsState` (plain object, not persisted). Filters: period tabs (`week`/`month`/`quarter`/`year`/`custom`), status radio, factory checkboxes, direction checkboxes (direction list is factory-dependent via `DIRECTION_MAP`), unit search, sort-by-popularity toggle, employee search/select. `refreshAnalytics()` re-filters `ANALYTICS_SESSIONS` and re-renders the table. Export buttons write XLSX (via CDN SheetJS `xlsx.full.min.js` — degrades gracefully to CSV if unavailable).
+
+`ANALYTICS_SESSIONS` shape: `{ id, unitId, unitTitle, direction, employeeId, employeeName, status, assignedDate, startDate, endDate, activeTimeMinutes, score, attempts }`. Status values: `"completed"`, `"in_progress"`, `"assigned"`. Can be injected via `window.AI_MENTOR_BOOTSTRAP.analyticsSessions`.
+
+`FACTORIES` and `DIRECTION_MAP` are hardcoded constants — update both when adding new factories/directions.
+
+### Builder data integration
+
+`mergeBuilderUnits()` runs at startup and reads `localStorage["ai-mentor-builder-data-v1"]` (written by the sandbox/builder). It updates `publicationStatus` for existing unit IDs and appends new units not already in the catalog. This is the bridge between the sandbox and the main catalog.
 
 ### Publication status
 
