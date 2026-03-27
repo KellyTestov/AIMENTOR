@@ -1831,3 +1831,496 @@ select.cu-edit-input { appearance: auto; cursor: pointer; }
   border-radius: var(--radius-sm);
   border: 1px solid #bbf7d0;
 }
+
+/* ══════════════════════════════════════
+   CLIENT CARD (case center)
+   ══════════════════════════════════════ */
+.client-card {
+  border: 1px solid var(--border-sub);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.cc-group { border-bottom: 1px solid var(--border-sub); }
+.cc-group:last-child { border-bottom: none; }
+
+.cc-group__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: none;
+  cursor: pointer;
+  font: 600 12px/1.3 Manrope, sans-serif;
+  color: var(--text);
+  text-align: left;
+  gap: 8px;
+  transition: background .12s;
+}
+.cc-group__head:hover { background: var(--border-sub); }
+
+.cc-group__chev {
+  flex-shrink: 0;
+  color: var(--muted-lt);
+  transition: transform .15s;
+}
+.cc-group.is-open .cc-group__chev { transform: rotate(180deg); }
+
+.cc-group__body { display: none; }
+.cc-group.is-open .cc-group__body { display: block; }
+
+.cc-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px 5px 14px;
+  border-top: 1px solid var(--border-sub);
+}
+
+.cc-row__label {
+  flex: 0 0 210px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.cc-row__input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 5px 8px;
+  font: 13px/1 Manrope, sans-serif;
+  color: var(--text);
+  background: transparent;
+  outline: none;
+  transition: border-color .12s, background .12s;
+}
+.cc-row__input:hover { border-color: var(--border); background: var(--bg); }
+.cc-row__input:focus { border-color: var(--accent); background: var(--surface); }
+.cc-row__input::placeholder { color: var(--muted-lt); font-style: italic; }
+
+/* ══════════════════════════════════════
+   CRITERIA (question center)
+   ══════════════════════════════════════ */
+.criteria-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.crit-list { display: flex; flex-direction: column; gap: 6px; }
+
+.crit-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border-sub);
+  border-radius: var(--radius-sm);
+}
+
+.crit-item__num {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted-lt);
+  min-width: 18px;
+}
+
+.crit-item__text {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  border-bottom: 1.5px solid transparent;
+  padding: 3px 4px;
+  font: 13px/1 Manrope, sans-serif;
+  color: var(--text);
+  background: none;
+  outline: none;
+  border-radius: 3px 3px 0 0;
+  transition: border-color .12s, background .12s;
+}
+.crit-item__text:hover { border-bottom-color: var(--border); background: var(--bg); }
+.crit-item__text:focus { border-bottom-color: var(--accent); background: var(--bg); }
+.crit-item__text::placeholder { color: var(--muted-lt); }
+
+.crit-item__score-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.crit-item__score-lbl {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted-lt);
+  white-space: nowrap;
+}
+
+.crit-item__score {
+  width: 52px;
+  border: 1px solid var(--border-sub);
+  border-radius: var(--radius-sm);
+  padding: 4px 6px;
+  font: 12px/1 Manrope, sans-serif;
+  color: var(--text);
+  text-align: center;
+  outline: none;
+  transition: border-color .12s;
+}
+.crit-item__score:focus { border-color: var(--accent); }
+
+/* ══════════════════════════════════════
+   CRITERIA CARDS (redesigned — nested hints)
+   ══════════════════════════════════════ */
+
+.crit-section-hd {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.crit-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.crit-card {
+  background: var(--surface);
+  border: 1px solid var(--border-sub);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  transition: box-shadow .15s;
+}
+.crit-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.07); }
+
+.crit-card__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.crit-card__num {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--muted-lt);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.crit-card__text {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  border-bottom: 1.5px solid transparent;
+  background: none;
+  padding: 3px 2px;
+  font: 13px/1.3 Manrope, sans-serif;
+  color: var(--text);
+  outline: none;
+  border-radius: 3px 3px 0 0;
+  transition: border-color .12s, background .12s;
+}
+.crit-card__text:hover { border-bottom-color: var(--border); background: var(--bg); }
+.crit-card__text:focus { border-bottom-color: var(--accent); background: var(--bg); }
+.crit-card__text::placeholder { color: var(--muted-lt); }
+
+.crit-card__score-pill {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: #eef1fb;
+  border: 1px solid #d5dcf5;
+  border-radius: 20px;
+  padding: 3px 10px 3px 8px;
+  flex-shrink: 0;
+}
+
+.crit-card__score-inp {
+  width: 38px;
+  border: none;
+  background: none;
+  font: 600 13px/1 Manrope, sans-serif;
+  color: #3b5bdb;
+  text-align: right;
+  outline: none;
+  padding: 0;
+  -moz-appearance: textfield;
+}
+.crit-card__score-inp::-webkit-inner-spin-button,
+.crit-card__score-inp::-webkit-outer-spin-button { -webkit-appearance: none; appearance: none; }
+
+.crit-card__score-unit {
+  font-size: 11px;
+  font-weight: 600;
+  color: #7b93d6;
+  white-space: nowrap;
+}
+
+.crit-card__del {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--muted-lt);
+  border-radius: 4px;
+  font-size: 16px;
+  line-height: 1;
+  transition: color .12s, background .12s;
+}
+.crit-card__del:hover { color: var(--accent); background: #fff5f5; }
+
+.crit-card__hints {
+  margin-top: 8px;
+  margin-left: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.crit-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  background: #fffceb;
+  border: 1px solid #f0e6a0;
+  border-radius: 6px;
+  padding: 6px 8px 6px 10px;
+}
+
+.crit-hint__icon {
+  font-size: 13px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  line-height: 1.4;
+}
+
+.crit-hint__body {
+  flex: 1;
+  min-width: 0;
+  font: 12px/1.4 Manrope, sans-serif;
+  color: #5a4a00;
+  outline: none;
+  word-break: break-word;
+}
+.crit-hint__body:empty::before {
+  content: attr(data-ph);
+  color: #c4aa50;
+  pointer-events: none;
+}
+
+.crit-hint__del {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #c4aa50;
+  border-radius: 3px;
+  font-size: 14px;
+  line-height: 1;
+  margin-top: 1px;
+  transition: color .12s, background .12s;
+}
+.crit-hint__del:hover { color: var(--accent); background: #fff5f5; }
+
+.crit-card__add-hint {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 7px;
+  margin-left: 30px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: 11px/1 Manrope, sans-serif;
+  color: var(--muted-lt);
+  padding: 2px 0;
+  transition: color .12s;
+}
+.crit-card__add-hint:hover { color: var(--accent); }
+
+/* ══════════════════════════════════════
+   HINTS LINKED TO CRITERIA (question center) — legacy, kept for compat
+   ══════════════════════════════════════ */
+.hint-item--linked {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-sub);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+}
+.hint-item--linked:last-child { margin-bottom: 0; }
+
+.hint-item__top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hint-link-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.hint-link-lbl {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted-lt);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.hint-link-sel {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border-sub);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  font: 12px/1 Manrope, sans-serif;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  cursor: pointer;
+  transition: border-color .12s;
+}
+.hint-link-sel:focus { border-color: var(--accent); }
+
+/* Task 3 fix: hint editor must be full-width and not collapse */
+.hint-editor {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 80px;
+}
+
+/* Task 2 fix: criteria header — field-lbl must stay inline inside flex row */
+.criteria-header .field-lbl {
+  display: inline;
+  margin-bottom: 0;
+}
+
+/* ══════════════════════════════════════
+   CONNECTOR CANVAS (criteria ↔ hints)
+   ══════════════════════════════════════ */
+
+/* Remove old hint-linked dropdown styles (replaced by connector) */
+.hint-link-row, .hint-link-lbl, .hint-link-sel { display: none; }
+
+.conn-field-block {
+  padding: 0;
+  overflow: visible;
+}
+
+.conn-canvas {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  align-items: flex-start;
+}
+
+.conn-col {
+  padding: 16px 20px;
+}
+.conn-col:first-child {
+  border-right: 1px solid var(--border-sub);
+}
+
+.conn-col__label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--muted-lt);
+  margin-bottom: 10px;
+}
+
+/* SVG overlay for connection lines */
+.conn-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 2;
+}
+
+/* Connection port circles */
+.conn-port {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  padding: 0;
+  transition: border-color .12s, background .12s, transform .1s, box-shadow .12s;
+}
+.conn-port:hover {
+  border-color: var(--accent);
+  background: #fff5f5;
+  transform: scale(1.25);
+}
+.conn-port--active {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: 0 0 0 3px rgba(201,30,30,.2);
+  transform: scale(1.2);
+}
+.conn-port--connected {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+/* Port on criterion row: sits at the far right */
+.conn-port--right { margin-left: 4px; }
+
+/* Port on hint row: sits at the far left of hint-item__top */
+.conn-port--left  { margin-right: 4px; }
+
+/* Hint item layout tweak for connector mode */
+.hint-item--linked .hint-item__top {
+  align-items: center;
+}
+
+/* Hint number in connector mode */
+.hint-item--linked .hint-item__num {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted-lt);
+}

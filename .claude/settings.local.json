@@ -8,7 +8,22 @@
       "WebFetch(domain:shadcn-svelte.com)",
       "WebFetch(domain:saas-ui.dev)",
       "Bash(ls f:/ownerpagementor/*.png)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "WebFetch(domain:rubric-maker.com)",
+      "WebFetch(domain:www.figma.com)",
+      "WebFetch(domain:www.rcampus.com)",
+      "WebFetch(domain:lms.tamu.edu)",
+      "WebFetch(domain:support.google.com)",
+      "WebFetch(domain:teaching.pitt.edu)",
+      "WebFetch(domain:www.smashingmagazine.com)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:www.eleken.co)",
+      "WebFetch(domain:mobbin.com)",
+      "WebFetch(domain:blog.logrocket.com)",
+      "WebFetch(domain:www.justinmind.com)",
+      "WebFetch(domain:ui-patterns.com)",
+      "WebFetch(domain:www.interaction-design.org)",
+      "WebFetch(domain:ixdf.org)"
     ]
   }
 }

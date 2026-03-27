@@ -18,6 +18,39 @@ const UNIT_CATEGORIES = ["Продукты","Коммуникации","Прод
 const UNIT_FACTORIES  = ["Доставка","Урегулирование","Сервис","Телемаркетинг"];
 const UNIT_DURATIONS  = ["15 минут","30 минут","1 час","1.5 часа","2 часа","2.5 часа","3 часа"];
 
+/* ── Client card field definitions ─────────────── */
+const CC_SECTIONS = [
+  { key: "creditDetails", title: "Детализация по кредитной карте клиента", fields: [
+    { key: "nearestPayment",   label: "Ближайший платёж",                      ph: "2 200 ₽ до 20.12.2024" },
+    { key: "paymentSkip",      label: "Пропуск платежа",                        ph: "Не подключен" },
+    { key: "totalDebt",        label: "Общая задолженность на сегодня",          ph: "3 140 ₽" },
+    { key: "purchases30",      label: "Покупки в первые 30 дней",               ph: "Льготный период не начался" },
+    { key: "purchasesFrom31",  label: "Покупки с 31 дня и снятие наличных",     ph: "Льготный период до 28.01.2026" },
+    { key: "repayOther",       label: "Погашение КК в другом банке",            ph: "Льготный период не начался" },
+    { key: "availableLimit",   label: "Доступный лимит",                        ph: "7 860 ₽" },
+    { key: "overdueDebt",      label: "Просроченная задолженность",             ph: "0 ₽" },
+    { key: "fines",            label: "Штрафы и неустойки",                     ph: "0 ₽" },
+  ]},
+  { key: "contractTerms", title: "Общие условия договора", fields: [
+    { key: "totalCredit",   label: "Общая сумма кредита",                    ph: "11 000 ₽" },
+    { key: "agreementDate", label: "Подписание ДС о беспроцентном периоде",  ph: "16 ноября 2023" },
+    { key: "issueDate",     label: "Дата выдачи",                            ph: "30 ноября 2023" },
+  ]},
+  { key: "interestRates", title: "Текущие процентные ставки", fields: [
+    { key: "rate30",        label: "Покупки в первые 30 дней",    ph: "39,99% годовых" },
+    { key: "rateFrom31",    label: "Покупки с 31 дня",             ph: "39,99% годовых" },
+    { key: "rateCash",      label: "Снятие наличных",              ph: "49,99% годовых" },
+    { key: "rateRepay",     label: "Погашение КК в другом банке",  ph: "49,99% годовых" },
+  ]},
+  { key: "cardInfo", title: "Информация по кредитной карте", fields: [
+    { key: "balance",       label: "Баланс",                                            ph: "7 860 ₽" },
+    { key: "serviceCost",   label: "Стоимость обслуживания",                            ph: "0 ₽" },
+    { key: "cashLimit",     label: "Лимит на снятие наличных без комиссии",             ph: "до 50 000 ₽/мес" },
+    { key: "commAlfa",      label: "Комиссия за снятие в банкоматах Альфа-Банка",       ph: "3,9% + 390 ₽" },
+    { key: "commOther",     label: "Комиссия за снятие в сторонних банкоматах",         ph: "3,9% + 390 ₽" },
+  ]},
+];
+
 /* ── State ─────────────────────────────────────── */
 let unit       = null;   // full unit tree
 let selectedId = null;   // selected node id
@@ -30,6 +63,7 @@ function genId(pfx) { return `${pfx || "n"}-${++_seq}`; }
 
 const loadingQueries = new Set();
 const MOCK_ABOOK_RESP = `✅ Комиссия за услугу уведомлений по дебетовым картам составляет — 99 рублей.\n\n🚨 По кредитным комиссия составляет — 159 рублей.\n\n❌ Если клиент хочет оспорить списание — направь его на составление обращения «Комиссии»`;
+let _connActivePort = null; // { type: 'crit'|'hint', id } | null
 
 /* ── DOM refs ───────────────────────────────────── */
 const dom = {};
@@ -115,8 +149,8 @@ function buildScaffold(meta) {
   }));
 
   if (isTrainer) {
-    const q1     = makeNode("question", "Вопрос 1",  [], { text: "", refAnswer: "", hints: [], feedback: "" });
-    const case1  = makeNode("case",     "Кейс 1",    [q1],    { description: "" });
+    const q1     = makeNode("question", "Вопрос 1",  [], { text: "", criteria: [], hints: [], feedback: "" });
+    const case1  = makeNode("case",     "Кейс 1",    [q1],    { description: "", clientCard: {} });
     const sec1   = makeNode("section",  "Раздел 1",  [case1], {});
     const prac   = makeNode("practice", "Практический блок", [sec1], {});
     const th1    = makeNode("theory",   "Теория 1",  [], { elements: [{ id: genId("el"), heading: "", text: "" }] });
@@ -124,8 +158,8 @@ function buildScaffold(meta) {
     u.children.push(tBlock);
     u.children.push(prac);
   } else {
-    const mkQ = () => makeNode("question", "Вопрос 1", [], { text: "", refAnswer: "", hints: [], feedback: "" });
-    const mkC = (q) => makeNode("case",    "Кейс 1",   [q], { description: "" });
+    const mkQ = () => makeNode("question", "Вопрос 1", [], { text: "", criteria: [], hints: [], feedback: "" });
+    const mkC = (q) => makeNode("case",    "Кейс 1",   [q], { description: "", clientCard: {} });
     const s1   = makeNode("section", "Раздел 1", [mkC(mkQ())], {});
     const s2   = makeNode("section", "Раздел 2", [mkC(mkQ())], {});
     const prac = makeNode("practice", "Практический блок", [s1, s2], {});
@@ -417,7 +451,7 @@ function addChildTo(parentId) {
   const num   = parent.children.length + 1;
   const title = `${CHILD_TITLES[childType] || "Элемент"} ${num}`;
   const content = childType === "question"
-    ? { text: "", refAnswer: "", hints: [], feedback: "" }
+    ? { text: "", criteria: [], hints: [], feedback: "" }
     : childType === "theory"
       ? { elements: [{ id: genId("el"), heading: "", text: "" }] }
       : {};
@@ -477,8 +511,8 @@ function duplicateNode(id) {
 function addTopBlock() {
   // Insert a new practice block before "completion"
   const num  = unit.children.filter(c => !["onboarding","completion"].includes(c.type)).length + 1;
-  const q    = makeNode("question", "Вопрос 1",  [], { text: "", refAnswer: "", hints: [], feedback: "" });
-  const c    = makeNode("case",     "Кейс 1",    [q],    { description: "" });
+  const q    = makeNode("question", "Вопрос 1",  [], { text: "", criteria: [], hints: [], feedback: "" });
+  const c    = makeNode("case",     "Кейс 1",    [q],    { description: "", clientCard: {} });
   const s    = makeNode("section",  "Раздел 1",  [c],    {});
   const blk  = makeNode("practice", `Практический блок ${num}`, [s], {});
   const ci   = unit.children.findIndex(ch => ch.type === "completion");
@@ -1313,8 +1347,38 @@ function renderCSection(node) {
 
 /* ── Case center ── */
 function renderCCase(node) {
-  const desc = (node.content && node.content.description) || "";
+  if (!node.content) node.content = {};
+  const desc = node.content.description || "";
   const qs   = (node.children || []);
+
+  // Init client card data structure
+  if (!node.content.clientCard) node.content.clientCard = {};
+  CC_SECTIONS.forEach(sec => {
+    if (!node.content.clientCard[sec.key]) node.content.clientCard[sec.key] = {};
+    sec.fields.forEach(f => {
+      if (node.content.clientCard[sec.key][f.key] === undefined)
+        node.content.clientCard[sec.key][f.key] = "";
+    });
+  });
+
+  const ccHtml = CC_SECTIONS.map((sec, si) => `
+    <div class="cc-group${si === 0 ? " is-open" : ""}">
+      <button class="cc-group__head" type="button">
+        <span>${esc(sec.title)}</span>
+        <svg class="cc-group__chev" width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+          <path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="cc-group__body">
+        ${sec.fields.map(f => `
+          <div class="cc-row">
+            <span class="cc-row__label">${esc(f.label)}</span>
+            <input class="cc-row__input" data-cc-sec="${sec.key}" data-cc-key="${f.key}"
+                   value="${esc(node.content.clientCard[sec.key][f.key])}"
+                   placeholder="${esc(f.ph)}" />
+          </div>`).join("")}
+      </div>
+    </div>`).join("");
 
   const qHtml = qs.map((q, i) => `
     <div class="q-item" data-goto="${q.id}">
@@ -1332,11 +1396,18 @@ function renderCCase(node) {
            value="${esc(node.title)}" maxlength="120" autocomplete="off" />
   </div>
   <p class="cv-subheading">Сценарий кейса и список вопросов</p>
+
   <div class="field-block">
     <label class="field-lbl" for="case-desc">Описание кейса</label>
     <textarea class="cv-textarea" id="case-desc" rows="3"
       placeholder="Опишите контекст или сценарий для этого кейса...">${esc(desc)}</textarea>
   </div>
+
+  <div class="field-block">
+    <div class="field-lbl" style="margin-bottom:10px">Карточка клиента</div>
+    <div class="client-card">${ccHtml}</div>
+  </div>
+
   <div class="field-block">
     <div class="field-lbl" style="margin-bottom:10px">Вопросы (${qs.length})</div>
     <div class="q-list">${qHtml || noItems("Нет вопросов")}</div>
@@ -1350,9 +1421,23 @@ function renderCCase(node) {
   bindNodeTitleInp(node);
 
   document.getElementById("case-desc").addEventListener("input", e => {
-    if (!node.content) node.content = {};
     node.content.description = e.target.value;
     persistUnit();
+  });
+
+  // Client card inputs
+  dom.center.querySelectorAll("[data-cc-sec]").forEach(inp => {
+    inp.addEventListener("input", () => {
+      const sec = inp.dataset.ccSec;
+      const key = inp.dataset.ccKey;
+      node.content.clientCard[sec][key] = inp.value;
+      persistUnit();
+    });
+  });
+
+  // Collapsible sections
+  dom.center.querySelectorAll(".cc-group__head").forEach(btn => {
+    btn.addEventListener("click", () => btn.closest(".cc-group").classList.toggle("is-open"));
   });
 
   gotoCards();
@@ -1363,7 +1448,7 @@ function renderCCase(node) {
   document.getElementById("add-5q-btn").addEventListener("click", () => {
     for (let i = 0; i < 5; i++) {
       const num = node.children.length + 1;
-      node.children.push(makeNode("question", `Вопрос ${num}`, [], { text: "", refAnswer: "", hints: [], feedback: "" }));
+      node.children.push(makeNode("question", `Вопрос ${num}`, [], { text: "", criteria: [], hints: [], feedback: "" }));
     }
     expanded.add(node.id);
     persistUnit(); renderTree(); renderCenter();
@@ -1372,16 +1457,147 @@ function renderCCase(node) {
 
 /* ── Question center ── */
 function renderCQuestion(node) {
-  const c      = node.content || {};
-  const hints  = c.hints || [];
+  _connActivePort = null; // reset connector state on every render
+  if (!node.content) node.content = {};
+  const c = node.content;
 
-  const hintsHtml = hints.map((h, i) => `
-    <div class="hint-item">
-      <span class="hint-item__num">${i + 1}.</span>
-      <input type="text" class="hint-input" data-hi="${i}" value="${esc(h)}"
-             placeholder="Подсказка ${i + 1}..." />
-      <button class="hint-item__del" data-del-hint="${i}" title="Удалить">×</button>
+  // Init queries (same model as theory, no Prompt field)
+  if (!c.queries || c.queries.length === 0) {
+    c.queries = [{ id: genId("q"), text: "", response: "" }];
+  } else {
+    c.queries = c.queries.map(q => ({ id: q.id || genId("q"), text: q.text || "", response: q.response || "" }));
+    if (c.queriesApproved === undefined) c.queriesApproved = c.queries.some(q => !!q.approved);
+  }
+  if (c.queriesApproved === undefined) c.queriesApproved = false;
+
+  // Init criteria (default 3)
+  if (!c.criteria || c.criteria.length === 0) {
+    c.criteria = [
+      { id: genId("crit"), text: "", score: "" },
+      { id: genId("crit"), text: "", score: "" },
+      { id: genId("crit"), text: "", score: "" },
+    ];
+  }
+
+  // Migrate hints string[] → [{id, text, criteriaId}]
+  if (!c.hints) c.hints = [];
+  c.hints = c.hints.map(h =>
+    typeof h === "string"
+      ? { id: genId("hint"), text: h, criteriaId: "" }
+      : (h.id ? h : { id: genId("hint"), text: h.text || "", criteriaId: h.criteriaId || "" })
+  );
+
+  const queries  = c.queries;
+  const criteria = c.criteria;
+  const hints    = c.hints;
+
+  // Query loading state uses separate key to avoid collision with theory
+  const qLoadKey    = node.id + "-q";
+  const qIsLoading  = loadingQueries.has(qLoadKey);
+  const qIsApproved = !!c.queriesApproved;
+  const qIsResponded = !qIsLoading && !qIsApproved && !!c.queryResponse;
+  const qLocked     = qIsLoading || qIsResponded || qIsApproved;
+  const qAllFilled  = queries.every(q => (q.text || "").trim().length > 0);
+
+  function planeSvg() {
+    return `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+    </svg>`;
+  }
+  function infoIco(tip, wide) {
+    return `<span class="info-icon" tabindex="0">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M8 7.5v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="8" cy="4.5" r=".85" fill="currentColor"/>
+      </svg>
+      <span class="info-tip${wide ? " info-tip--wide" : ""}">${esc(tip)}</span>
+    </span>`;
+  }
+
+  const qItemsHtml = queries.map((q, i) => `
+    <div class="query-item">
+      <div class="query-item__header">
+        <span class="query-item__label">Запрос ${i + 1}</span>
+        ${queries.length > 1 && !qLocked
+          ? `<button class="query-item__del" data-del-q="${q.id}">${xSvg()}</button>` : ""}
+      </div>
+      <textarea class="query-textarea${qLocked ? " query-textarea--locked" : ""}"
+        ${qLocked ? "disabled" : ""} data-qid="${q.id}"
+        placeholder="Например: Какая комиссия за услугу уведомлений по дебетовой карте">${esc(q.text)}</textarea>
     </div>`).join("");
+
+  const qResponseHtml = (qIsResponded || qIsApproved) && c.queryResponse ? `
+    <div class="query-response${qIsApproved ? " query-response--approved" : ""}">
+      <div class="query-response__title">Ответ</div>
+      <div class="query-response__text">${esc(c.queryResponse)}</div>
+    </div>` : "";
+
+  const qFooterHtml = qIsLoading
+    ? `<div class="query-sending"><span class="query-spinner"></span>Отправляем запросы...</div>`
+    : qIsApproved
+      ? `<div class="query-approved-note">
+          <svg width="13" height="13" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Все запросы утверждены
+        </div>`
+      : qIsResponded
+        ? `<div class="query-actions">
+            <button class="query-approve-btn" id="q-approve-all-btn">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Утвердить запросы
+            </button>
+            <button class="query-change-btn" id="q-change-all-btn">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              Изменить запросы
+            </button>
+          </div>`
+        : `<button class="query-send-btn" id="q-send-all-btn"${qAllFilled ? "" : " disabled"}>
+            ${planeSvg()} Отправить
+          </button>`;
+
+  // Auto-link orphan hints to the first criterion
+  if (criteria.length > 0) {
+    hints.forEach(h => { if (!h.criteriaId) h.criteriaId = criteria[0].id; });
+  }
+
+  // Criteria cards with nested hints
+  const critCardsHtml = criteria.map((cr, i) => {
+    const linked = hints.filter(h => h.criteriaId === cr.id);
+    const hintsInCard = linked.map(h => `
+      <div class="crit-hint" data-hint-id="${h.id}">
+        <span class="crit-hint__icon">💡</span>
+        <div contenteditable="true" class="crit-hint__body cv-editor" data-hint-ce="${h.id}"
+             data-ph="Подсказка для сотрудника...">${esc(h.text)}</div>
+        <button class="crit-hint__del" data-del-hint="${h.id}" title="Удалить подсказку">×</button>
+      </div>`).join("");
+    return `
+      <div class="crit-card" data-crit-id="${cr.id}">
+        <div class="crit-card__row">
+          <span class="crit-card__num">${i + 1}</span>
+          <input type="text" class="crit-card__text" data-crit-text="${cr.id}"
+                 value="${esc(cr.text)}" placeholder="Опишите критерий оценки..." />
+          <div class="crit-card__score-pill">
+            <input type="number" class="crit-card__score-inp" data-crit-score="${cr.id}"
+                   value="${esc(cr.score)}" min="0" max="100" placeholder="0" />
+            <span class="crit-card__score-unit">б.</span>
+          </div>
+          ${criteria.length > 1
+            ? `<button class="crit-card__del" data-del-crit="${cr.id}" title="Удалить критерий">×</button>`
+            : ""}
+        </div>
+        ${linked.length > 0 ? `<div class="crit-card__hints">${hintsInCard}</div>` : ""}
+        <button class="crit-card__add-hint" data-add-hint-crit="${cr.id}">+ Подсказка</button>
+      </div>`;
+  }).join("");
 
   dom.center.innerHTML = `
 <div class="cv">
@@ -1391,65 +1607,267 @@ function renderCQuestion(node) {
     <input class="cv-title-inp" id="node-title-inp" type="text"
            value="${esc(node.title)}" maxlength="120" autocomplete="off" />
   </div>
-  <p class="cv-subheading">Вопрос к участнику и эталонный ответ</p>
+  <p class="cv-subheading">Вопрос к участнику, критерии оценки и подсказки</p>
 
   <div class="field-block">
     <label class="field-lbl">Текст вопроса</label>
     <div contenteditable="true" id="q-text" class="cv-editor"
-         data-ph="Сформулируйте вопрос для участника...">${esc(c.text || "")}</div>
+         data-ph="Сформулируйте вопрос для сотрудника">${esc(c.text || "")}</div>
+  </div>
+
+  <div class="enrich-section">
+    <div class="enrich-section__title-row">
+      <span class="enrich-section__title">Обогащение из базы знаний</span>
+      ${infoIco("Укажите запросы в A-Book — система будет отправлять их во время прохождения сотрудником вопроса. Можно добавить до 5 запросов.", true)}
+    </div>
+    <div class="query-card${qIsApproved ? " query-card--approved" : ""}">
+      <div class="query-card__header">
+        <span class="query-card__title">Тестовые запросы в A-Book</span>
+      </div>
+      <div id="q-query-items-list">${qItemsHtml}</div>
+      ${!qLocked && queries.length < 5
+        ? `<button class="add-dashed add-dashed--sm" id="add-q-query-btn" style="margin-top:8px;width:100%">${plusSvg()} Добавить запрос</button>`
+        : ""}
+      ${qResponseHtml}
+      <div class="query-footer">${qFooterHtml}</div>
+    </div>
   </div>
 
   <div class="field-block">
-    <label class="field-lbl">Эталонный ответ</label>
-    <div contenteditable="true" id="q-ref" class="cv-editor"
-         data-ph="Образцовый ответ — ориентир для ИИ при оценке...">${esc(c.refAnswer || "")}</div>
-  </div>
-
-  <div class="field-block">
-    <div class="field-lbl" style="margin-bottom:10px">Подсказки</div>
-    <div class="hint-list" id="hint-list">${hintsHtml}</div>
-    <button class="add-dashed add-dashed--sm" id="add-hint-btn">${plusSvg()} Добавить подсказку</button>
+    <div class="crit-section-hd">
+      <span class="field-lbl" style="margin:0">Критерии оценки</span>
+      ${infoIco("Добавьте до 3 критериев оценки. К каждому можно прикрепить подсказки для сотрудника.")}
+    </div>
+    <div class="crit-cards" id="crit-cards">${critCardsHtml}</div>
+    ${criteria.length < 3
+      ? `<button class="add-dashed add-dashed--sm" id="add-crit-btn" style="margin-top:8px">${plusSvg()} Добавить критерий</button>`
+      : ""}
   </div>
 </div>`;
 
   bindBreadcrumbs();
   bindNodeTitleInp(node);
 
+  // Question text
   document.getElementById("q-text").addEventListener("input", e => {
-    if (!node.content) node.content = {};
-    node.content.text = e.currentTarget.innerText;
+    c.text = e.currentTarget.innerText;
     persistUnit();
   });
 
-  document.getElementById("q-ref").addEventListener("input", e => {
-    if (!node.content) node.content = {};
-    node.content.refAnswer = e.currentTarget.innerText;
-    persistUnit();
-  });
-
-  dom.center.querySelectorAll(".hint-input").forEach(inp => {
-    inp.addEventListener("input", () => {
-      const idx = parseInt(inp.dataset.hi);
-      if (!node.content.hints) node.content.hints = [];
-      node.content.hints[idx] = inp.value;
-      persistUnit();
+  // Query textareas
+  function updateQSendBtn() {
+    const btn = document.getElementById("q-send-all-btn");
+    if (btn) btn.disabled = !queries.every(q => (q.text || "").trim().length > 0);
+  }
+  dom.center.querySelectorAll(".query-textarea[data-qid]").forEach(ta => {
+    ta.addEventListener("input", () => {
+      const q = queries.find(x => x.id === ta.dataset.qid);
+      if (q) { q.text = ta.value; persistUnit(); }
+      updateQSendBtn();
     });
   });
+  dom.center.querySelectorAll("[data-del-q]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = queries.findIndex(x => x.id === btn.dataset.delQ);
+      if (idx >= 0 && queries.length > 1) { queries.splice(idx, 1); persistUnit(); renderCenter(); }
+    });
+  });
+  document.getElementById("add-q-query-btn")?.addEventListener("click", () => {
+    if (queries.length < 5) { queries.push({ id: genId("q"), text: "", response: "" }); persistUnit(); renderCenter(); }
+  });
+  document.getElementById("q-send-all-btn")?.addEventListener("click", () => {
+    dom.center.querySelectorAll(".query-textarea[data-qid]").forEach(ta => {
+      const q = queries.find(x => x.id === ta.dataset.qid);
+      if (q) q.text = ta.value;
+    });
+    persistUnit();
+    loadingQueries.add(qLoadKey);
+    renderCenter();
+    setTimeout(() => {
+      loadingQueries.delete(qLoadKey);
+      c.queryResponse = MOCK_ABOOK_RESP;
+      persistUnit(); renderCenter();
+    }, 3000);
+  });
+  document.getElementById("q-approve-all-btn")?.addEventListener("click", () => {
+    c.queriesApproved = true; persistUnit(); renderCenter();
+  });
+  document.getElementById("q-change-all-btn")?.addEventListener("click", () => {
+    c.queryResponse = ""; c.queriesApproved = false; persistUnit(); renderCenter();
+  });
 
+  // Criteria inputs
+  dom.center.querySelectorAll("[data-crit-text]").forEach(inp => {
+    inp.addEventListener("input", () => {
+      const cr = criteria.find(x => x.id === inp.dataset.critText);
+      if (cr) { cr.text = inp.value; persistUnit(); }
+    });
+  });
+  dom.center.querySelectorAll("[data-crit-score]").forEach(inp => {
+    inp.addEventListener("input", () => {
+      const cr = criteria.find(x => x.id === inp.dataset.critScore);
+      if (cr) { cr.score = inp.value; persistUnit(); }
+    });
+  });
+  dom.center.querySelectorAll("[data-del-crit]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = criteria.findIndex(x => x.id === btn.dataset.delCrit);
+      if (idx >= 0 && criteria.length > 1) { criteria.splice(idx, 1); persistUnit(); renderCenter(); }
+    });
+  });
+  document.getElementById("add-crit-btn")?.addEventListener("click", () => {
+    if (criteria.length < 3) { criteria.push({ id: genId("crit"), text: "", score: "" }); persistUnit(); renderCenter(); }
+  });
+
+  // Hint editors
+  dom.center.querySelectorAll(".crit-hint__body[data-hint-ce]").forEach(el => {
+    el.addEventListener("input", () => {
+      const h = hints.find(x => x.id === el.dataset.hintCe);
+      if (h) { h.text = el.innerText; persistUnit(); }
+    });
+  });
   dom.center.querySelectorAll("[data-del-hint]").forEach(btn => {
     btn.addEventListener("click", () => {
-      const idx = parseInt(btn.dataset.delHint);
-      (node.content.hints || []).splice(idx, 1);
+      const idx = hints.findIndex(x => x.id === btn.dataset.delHint);
+      if (idx >= 0) { hints.splice(idx, 1); persistUnit(); renderCenter(); }
+    });
+  });
+  dom.center.querySelectorAll("[data-add-hint-crit]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (hints.length >= 10) return;
+      hints.push({ id: genId("hint"), text: "", criteriaId: btn.dataset.addHintCrit });
       persistUnit(); renderCenter();
     });
   });
+}
 
-  document.getElementById("add-hint-btn").addEventListener("click", () => {
-    if (!node.content) node.content = {};
-    if (!node.content.hints) node.content.hints = [];
-    node.content.hints.push("");
-    persistUnit(); renderCenter();
+/* ── Connector canvas (criteria ↔ hints) ── */
+function drawConnectorLines() {
+  const svg    = document.getElementById("conn-svg");
+  const canvas = document.getElementById("conn-canvas");
+  if (!svg || !canvas) return;
+
+  const node = findNode(unit, selectedId);
+  const hints = (node && node.content && node.content.hints) || [];
+
+  const cr = canvas.getBoundingClientRect();
+  svg.setAttribute("viewBox", `0 0 ${canvas.offsetWidth} ${canvas.offsetHeight}`);
+  svg.setAttribute("width",  canvas.offsetWidth);
+  svg.setAttribute("height", canvas.offsetHeight);
+
+  // Clear old content
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+  hints.forEach(h => {
+    if (!h.criteriaId) return;
+    const critPort = canvas.querySelector(`[data-port-crit="${CSS.escape(h.criteriaId)}"]`);
+    const hintPort = canvas.querySelector(`[data-port-hint="${CSS.escape(h.id)}"]`);
+    if (!critPort || !hintPort) return;
+
+    const cpr = critPort.getBoundingClientRect();
+    const hpr = hintPort.getBoundingClientRect();
+
+    const x1 = cpr.left + cpr.width  / 2 - cr.left;
+    const y1 = cpr.top  + cpr.height / 2 - cr.top;
+    const x2 = hpr.left + hpr.width  / 2 - cr.left;
+    const y2 = hpr.top  + hpr.height / 2 - cr.top;
+    const dx = Math.max(40, Math.abs(x2 - x1) * 0.5);
+
+    const dAttr = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+
+    // Wider transparent hit area
+    const hit = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    hit.setAttribute("d", dAttr);
+    hit.setAttribute("stroke", "transparent");
+    hit.setAttribute("stroke-width", "12");
+    hit.setAttribute("fill", "none");
+    hit.style.cursor = "pointer";
+    hit.style.pointerEvents = "stroke";
+    hit.title = "Удалить связь";
+    hit.addEventListener("click", e => {
+      e.stopPropagation();
+      h.criteriaId = "";
+      _connActivePort = null;
+      persistUnit(); renderCenter();
+    });
+
+    // Visible path
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", dAttr);
+    path.setAttribute("stroke", "#c91e1e");
+    path.setAttribute("stroke-width", "2");
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke-linecap", "round");
+    path.style.pointerEvents = "none";
+
+    svg.appendChild(hit);
+    svg.appendChild(path);
   });
+
+  // Mark connected ports
+  canvas.querySelectorAll(".conn-port--connected").forEach(p => p.classList.remove("conn-port--connected"));
+  hints.forEach(h => {
+    if (!h.criteriaId) return;
+    canvas.querySelector(`[data-port-crit="${CSS.escape(h.criteriaId)}"]`)?.classList.add("conn-port--connected");
+    canvas.querySelector(`[data-port-hint="${CSS.escape(h.id)}"]`)?.classList.add("conn-port--connected");
+  });
+}
+
+function bindConnectorPorts(node) {
+  const canvas   = document.getElementById("conn-canvas");
+  if (!canvas) return;
+  const hints = node.content.hints || [];
+
+  function clearActive() {
+    _connActivePort = null;
+    canvas.querySelectorAll(".conn-port--active").forEach(p => p.classList.remove("conn-port--active"));
+  }
+
+  canvas.addEventListener("click", e => {
+    if (!e.target.closest(".conn-port")) clearActive();
+  });
+
+  canvas.querySelectorAll("[data-port-crit]").forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      const critId = btn.dataset.portCrit;
+
+      if (_connActivePort && _connActivePort.type === "hint") {
+        const h = hints.find(x => x.id === _connActivePort.id);
+        if (h) { h.criteriaId = critId; persistUnit(); }
+        _connActivePort = null;
+        renderCenter(); return;
+      }
+      if (_connActivePort?.type === "crit" && _connActivePort.id === critId) {
+        clearActive(); return;
+      }
+      clearActive();
+      _connActivePort = { type: "crit", id: critId };
+      btn.classList.add("conn-port--active");
+    });
+  });
+
+  canvas.querySelectorAll("[data-port-hint]").forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      const hintId = btn.dataset.portHint;
+
+      if (_connActivePort && _connActivePort.type === "crit") {
+        const h = hints.find(x => x.id === hintId);
+        if (h) { h.criteriaId = _connActivePort.id; persistUnit(); }
+        _connActivePort = null;
+        renderCenter(); return;
+      }
+      if (_connActivePort?.type === "hint" && _connActivePort.id === hintId) {
+        clearActive(); return;
+      }
+      clearActive();
+      _connActivePort = { type: "hint", id: hintId };
+      btn.classList.add("conn-port--active");
+    });
+  });
+
+  requestAnimationFrame(drawConnectorLines);
 }
 
 /* ── Center helpers ── */
@@ -1612,34 +2030,43 @@ function renderISection(node) {
 /* ── Case inspector ── */
 function renderICase(node) {
   dom.inspTitle.textContent = "Кейс";
-  const rags = node.settings.ragSources || [];
+  if (!node.settings) node.settings = {};
+  const s = node.settings;
 
-  const ragHtml = rags.map((src, i) => `
-    <div class="rag-item">
-      <span class="rag-item__name">${esc(src)}</span>
-      <button class="rag-item__del" data-del-rag="${i}" title="Удалить">×</button>
-    </div>`).join("");
+  const minuteOpts = Array.from({length: 15}, (_, i) => {
+    const m = i + 1;
+    const lbl = m === 1 ? "1 минута" : m < 5 ? `${m} минуты` : `${m} минут`;
+    return `<option value="${m}"${s.silenceMinutes === m ? " selected" : ""}>${lbl}</option>`;
+  }).join("");
+
+  const actionOpts = [
+    ["loyal",          "Лояльное сообщение оператору"],
+    ["negative",       "Негативное сообщение оператору"],
+    ["negative_multi", "Несколько негативных сообщений оператору"],
+  ].map(([v, l]) => `<option value="${v}"${s.silenceAction === v ? " selected" : ""}>${l}</option>`).join("");
 
   dom.inspBody.innerHTML =
-    ig("rag", "🔗", "Привязка к знаниям",
-      `<div class="rag-list" id="rag-list">${ragHtml}</div>
-       <button class="add-dashed add-dashed--sm" id="add-rag" style="width:100%">${plusSvg()} Добавить источник</button>`, true) +
-
-    ig("aht", "⏱️", "AHT — время", igField("Таргет (сек)",
-      `<input type="number" id="ig-case-aht" value="${node.settings.ahtTarget || ""}" min="10" max="600" placeholder="Из единицы" />`, true)) +
-
-    ig("hints-max", "💡", "Подсказки", igField("Максимум подсказок",
-      `<input type="number" id="ig-case-hmax" value="${node.settings.hintsMax || ""}" min="0" max="10" placeholder="Из единицы" />`, true));
+    ig("silence", "🔇", "Параметр молчания", `
+      ${igField("Время молчания",
+        `<select id="ig-case-silence-min">
+          <option value="">Из единицы обучения</option>
+          ${minuteOpts}
+        </select>`, true)}
+      ${igField("Действие после молчания",
+        `<select id="ig-case-silence-action">
+          <option value="">Не задано</option>
+          ${actionOpts}
+        </select>`)}
+    `, true);
 
   bindIToggles();
-  bindRagList(node);
 
-  document.getElementById("ig-case-aht")?.addEventListener("change", e => {
-    node.settings.ahtTarget = parseInt(e.target.value) || undefined;
+  document.getElementById("ig-case-silence-min")?.addEventListener("change", e => {
+    s.silenceMinutes = parseInt(e.target.value) || undefined;
     persistUnit();
   });
-  document.getElementById("ig-case-hmax")?.addEventListener("change", e => {
-    node.settings.hintsMax = parseInt(e.target.value) || undefined;
+  document.getElementById("ig-case-silence-action")?.addEventListener("change", e => {
+    s.silenceAction = e.target.value || undefined;
     persistUnit();
   });
 }
@@ -1647,53 +2074,71 @@ function renderICase(node) {
 /* ── Question inspector ── */
 function renderIQuestion(node) {
   dom.inspTitle.textContent = "Вопрос";
-  const rags = node.settings.ragSources || [];
+  if (!node.settings) node.settings = {};
+  const s = node.settings;
 
-  const ragHtml = rags.map((src, i) => `
-    <div class="rag-item">
-      <span class="rag-item__name">${esc(src)}</span>
-      <button class="rag-item__del" data-del-rag="${i}" title="Удалить">×</button>
-    </div>`).join("");
+  const rubrics = [
+    ["", "Выберите рубрику..."],
+    ["retail",    "Розничный бизнес"],
+    ["corporate", "Корпоративный бизнес"],
+    ["digital",   "Цифровые продукты"],
+    ["sme",       "МСБ"],
+  ];
+  const abookSections = [
+    ["", "Выберите раздел..."],
+    ["credits",   "Кредитование"],
+    ["debit",     "Дебетовые карты"],
+    ["deposits",  "Вклады"],
+    ["insurance", "Страхование"],
+  ];
+  const abookArticles = [["", "Статьи раздела"]];
+  const restrict = !!s.abookRestrict;
 
   dom.inspBody.innerHTML =
-    ig("fb", "💬", "Обратная связь", igField("Тип",
-      igSelect("ig-q-fb", [
-        ["inherit", "По умолчанию"],
-        ["text",    "Текстовая"],
-        ["score",   "Баллы"],
-        ["none",    "Без обратной связи"],
-      ], node.settings.feedbackType || "inherit"), true), true) +
-
-    ig("criteria", "✅", "Критерии оценки",
-      `<div class="igf">
-        <textarea id="ig-criteria" placeholder="Опишите критерии для ИИ-оценки ответа...">${esc(node.settings.criteria || "")}</textarea>
-       </div>`) +
-
-    ig("rag", "🔗", "Привязка к знаниям",
-      `<div class="rag-list" id="rag-list">${ragHtml}</div>
-       <button class="add-dashed add-dashed--sm" id="add-rag" style="width:100%">${plusSvg()} Добавить источник</button>`) +
-
-    ig("hint-type", "💡", "Тип подсказок", igField("Вид",
-      igSelect("ig-hint-type", [
-        ["text",    "Текстовые"],
-        ["partial", "Частичный ответ"],
-        ["context", "Контекстная помощь"],
-      ], node.settings.hintType || "text")));
+    ig("abook", "📖", "Информация из A-Book", `
+      <p class="ig-desc">Выберите рубрику, из которой AI будет получать справочную информацию для этого вопроса</p>
+      <div class="igf">
+        <div class="igf__label">Область поиска</div>
+        <select id="ig-q-rubric">
+          ${rubrics.map(([v, l]) => `<option value="${v}"${v === (s.abookRubric || "") ? " selected" : ""}>${l}</option>`).join("")}
+        </select>
+      </div>
+      <div class="igf ig-toggle-row">
+        <label class="ig-toggle">
+          <input type="checkbox" id="ig-q-restrict" ${restrict ? "checked" : ""} />
+          <span class="ig-toggle__track"></span>
+          <span class="ig-toggle__label">Ограничить поиск по разделам рубрики</span>
+        </label>
+      </div>
+      <div id="ig-q-section-block"${!restrict ? ' style="display:none"' : ""}>
+        <div class="igf">
+          <div class="igf__label">Раздел</div>
+          <select id="ig-q-section">
+            ${abookSections.map(([v, l]) => `<option value="${v}"${v === (s.abookSection || "") ? " selected" : ""}>${l}</option>`).join("")}
+          </select>
+          <select id="ig-q-articles" style="margin-top:8px">
+            ${abookArticles.map(([v, l]) => `<option value="${v}"${v === (s.abookArticles || "") ? " selected" : ""}>${l}</option>`).join("")}
+          </select>
+          <div class="ig-hint">При выборе статей поиск будет осуществляться только по ним</div>
+        </div>
+      </div>
+    `, true);
 
   bindIToggles();
-  bindRagList(node);
 
-  document.getElementById("ig-q-fb")?.addEventListener("change", e => {
-    node.settings.feedbackType = e.target.value === "inherit" ? undefined : e.target.value;
+  document.getElementById("ig-q-rubric")?.addEventListener("change", e => {
+    s.abookRubric = e.target.value; persistUnit(); renderCenter();
+  });
+  document.getElementById("ig-q-restrict")?.addEventListener("change", e => {
+    s.abookRestrict = e.target.checked;
+    document.getElementById("ig-q-section-block").style.display = e.target.checked ? "" : "none";
     persistUnit();
   });
-  document.getElementById("ig-criteria")?.addEventListener("input", e => {
-    node.settings.criteria = e.target.value;
-    persistUnit();
+  document.getElementById("ig-q-section")?.addEventListener("change", e => {
+    s.abookSection = e.target.value; persistUnit();
   });
-  document.getElementById("ig-hint-type")?.addEventListener("change", e => {
-    node.settings.hintType = e.target.value;
-    persistUnit();
+  document.getElementById("ig-q-articles")?.addEventListener("change", e => {
+    s.abookArticles = e.target.value; persistUnit();
   });
 }
 
