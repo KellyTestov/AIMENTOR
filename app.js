@@ -2,6 +2,7 @@
 
 const ADMIN_USERS_STORAGE_KEY = "ai-mentor-access-users-v1";
 const WIZARD_STORAGE_KEY = "ai-mentor-wizard-v2";
+const ANALYTICS_STATE_KEY = "ai-mentor-analytics-state-v1";
 
 const bootstrap = window.AI_MENTOR_BOOTSTRAP || {};
 
@@ -190,7 +191,7 @@ const defaultAnalyticsState = {
   status: "all",
   factories: [],
   directions: [],
-  unitSearch: "",
+  selectedCourses: [],
   sortByPopularity: false,
   selectedEmployeeId: null,
   employeeSearchText: "",
@@ -200,10 +201,9 @@ let analyticsState = { ...defaultAnalyticsState };
 
 const FACTORIES = ['Доставка', 'Урегулирование', 'Сервис', 'Телемаркетинг'];
 const DIRECTION_MAP = {
-  'Доставка':       ['Малый и микро бизнес', 'Розничный бизнес'],
+  'Доставка':       ['Малый и микро бизнес', 'Розничный бизнес', 'Универсал', 'Партнёрка'],
   'Урегулирование': ['90-', '90+', 'Выездное'],
   'Сервис':         ['ФЛ Chat', 'ФЛ Voice', 'ЮЛ Chat', 'ЮЛ Voice', 'СвА', 'Эквайринг'],
-
   'Телемаркетинг':  ['Физ.лица', 'Юр.лица'],
 };
 const ALL_DIRECTIONS = [...new Set(Object.values(DIRECTION_MAP).flat())];
@@ -302,10 +302,12 @@ const dom = {
   userName: document.getElementById("user-name"),
   userRole: document.getElementById("user-role"),
   // Analytics elements
-  anPeriodTabs: document.getElementById("an-period-tabs"),
-  anDateRange: document.getElementById("an-date-range"),
-  anDateFrom: document.getElementById("an-date-from"),
-  anDateTo: document.getElementById("an-date-to"),
+  anDdPeriod: document.getElementById("an-dd-period"),
+  anDdPeriodLabel: document.getElementById("an-dd-period-label"),
+  anPickerFrom: document.getElementById("an-picker-from"),
+  anPickerTo: document.getElementById("an-picker-to"),
+  anCalTitle: document.getElementById("an-cal-title"),
+  anCalendar: document.getElementById("an-calendar"),
   anDdStatus: document.getElementById("an-dd-status"),
   anDdStatusLabel: document.getElementById("an-dd-status-label"),
   anDdFactory: document.getElementById("an-dd-factory"),
@@ -315,7 +317,10 @@ const dom = {
   anDdDirection: document.getElementById("an-dd-direction"),
   anDdDirectionLabel: document.getElementById("an-dd-direction-label"),
   anDirApply: document.getElementById("an-dir-apply"),
-  anUnitSearch: document.getElementById("an-unit-search"),
+  anDdCourse: document.getElementById("an-dd-course"),
+  anDdCourseLabel: document.getElementById("an-dd-course-label"),
+  anDdCourseList: document.getElementById("an-dd-course-list"),
+  anCourseApply: document.getElementById("an-course-apply"),
   anSortPopular: document.getElementById("an-sort-popular"),
   anResetBtn: document.getElementById("an-reset-btn"),
   anExportBtn: document.getElementById("an-export-btn"),
@@ -414,6 +419,7 @@ function init() {
     renderNoAccess();
     return;
   }
+  loadAnalyticsState();
 
   mergeBuilderUnits();
   renderUserBlock();
@@ -656,6 +662,7 @@ function refreshView() {
   if (isAnalytics) {
     dom.sectionTitle.textContent = "Аналитика";
     dom.sectionSubtitle.textContent = "Сводка по единицам обучения";
+    updatePeriodLabel();
     refreshAnalytics();
     return;
   }
@@ -680,6 +687,8 @@ function refreshAnalytics() {
   dom.anMCompleted.textContent = String(metrics.completed);
   dom.anMAvgScore.textContent = metrics.avgScore != null ? String(metrics.avgScore) : "—";
   dom.anMAvgAttempts.textContent = metrics.avgAttempts != null ? String(metrics.avgAttempts) : "—";
+
+  saveAnalyticsState();
 
   renderAnalyticsTable(sessions);
   syncAnalyticsResetBtn();
@@ -1705,10 +1714,12 @@ function getAnalyticsDateRange() {
 
   let from;
   switch (analyticsState.period) {
-    case "week":
+    case "week": {
+      const dow = today.getDay() === 0 ? 6 : today.getDay() - 1; // Пн=0…Вс=6
       from = new Date(today);
-      from.setDate(from.getDate() - 6);
+      from.setDate(today.getDate() - dow);
       break;
+    }
     case "month":
       from = new Date(today.getFullYear(), today.getMonth(), 1);
       break;
@@ -1761,9 +1772,8 @@ function filterAnalyticsSessions() {
     sessions = sessions.filter((s) => analyticsState.directions.includes(s.direction));
   }
 
-  if (analyticsState.unitSearch) {
-    const q = analyticsState.unitSearch.toLowerCase();
-    sessions = sessions.filter((s) => s.unitTitle.toLowerCase().includes(q));
+  if (analyticsState.selectedCourses.length > 0) {
+    sessions = sessions.filter((s) => analyticsState.selectedCourses.includes(s.unitTitle));
   }
 
   if (analyticsState.selectedEmployeeId) {
@@ -1779,6 +1789,218 @@ function filterAnalyticsSessions() {
   }
 
   return sessions;
+}
+
+// ─── Date helpers ──────────────────────────────────────────────────────────────
+
+function dateToStr(date) {
+  if (!date) return "";
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function strToDate(str) {
+  if (!str) return null;
+  const parts = str.split("-").map(Number);
+  const d = new Date(parts[0], parts[1] - 1, parts[2]);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+// ─── Period picker state & functions ──────────────────────────────────────────
+
+const PERIOD_LABELS = {
+  week: "Текущая неделя",
+  month: "Текущий месяц",
+  quarter: "Текущий квартал",
+  year: "Текущий год",
+};
+
+const CAL_MONTH_NAMES = ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+
+let periodPickerState = {
+  period: "month",
+  customFrom: "",
+  customTo: "",
+  calYear: new Date().getFullYear(),
+  calMonth: new Date().getMonth(),
+  isSelecting: false,
+};
+
+function getPickerRange() {
+  if (periodPickerState.period === "custom") {
+    return { from: strToDate(periodPickerState.customFrom), to: strToDate(periodPickerState.customTo) };
+  }
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let from;
+  switch (periodPickerState.period) {
+    case "week": {
+      const dow = today.getDay() === 0 ? 6 : today.getDay() - 1;
+      from = new Date(today);
+      from.setDate(today.getDate() - dow);
+      break;
+    }
+    case "month":
+      from = new Date(today.getFullYear(), today.getMonth(), 1);
+      break;
+    case "quarter": {
+      const q = Math.floor(today.getMonth() / 3);
+      from = new Date(today.getFullYear(), q * 3, 1);
+      break;
+    }
+    case "year":
+      from = new Date(today.getFullYear(), 0, 1);
+      break;
+    default:
+      return { from: null, to: null };
+  }
+  return { from, to: new Date(today) };
+}
+
+function renderCalendar() {
+  const year = periodPickerState.calYear;
+  const month = periodPickerState.calMonth;
+  const { from, to } = getPickerRange();
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  dom.anCalTitle.textContent = `${CAL_MONTH_NAMES[month]} ${year}`;
+
+  const firstDay = new Date(year, month, 1);
+  let startDow = firstDay.getDay() - 1;
+  if (startDow < 0) startDow = 6;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const DOW_SHORT = ["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
+  let html = `<div class="an-cal-grid">`;
+  html += DOW_SHORT.map((d) => `<div class="an-cal-dow">${d}</div>`).join("");
+  for (let i = 0; i < startDow; i++) html += `<div></div>`;
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month, day);
+    const dateStr = dateToStr(date);
+    const toDay0 = to ? new Date(to.getFullYear(), to.getMonth(), to.getDate()) : null;
+    const isToday = date.getTime() === today.getTime();
+    const isStart = from && date.getTime() === from.getTime();
+    const isEnd = toDay0 && date.getTime() === toDay0.getTime();
+    const inRange = from && toDay0 && date > from && date < toDay0;
+
+    let cls = "an-cal-day";
+    if (isToday) cls += " an-cal-day--today";
+    if (isStart) cls += " an-cal-day--start";
+    if (isEnd && !isStart) cls += " an-cal-day--end";
+    if (inRange) cls += " an-cal-day--in-range";
+    html += `<button type="button" class="${cls}" data-date="${dateStr}">${day}</button>`;
+  }
+  html += `</div>`;
+  dom.anCalendar.innerHTML = html;
+}
+
+function updatePickerPresets() {
+  document.querySelectorAll(".an-preset-btn").forEach((btn) => {
+    btn.classList.toggle("is-active", btn.dataset.preset === periodPickerState.period);
+  });
+}
+
+function updatePickerInputs() {
+  const { from, to } = getPickerRange();
+  dom.anPickerFrom.value = from ? dateToStr(from) : "";
+  dom.anPickerTo.value = to ? dateToStr(to) : "";
+}
+
+function updatePeriodPickerUI() {
+  updatePickerPresets();
+  updatePickerInputs();
+  renderCalendar();
+}
+
+function openPeriodPicker() {
+  periodPickerState.period = analyticsState.period;
+  periodPickerState.customFrom = analyticsState.customFrom;
+  periodPickerState.customTo = analyticsState.customTo;
+  periodPickerState.isSelecting = false;
+  const { from } = getPickerRange();
+  if (from) {
+    periodPickerState.calYear = from.getFullYear();
+    periodPickerState.calMonth = from.getMonth();
+  } else {
+    const now = new Date();
+    periodPickerState.calYear = now.getFullYear();
+    periodPickerState.calMonth = now.getMonth();
+  }
+  updatePeriodPickerUI();
+  closeAllAnalyticsDds();
+  dom.anDdPeriod.classList.add("dd--open");
+}
+
+function closePeriodPicker(save) {
+  if (save) {
+    analyticsState.period = periodPickerState.period;
+    analyticsState.customFrom = periodPickerState.customFrom;
+    analyticsState.customTo = periodPickerState.customTo;
+    updatePeriodLabel();
+    refreshAnalytics();
+    syncAnalyticsResetBtn();
+  }
+  dom.anDdPeriod.classList.remove("dd--open");
+}
+
+function updatePeriodLabel() {
+  if (analyticsState.period === "custom" && analyticsState.customFrom && analyticsState.customTo) {
+    const f = strToDate(analyticsState.customFrom);
+    const t = strToDate(analyticsState.customTo);
+    const fmt = (d) => `${String(d.getDate()).padStart(2,"0")}.${String(d.getMonth()+1).padStart(2,"0")}`;
+    dom.anDdPeriodLabel.textContent = `${fmt(f)} — ${fmt(t)}`;
+  } else {
+    dom.anDdPeriodLabel.textContent = PERIOD_LABELS[analyticsState.period] || "Период";
+  }
+}
+
+// ─── Analytics state persistence ─────────────────────────────────────────────
+
+function saveAnalyticsState() {
+  try { sessionStorage.setItem(ANALYTICS_STATE_KEY, JSON.stringify(analyticsState)); } catch (e) { /* ignore */ }
+}
+
+function loadAnalyticsState() {
+  try {
+    const raw = sessionStorage.getItem(ANALYTICS_STATE_KEY);
+    if (raw) analyticsState = { ...defaultAnalyticsState, ...JSON.parse(raw) };
+  } catch (e) { /* ignore */ }
+}
+
+function restoreAnalyticsUI() {
+  updatePeriodLabel();
+
+  const statusRadio = document.querySelector(`input[name="an-status"][value="${analyticsState.status}"]`);
+  if (statusRadio) statusRadio.checked = true;
+  const statusLabels = { all: "Статус", assigned: "Назначен", in_progress: "В процессе", completed: "Завершён" };
+  dom.anDdStatusLabel.textContent = statusLabels[analyticsState.status] || "Статус";
+
+  document.querySelectorAll('input[name="an-factory"]').forEach((cb) => { cb.checked = analyticsState.factories.includes(cb.value); });
+  const fLabel = analyticsState.factories.length > 0 ? analyticsState.factories.join(", ") : "Фабрика";
+  dom.anDdFactoryLabel.textContent = fLabel.length > 15 ? fLabel.slice(0, 13) + "…" : fLabel;
+
+  populateAnDirectionList(analyticsState.factories);
+  document.querySelectorAll('input[name="an-dir"]').forEach((cb) => { cb.checked = analyticsState.directions.includes(cb.value); });
+  const dLabel = analyticsState.directions.length > 0 ? analyticsState.directions.join(", ") : "Направление";
+  dom.anDdDirectionLabel.textContent = dLabel.length > 15 ? dLabel.slice(0, 13) + "…" : dLabel;
+
+  document.querySelectorAll('input[name="an-course"]').forEach((cb) => { cb.checked = analyticsState.selectedCourses.includes(cb.value); });
+  const cLabel = analyticsState.selectedCourses.length > 0 ? analyticsState.selectedCourses.join(", ") : "Обучение";
+  dom.anDdCourseLabel.textContent = cLabel.length > 18 ? cLabel.slice(0, 16) + "…" : cLabel;
+
+  dom.anSortPopular.checked = analyticsState.sortByPopularity;
+
+  if (analyticsState.employeeSearchText) {
+    dom.anEmployeeSearch.value = analyticsState.employeeSearchText;
+    dom.anEmployeeClear.classList.remove("hidden");
+  }
+
+  syncAnalyticsResetBtn();
 }
 
 function computeAnalyticsMetrics(sessions) {
@@ -1834,24 +2056,88 @@ function renderAnalyticsTable(sessions) {
     dom.anEmptyAnalytics.classList.remove("hidden");
     return;
   }
-
   dom.anEmptyAnalytics.classList.add("hidden");
 
+  // Group by unitId, preserving order of first occurrence
+  const order = [];
+  const groups = {};
   sessions.forEach((s) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${escapeHtml(s.employeeName)}</td>
-      <td><code>${escapeHtml(s.employeeId)}</code></td>
-      <td class="an-unit-cell">${escapeHtml(s.unitTitle)}</td>
-      <td><span class="an-direction-badge">${escapeHtml(s.direction)}</span></td>
-      <td>${s.startDate ? formatDate(s.startDate) : formatDate(s.assignedDate)}</td>
-      <td>${formatDate(s.endDate)}</td>
-      <td>${s.activeTimeMinutes != null && s.activeTimeMinutes > 0 ? formatMinutes(s.activeTimeMinutes) : "—"}</td>
-      <td><span class="an-status ${getStatusClass(s.status)}">${escapeHtml(getStatusLabel(s.status))}</span></td>
-      <td>${s.score != null ? s.score : "—"}</td>
-      <td>${s.attempts != null && s.attempts > 0 ? s.attempts : "—"}</td>
+    if (!groups[s.unitId]) {
+      order.push(s.unitId);
+      const unit = allUnits.find((u) => u.id === s.unitId);
+      groups[s.unitId] = {
+        unitId: s.unitId,
+        unitTitle: s.unitTitle,
+        factory: unit ? (unit.factory || "—") : "—",
+        sessions: [],
+        directions: new Set(),
+      };
+    }
+    groups[s.unitId].sessions.push(s);
+    if (s.direction) groups[s.unitId].directions.add(s.direction);
+  });
+
+  order.forEach((unitId) => {
+    const g = groups[unitId];
+    const dirs = [...g.directions].join(", ") || "—";
+
+    // ── Unit row ──────────────────────────────────────────────
+    const unitTr = document.createElement("tr");
+    unitTr.className = "an-unit-row";
+    unitTr.dataset.unitId = unitId;
+    unitTr.innerHTML = `
+      <td><button type="button" class="an-expand-btn" aria-expanded="false">▶</button></td>
+      <td class="an-unit-cell">${escapeHtml(g.unitTitle)}</td>
+      <td><span class="an-factory-badge">${escapeHtml(g.factory)}</span></td>
+      <td><span class="an-direction-badge">${escapeHtml(dirs)}</span></td>
+      <td>${g.sessions.length}<span class="an-session-count"> сес.</span></td>
     `;
-    dom.anTableBody.appendChild(tr);
+    dom.anTableBody.appendChild(unitTr);
+
+    // ── Detail row (hidden) ───────────────────────────────────
+    const detailTr = document.createElement("tr");
+    detailTr.className = "an-detail-row hidden";
+    detailTr.dataset.unitId = unitId;
+
+    const detailRows = g.sessions.map((s) => `
+      <tr>
+        <td>${escapeHtml(s.employeeName)}</td>
+        <td><code>${escapeHtml(s.employeeId)}</code></td>
+        <td>${s.startDate ? formatDate(s.startDate) : (s.assignedDate ? formatDate(s.assignedDate) : "—")}</td>
+        <td>${s.endDate ? formatDate(s.endDate) : "—"}</td>
+        <td>${s.activeTimeMinutes != null && s.activeTimeMinutes > 0 ? formatMinutes(s.activeTimeMinutes) : "—"}</td>
+        <td><span class="an-status ${getStatusClass(s.status)}">${escapeHtml(getStatusLabel(s.status))}</span></td>
+        <td>${s.score != null ? s.score : "—"}</td>
+        <td>${s.attempts != null && s.attempts > 0 ? s.attempts : "—"}</td>
+      </tr>
+    `).join("");
+
+    detailTr.innerHTML = `
+      <td colspan="5">
+        <div class="an-detail-wrap">
+          <table class="an-detail-table">
+            <thead>
+              <tr>
+                <th>ФИО</th><th>User</th><th>Дата начала</th><th>Дата завершения</th>
+                <th>Активное время</th><th>Статус</th><th>Балл</th><th>Попытки</th>
+              </tr>
+            </thead>
+            <tbody>${detailRows}</tbody>
+          </table>
+        </div>
+      </td>
+    `;
+    dom.anTableBody.appendChild(detailTr);
+
+    // Toggle expand on click
+    unitTr.addEventListener("click", () => {
+      const btn = unitTr.querySelector(".an-expand-btn");
+      const opening = !btn.classList.contains("is-open");
+      btn.classList.toggle("is-open", opening);
+      btn.textContent = opening ? "▼" : "▶";
+      btn.setAttribute("aria-expanded", String(opening));
+      detailTr.classList.toggle("hidden", !opening);
+    });
   });
 }
 
@@ -1860,7 +2146,7 @@ function isAnalyticsDefault() {
     analyticsState.status === "all" &&
     analyticsState.factories.length === 0 &&
     analyticsState.directions.length === 0 &&
-    !analyticsState.unitSearch &&
+    analyticsState.selectedCourses.length === 0 &&
     !analyticsState.sortByPopularity &&
     !analyticsState.selectedEmployeeId;
 }
@@ -1872,12 +2158,7 @@ function syncAnalyticsResetBtn() {
 function resetAnalytics() {
   analyticsState = { ...defaultAnalyticsState };
 
-  document.querySelectorAll("#an-period-tabs .an-period-tab").forEach((btn) => {
-    btn.classList.toggle("is-active", btn.dataset.period === "month");
-  });
-  dom.anDateRange.classList.add("hidden");
-  dom.anDateFrom.value = "";
-  dom.anDateTo.value = "";
+  updatePeriodLabel();
 
   const allRadio = document.querySelector('input[name="an-status"][value="all"]');
   if (allRadio) allRadio.checked = true;
@@ -1889,7 +2170,8 @@ function resetAnalytics() {
   populateAnDirectionList([]);
   dom.anDdDirectionLabel.textContent = "Направление";
 
-  dom.anUnitSearch.value = "";
+  document.querySelectorAll('#an-dd-course-list input').forEach((cb) => { cb.checked = false; });
+  dom.anDdCourseLabel.textContent = "Обучение";
   dom.anSortPopular.checked = false;
 
   dom.anEmployeeSearch.value = "";
@@ -1897,7 +2179,9 @@ function resetAnalytics() {
   dom.anEmployeeSuggestions.classList.add("hidden");
 
   closeAllAnalyticsDds();
+  closePeriodPicker(false);
   refreshAnalytics();
+  saveAnalyticsState();
 }
 
 function exportAnalyticsExcel() {
@@ -1979,10 +2263,12 @@ function selectAnalyticsEmployee(empId) {
   const session = ANALYTICS_SESSIONS.find((s) => s.employeeId === empId);
   if (!session) return;
   analyticsState.selectedEmployeeId = empId;
+  analyticsState.employeeSearchText = session.employeeName;
   dom.anEmployeeSearch.value = session.employeeName;
   dom.anEmployeeSuggestions.classList.add("hidden");
   dom.anEmployeeClear.classList.remove("hidden");
   refreshAnalytics();
+  saveAnalyticsState();
 }
 
 function clearAnalyticsEmployee() {
@@ -1992,6 +2278,7 @@ function clearAnalyticsEmployee() {
   dom.anEmployeeClear.classList.add("hidden");
   dom.anEmployeeSuggestions.classList.add("hidden");
   refreshAnalytics();
+  saveAnalyticsState();
 }
 
 function closeAllAnalyticsDds() {
@@ -2026,49 +2313,111 @@ function populateAnDirectionList(selectedFactories) {
   ).join("");
 }
 
+function populateAnCourseList() {
+  const titles = [...new Set(allUnits.map((u) => u.title))].sort((a, b) => a.localeCompare(b, "ru"));
+  dom.anDdCourseList.innerHTML = titles.map((t) =>
+    `<label class="dd__check-item"><input type="checkbox" name="an-course" value="${escapeHtml(t)}" /> ${escapeHtml(t)}</label>`
+  ).join("");
+}
+
 function bindAnalyticsEvents() {
-  [dom.anDdStatus, dom.anDdFactory, dom.anDdDirection].forEach(bindAnalyticsDd);
+  [dom.anDdStatus, dom.anDdFactory, dom.anDdDirection, dom.anDdCourse].forEach(bindAnalyticsDd);
 
   populateAnFactoryList();
   populateAnDirectionList([]);
+  populateAnCourseList();
+  restoreAnalyticsUI();
 
+  // ── Period picker ──────────────────────────────────────────
+  dom.anDdPeriod.querySelector(".dd__trigger").addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (dom.anDdPeriod.classList.contains("dd--open")) {
+      closePeriodPicker(false);
+    } else {
+      openPeriodPicker();
+    }
+  });
+
+  document.querySelectorAll(".an-preset-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      periodPickerState.period = btn.dataset.preset;
+      periodPickerState.customFrom = "";
+      periodPickerState.customTo = "";
+      periodPickerState.isSelecting = false;
+      updatePeriodPickerUI();
+    });
+  });
+
+  dom.anPickerFrom.addEventListener("change", () => {
+    periodPickerState.customFrom = dom.anPickerFrom.value;
+    if (periodPickerState.customFrom) { periodPickerState.period = "custom"; updatePickerPresets(); }
+    renderCalendar();
+  });
+
+  dom.anPickerTo.addEventListener("change", () => {
+    periodPickerState.customTo = dom.anPickerTo.value;
+    if (periodPickerState.customTo) { periodPickerState.period = "custom"; updatePickerPresets(); }
+    renderCalendar();
+  });
+
+  document.getElementById("an-cal-prev").addEventListener("click", () => {
+    periodPickerState.calMonth--;
+    if (periodPickerState.calMonth < 0) { periodPickerState.calMonth = 11; periodPickerState.calYear--; }
+    renderCalendar();
+  });
+
+  document.getElementById("an-cal-next").addEventListener("click", () => {
+    periodPickerState.calMonth++;
+    if (periodPickerState.calMonth > 11) { periodPickerState.calMonth = 0; periodPickerState.calYear++; }
+    renderCalendar();
+  });
+
+  dom.anCalendar.addEventListener("click", (e) => {
+    const dayBtn = e.target.closest(".an-cal-day");
+    if (!dayBtn) return;
+    const dateStr = dayBtn.dataset.date;
+    if (!periodPickerState.isSelecting) {
+      periodPickerState.customFrom = dateStr;
+      periodPickerState.customTo = "";
+      periodPickerState.period = "custom";
+      periodPickerState.isSelecting = true;
+    } else {
+      const from = strToDate(periodPickerState.customFrom);
+      const clicked = strToDate(dateStr);
+      if (clicked < from) {
+        periodPickerState.customTo = periodPickerState.customFrom;
+        periodPickerState.customFrom = dateStr;
+      } else {
+        periodPickerState.customTo = dateStr;
+      }
+      periodPickerState.isSelecting = false;
+    }
+    updatePeriodPickerUI();
+  });
+
+  document.getElementById("an-period-save").addEventListener("click", () => closePeriodPicker(true));
+  document.getElementById("an-period-close").addEventListener("click", () => closePeriodPicker(false));
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#an-dd-period")) closePeriodPicker(false);
+    if (!e.target.closest("#an-toolbar .dd")) closeAllAnalyticsDds();
+  });
+
+  // ── Factory ────────────────────────────────────────────────
   dom.anFactoryApply.addEventListener("click", () => {
     analyticsState.factories = [...document.querySelectorAll('input[name="an-factory"]:checked')].map((cb) => cb.value);
     const label = analyticsState.factories.length > 0 ? analyticsState.factories.join(", ") : "Фабрика";
     dom.anDdFactoryLabel.textContent = label.length > 15 ? label.slice(0, 13) + "…" : label;
-    // Перестраиваем список направлений под выбранные фабрики и сбрасываем их выбор
     populateAnDirectionList(analyticsState.factories);
     analyticsState.directions = [];
     dom.anDdDirectionLabel.textContent = "Направление";
     closeAllAnalyticsDds();
     refreshAnalytics();
     syncAnalyticsResetBtn();
+    saveAnalyticsState();
   });
 
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest("#an-toolbar .dd")) closeAllAnalyticsDds();
-  });
-
-  dom.anPeriodTabs.addEventListener("click", (e) => {
-    const tab = e.target.closest(".an-period-tab");
-    if (!tab) return;
-    document.querySelectorAll(".an-period-tab").forEach((t) => t.classList.remove("is-active"));
-    tab.classList.add("is-active");
-    analyticsState.period = tab.dataset.period;
-    dom.anDateRange.classList.toggle("hidden", analyticsState.period !== "custom");
-    if (analyticsState.period !== "custom") refreshAnalytics();
-  });
-
-  dom.anDateFrom.addEventListener("change", () => {
-    analyticsState.customFrom = dom.anDateFrom.value;
-    if (analyticsState.period === "custom" && analyticsState.customFrom && analyticsState.customTo) refreshAnalytics();
-  });
-
-  dom.anDateTo.addEventListener("change", () => {
-    analyticsState.customTo = dom.anDateTo.value;
-    if (analyticsState.period === "custom" && analyticsState.customFrom && analyticsState.customTo) refreshAnalytics();
-  });
-
+  // ── Status ─────────────────────────────────────────────────
   document.querySelectorAll('input[name="an-status"]').forEach((radio) => {
     radio.addEventListener("change", () => {
       analyticsState.status = radio.value;
@@ -2076,38 +2425,46 @@ function bindAnalyticsEvents() {
       dom.anDdStatusLabel.textContent = labels[radio.value] || "Статус";
       closeAllAnalyticsDds();
       refreshAnalytics();
+      saveAnalyticsState();
     });
   });
 
+  // ── Direction ──────────────────────────────────────────────
   dom.anDirApply.addEventListener("click", () => {
     analyticsState.directions = [...document.querySelectorAll('input[name="an-dir"]:checked')].map((cb) => cb.value);
-    const label = analyticsState.directions.length > 0
-      ? analyticsState.directions.join(", ")
-      : "Направление";
+    const label = analyticsState.directions.length > 0 ? analyticsState.directions.join(", ") : "Направление";
     dom.anDdDirectionLabel.textContent = label.length > 15 ? label.slice(0, 13) + "…" : label;
     closeAllAnalyticsDds();
     refreshAnalytics();
+    syncAnalyticsResetBtn();
+    saveAnalyticsState();
   });
 
-  dom.anUnitSearch.addEventListener("input", () => {
-    analyticsState.unitSearch = dom.anUnitSearch.value.trim();
+  // ── Course ─────────────────────────────────────────────────
+  dom.anCourseApply.addEventListener("click", () => {
+    analyticsState.selectedCourses = [...document.querySelectorAll('input[name="an-course"]:checked')].map((cb) => cb.value);
+    const label = analyticsState.selectedCourses.length > 0 ? analyticsState.selectedCourses.join(", ") : "Обучение";
+    dom.anDdCourseLabel.textContent = label.length > 18 ? label.slice(0, 16) + "…" : label;
+    closeAllAnalyticsDds();
     refreshAnalytics();
+    syncAnalyticsResetBtn();
+    saveAnalyticsState();
   });
 
+  // ── Popularity sort ────────────────────────────────────────
   dom.anSortPopular.addEventListener("change", () => {
     analyticsState.sortByPopularity = dom.anSortPopular.checked;
     refreshAnalytics();
+    saveAnalyticsState();
   });
 
   dom.anResetBtn.addEventListener("click", resetAnalytics);
   dom.anExportBtn.addEventListener("click", exportAnalyticsExcel);
 
+  // ── Employee search ────────────────────────────────────────
   dom.anEmployeeSearch.addEventListener("input", () => {
     const q = dom.anEmployeeSearch.value.trim();
-    if (!q) {
-      clearAnalyticsEmployee();
-      return;
-    }
+    if (!q) { clearAnalyticsEmployee(); return; }
     analyticsState.employeeSearchText = q;
     showEmployeeSuggestions(getAnalyticsEmployeeSuggestions(q));
     dom.anEmployeeClear.classList.toggle("hidden", !q);
@@ -2122,9 +2479,7 @@ function bindAnalyticsEvents() {
   dom.anEmployeeClear.addEventListener("click", clearAnalyticsEmployee);
 
   document.addEventListener("click", (e) => {
-    if (!e.target.closest(".an-employee-bar")) {
-      dom.anEmployeeSuggestions.classList.add("hidden");
-    }
+    if (!e.target.closest(".an-employee-bar")) dom.anEmployeeSuggestions.classList.add("hidden");
   });
 
   dom.anEmptyAnalytics.addEventListener("click", (e) => {
