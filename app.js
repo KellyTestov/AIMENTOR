@@ -1989,7 +1989,9 @@ function restoreAnalyticsUI() {
   const dLabel = analyticsState.directions.length > 0 ? analyticsState.directions.join(", ") : "Направление";
   dom.anDdDirectionLabel.textContent = dLabel.length > 15 ? dLabel.slice(0, 13) + "…" : dLabel;
 
-  document.querySelectorAll('input[name="an-course"]').forEach((cb) => { cb.checked = analyticsState.selectedCourses.includes(cb.value); });
+  // Курсы перестраиваем уже с учётом восстановленных фабрик/направлений
+  populateAnCourseList();
+  // Метка курса (selectedCourses мог быть скорректирован внутри populateAnCourseList)
   const cLabel = analyticsState.selectedCourses.length > 0 ? analyticsState.selectedCourses.join(", ") : "Обучение";
   dom.anDdCourseLabel.textContent = cLabel.length > 18 ? cLabel.slice(0, 16) + "…" : cLabel;
 
@@ -2170,7 +2172,7 @@ function resetAnalytics() {
   populateAnDirectionList([]);
   dom.anDdDirectionLabel.textContent = "Направление";
 
-  document.querySelectorAll('#an-dd-course-list input').forEach((cb) => { cb.checked = false; });
+  populateAnCourseList();
   dom.anDdCourseLabel.textContent = "Обучение";
   dom.anSortPopular.checked = false;
 
@@ -2314,10 +2316,42 @@ function populateAnDirectionList(selectedFactories) {
 }
 
 function populateAnCourseList() {
-  const titles = [...new Set(allUnits.map((u) => u.title))].sort((a, b) => a.localeCompare(b, "ru"));
-  dom.anDdCourseList.innerHTML = titles.map((t) =>
-    `<label class="dd__check-item"><input type="checkbox" name="an-course" value="${escapeHtml(t)}" /> ${escapeHtml(t)}</label>`
-  ).join("");
+  let units = allUnits.slice();
+
+  if (analyticsState.factories.length > 0) {
+    units = units.filter((u) => analyticsState.factories.includes(u.factory));
+  }
+
+  if (analyticsState.directions.length > 0) {
+    const unitIdsWithDir = new Set(
+      ANALYTICS_SESSIONS
+        .filter((s) => analyticsState.directions.includes(s.direction))
+        .map((s) => s.unitId)
+    );
+    units = units.filter((u) => unitIdsWithDir.has(u.id));
+  }
+
+  const titles = [...new Set(units.map((u) => u.title))].sort((a, b) => a.localeCompare(b, "ru"));
+
+  dom.anDdCourseList.innerHTML = titles.length > 0
+    ? titles.map((t) =>
+        `<label class="dd__check-item"><input type="checkbox" name="an-course" value="${escapeHtml(t)}" /> ${escapeHtml(t)}</label>`
+      ).join("")
+    : `<p style="padding:10px 12px;font-size:13px;color:var(--muted)">Нет обучений по выбранным фильтрам</p>`;
+
+  // Убираем ранее выбранные курсы, которые больше не входят в список
+  if (analyticsState.selectedCourses.length > 0) {
+    analyticsState.selectedCourses = analyticsState.selectedCourses.filter((c) => titles.includes(c));
+    const cLabel = analyticsState.selectedCourses.length > 0 ? analyticsState.selectedCourses.join(", ") : "Обучение";
+    dom.anDdCourseLabel.textContent = cLabel.length > 18 ? cLabel.slice(0, 16) + "…" : cLabel;
+  }
+
+  // Восстанавливаем чекбоксы для ранее выбранных (если они ещё в списке)
+  if (analyticsState.selectedCourses.length > 0) {
+    document.querySelectorAll('input[name="an-course"]').forEach((cb) => {
+      cb.checked = analyticsState.selectedCourses.includes(cb.value);
+    });
+  }
 }
 
 function bindAnalyticsEvents() {
@@ -2411,6 +2445,7 @@ function bindAnalyticsEvents() {
     populateAnDirectionList(analyticsState.factories);
     analyticsState.directions = [];
     dom.anDdDirectionLabel.textContent = "Направление";
+    populateAnCourseList();
     closeAllAnalyticsDds();
     refreshAnalytics();
     syncAnalyticsResetBtn();
@@ -2434,6 +2469,7 @@ function bindAnalyticsEvents() {
     analyticsState.directions = [...document.querySelectorAll('input[name="an-dir"]:checked')].map((cb) => cb.value);
     const label = analyticsState.directions.length > 0 ? analyticsState.directions.join(", ") : "Направление";
     dom.anDdDirectionLabel.textContent = label.length > 15 ? label.slice(0, 13) + "…" : label;
+    populateAnCourseList();
     closeAllAnalyticsDds();
     refreshAnalytics();
     syncAnalyticsResetBtn();
