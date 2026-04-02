@@ -27,7 +27,7 @@ let allUnits = bootstrap.units || [
     title: "Тренажер по кредитным картам",
     type: "Обучающая",
     category: "Продукты",
-    factory: "КЦ",
+    factory: "Сервис",
     authorId: "u-101",
     authorName: "Роман Плишкин",
     createdAt: "2026-02-12T10:00:00Z",
@@ -42,7 +42,7 @@ let allUnits = bootstrap.units || [
     title: "Тренажер по лояльности с клиентами",
     type: "Обучающая",
     category: "Коммуникации",
-    factory: "КЦ",
+    factory: "Телемаркетинг",
     authorId: "u-101",
     authorName: "Роман Плишкин",
     createdAt: "2026-02-20T11:30:00Z",
@@ -57,7 +57,7 @@ let allUnits = bootstrap.units || [
     title: "Экзамен Basic1",
     type: "Проверяющая",
     category: "Экзамены",
-    factory: "ДКЦ",
+    factory: "Сервис",
     authorId: "u-204",
     authorName: "Ирина Платонова",
     createdAt: "2026-01-28T08:10:00Z",
@@ -72,7 +72,7 @@ let allUnits = bootstrap.units || [
     title: "Экзамен Optimum",
     type: "Проверяющая",
     category: "Экзамены",
-    factory: "Взыскание",
+    factory: "Урегулирование",
     authorId: "u-322",
     authorName: "Марина Сизова",
     createdAt: "2026-01-14T13:00:00Z",
@@ -137,50 +137,54 @@ const ANALYTICS_SESSIONS = bootstrap.analyticsSessions || (function () {
     return { id, unitId, unitTitle, direction: dir, employeeId: empId, employeeName: empName, status, assignedDate, startDate, endDate, activeTimeMinutes: activeMin, score, attempts };
   }
   return [
+    // edu-001 → Сервис / ФЛ Voice
+    // edu-002 → Телемаркетинг / Физ.лица
+    // edu-003 → Сервис / ЮЛ Chat
+    // edu-004 → Урегулирование / 90+
     // Январь 2026
-    s("s01","edu-001","Тренажер по кредитным картам","КЦ","U_QD7RZ","Рожков Александр Игоревич","completed","2026-01-18T08:00:00Z","2026-01-20T09:15:00Z","2026-01-20T10:20:00Z",65,null,1),
-    s("s02","edu-003","Экзамен Basic1","ДКЦ","U_W2K9M","Савельева Мария Сергеевна","completed","2026-01-10T08:00:00Z","2026-01-15T10:00:00Z","2026-01-15T10:50:00Z",50,72,2),
-    s("s03","edu-004","Экзамен Optimum","SME","U_FH18Q","Игнатов Павел Андреевич","completed","2026-01-05T08:00:00Z","2026-01-08T14:00:00Z","2026-01-08T14:38:00Z",38,91,1),
-    s("s04","edu-004","Экзамен Optimum","SME","U_Z8P3D","Новикова Валерия Олеговна","completed","2026-01-22T08:00:00Z","2026-01-25T11:00:00Z","2026-01-25T11:33:00Z",33,85,1),
-    s("s05","edu-002","Тренажер по лояльности с клиентами","ТМ","U_J3R8P","Орлова Софья Артёмовна","completed","2026-01-08T08:00:00Z","2026-01-12T09:00:00Z","2026-01-12T09:58:00Z",58,null,1),
+    s("s01","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_QD7RZ","Рожков Александр Игоревич","completed","2026-01-18T08:00:00Z","2026-01-20T09:15:00Z","2026-01-20T10:20:00Z",65,null,1),
+    s("s02","edu-003","Экзамен Basic1","ЮЛ Chat","U_W2K9M","Савельева Мария Сергеевна","completed","2026-01-10T08:00:00Z","2026-01-15T10:00:00Z","2026-01-15T10:50:00Z",50,72,2),
+    s("s03","edu-004","Экзамен Optimum","90+","U_FH18Q","Игнатов Павел Андреевич","completed","2026-01-05T08:00:00Z","2026-01-08T14:00:00Z","2026-01-08T14:38:00Z",38,91,1),
+    s("s04","edu-004","Экзамен Optimum","90+","U_Z8P3D","Новикова Валерия Олеговна","completed","2026-01-22T08:00:00Z","2026-01-25T11:00:00Z","2026-01-25T11:33:00Z",33,85,1),
+    s("s05","edu-002","Тренажер по лояльности с клиентами","Физ.лица","U_J3R8P","Орлова Софья Артёмовна","completed","2026-01-08T08:00:00Z","2026-01-12T09:00:00Z","2026-01-12T09:58:00Z",58,null,1),
     // Февраль 2026
-    s("s06","edu-002","Тренажер по лояльности с клиентами","ТМ","U_QD7RZ","Рожков Александр Игоревич","completed","2026-02-10T08:00:00Z","2026-02-14T09:00:00Z","2026-02-14T09:48:00Z",48,null,2),
-    s("s07","edu-003","Экзамен Basic1","ДКЦ","U_QD7RZ","Рожков Александр Игоревич","completed","2026-02-16T08:00:00Z","2026-02-20T10:00:00Z","2026-02-20T10:42:00Z",42,88,1),
-    s("s08","edu-001","Тренажер по кредитным картам","КЦ","U_W2K9M","Савельева Мария Сергеевна","completed","2026-02-06T08:00:00Z","2026-02-10T09:30:00Z","2026-02-10T10:40:00Z",70,null,1),
-    s("s09","edu-001","Тренажер по кредитным картам","КЦ","U_M0T5B","Королев Денис Владимирович","completed","2026-02-04T08:00:00Z","2026-02-08T13:00:00Z","2026-02-08T14:00:00Z",60,null,1),
-    s("s10","edu-002","Тренажер по лояльности с клиентами","ТМ","U_K4V1S","Баранов Олег Михайлович","completed","2026-02-12T08:00:00Z","2026-02-16T09:00:00Z","2026-02-16T09:55:00Z",55,null,1),
-    s("s11","edu-003","Экзамен Basic1","ДКЦ","U_K4V1S","Баранов Олег Михайлович","completed","2026-02-18T08:00:00Z","2026-02-22T10:00:00Z","2026-02-22T10:51:00Z",51,94,1),
-    s("s12","edu-003","Экзамен Basic1","ДКЦ","U_H9C7L","Пахомов Евгений Александрович","completed","2026-02-08T08:00:00Z","2026-02-12T10:00:00Z","2026-02-12T10:46:00Z",46,83,1),
-    s("s13","edu-001","Тренажер по кредитным картам","КЦ","U_J3R8P","Орлова Софья Артёмовна","completed","2026-02-14T08:00:00Z","2026-02-18T10:00:00Z","2026-02-18T11:07:00Z",67,null,1),
-    s("s14","edu-003","Экзамен Basic1","ДКЦ","U_B5U0K","Елисеев Артем Константинович","completed","2026-02-20T08:00:00Z","2026-02-24T10:00:00Z","2026-02-24T10:44:00Z",44,76,2),
-    s("s15","edu-002","Тренажер по лояльности с клиентами","ТМ","U_P7E4J","Егорова Татьяна Борисовна","completed","2026-02-02T08:00:00Z","2026-02-06T09:00:00Z","2026-02-06T09:45:00Z",45,null,1),
-    s("s16","edu-001","Тренажер по кредитным картам","КЦ","U_FH18Q","Игнатов Павел Андреевич","in_progress","2026-02-22T08:00:00Z","2026-02-25T11:00:00Z",null,35,null,1),
+    s("s06","edu-002","Тренажер по лояльности с клиентами","Физ.лица","U_QD7RZ","Рожков Александр Игоревич","completed","2026-02-10T08:00:00Z","2026-02-14T09:00:00Z","2026-02-14T09:48:00Z",48,null,2),
+    s("s07","edu-003","Экзамен Basic1","ЮЛ Chat","U_QD7RZ","Рожков Александр Игоревич","completed","2026-02-16T08:00:00Z","2026-02-20T10:00:00Z","2026-02-20T10:42:00Z",42,88,1),
+    s("s08","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_W2K9M","Савельева Мария Сергеевна","completed","2026-02-06T08:00:00Z","2026-02-10T09:30:00Z","2026-02-10T10:40:00Z",70,null,1),
+    s("s09","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_M0T5B","Королев Денис Владимирович","completed","2026-02-04T08:00:00Z","2026-02-08T13:00:00Z","2026-02-08T14:00:00Z",60,null,1),
+    s("s10","edu-002","Тренажер по лояльности с клиентами","Физ.лица","U_K4V1S","Баранов Олег Михайлович","completed","2026-02-12T08:00:00Z","2026-02-16T09:00:00Z","2026-02-16T09:55:00Z",55,null,1),
+    s("s11","edu-003","Экзамен Basic1","ЮЛ Chat","U_K4V1S","Баранов Олег Михайлович","completed","2026-02-18T08:00:00Z","2026-02-22T10:00:00Z","2026-02-22T10:51:00Z",51,94,1),
+    s("s12","edu-003","Экзамен Basic1","ЮЛ Chat","U_H9C7L","Пахомов Евгений Александрович","completed","2026-02-08T08:00:00Z","2026-02-12T10:00:00Z","2026-02-12T10:46:00Z",46,83,1),
+    s("s13","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_J3R8P","Орлова Софья Артёмовна","completed","2026-02-14T08:00:00Z","2026-02-18T10:00:00Z","2026-02-18T11:07:00Z",67,null,1),
+    s("s14","edu-003","Экзамен Basic1","ЮЛ Chat","U_B5U0K","Елисеев Артем Константинович","completed","2026-02-20T08:00:00Z","2026-02-24T10:00:00Z","2026-02-24T10:44:00Z",44,76,2),
+    s("s15","edu-002","Тренажер по лояльности с клиентами","Физ.лица","U_P7E4J","Егорова Татьяна Борисовна","completed","2026-02-02T08:00:00Z","2026-02-06T09:00:00Z","2026-02-06T09:45:00Z",45,null,1),
+    s("s16","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_FH18Q","Игнатов Павел Андреевич","in_progress","2026-02-22T08:00:00Z","2026-02-25T11:00:00Z",null,35,null,1),
     // Март 2026 (1–16)
-    s("s17","edu-004","Экзамен Optimum","SME","U_QD7RZ","Рожков Александр Игоревич","in_progress","2026-03-08T08:00:00Z","2026-03-10T14:00:00Z",null,20,null,1),
-    s("s18","edu-001","Тренажер по кредитным картам","КЦ","U_Q6Y2N","Филатова Наталья Юрьевна","completed","2026-03-01T08:00:00Z","2026-03-03T10:00:00Z","2026-03-03T11:03:00Z",63,null,1),
-    s("s19","edu-002","Тренажер по лояльности с клиентами","ТМ","U_M0T5B","Королев Денис Владимирович","completed","2026-03-03T08:00:00Z","2026-03-05T09:00:00Z","2026-03-05T09:52:00Z",52,null,1),
-    s("s20","edu-001","Тренажер по кредитным картам","КЦ","U_T1M6V","Громова Ксения Дмитриевна","completed","2026-03-02T08:00:00Z","2026-03-04T10:00:00Z","2026-03-04T11:01:00Z",61,null,1),
-    s("s21","edu-001","Тренажер по кредитным картам","КЦ","U_P7E4J","Егорова Татьяна Борисовна","completed","2026-03-04T08:00:00Z","2026-03-06T09:00:00Z","2026-03-06T09:59:00Z",59,null,1),
-    s("s22","edu-004","Экзамен Optimum","SME","U_H9C7L","Пахомов Евгений Александрович","completed","2026-03-05T08:00:00Z","2026-03-07T10:00:00Z","2026-03-07T10:40:00Z",40,70,2),
-    s("s23","edu-004","Экзамен Optimum","SME","U_P7E4J","Егорова Татьяна Борисовна","completed","2026-03-06T08:00:00Z","2026-03-08T10:00:00Z","2026-03-08T10:41:00Z",41,81,1),
-    s("s24","edu-001","Тренажер по кредитным картам","КЦ","U_Z8P3D","Новикова Валерия Олеговна","in_progress","2026-03-06T08:00:00Z","2026-03-08T11:00:00Z",null,28,null,1),
-    s("s25","edu-001","Тренажер по кредитным картам","КЦ","U_H9C7L","Пахомов Евгений Александрович","in_progress","2026-03-07T08:00:00Z","2026-03-09T09:00:00Z",null,30,null,1),
-    s("s26","edu-001","Тренажер по кредитным картам","КЦ","U_N2A9F","Чернов Роман Евгеньевич","in_progress","2026-03-08T08:00:00Z","2026-03-10T10:00:00Z",null,15,null,1),
-    s("s27","edu-004","Экзамен Optimum","SME","U_Q6Y2N","Филатова Наталья Юрьевна","in_progress","2026-03-09T08:00:00Z","2026-03-11T14:00:00Z",null,18,null,1),
-    s("s28","edu-002","Тренажер по лояльности с клиентами","ТМ","U_T1M6V","Громова Ксения Дмитриевна","in_progress","2026-03-10T08:00:00Z","2026-03-12T11:00:00Z",null,22,null,1),
-    s("s29","edu-003","Экзамен Basic1","ДКЦ","U_M0T5B","Королев Денис Владимирович","assigned","2026-03-14T08:00:00Z",null,null,null,null,0),
-    s("s30","edu-003","Экзамен Basic1","ДКЦ","U_J3R8P","Орлова Софья Артёмовна","assigned","2026-03-13T08:00:00Z",null,null,null,null,0),
-    s("s31","edu-001","Тренажер по кредитным картам","КЦ","U_K4V1S","Баранов Олег Михайлович","assigned","2026-03-14T08:00:00Z",null,null,null,null,0),
-    s("s32","edu-002","Тренажер по лояльности с клиентами","ТМ","U_W2K9M","Савельева Мария Сергеевна","assigned","2026-03-15T08:00:00Z",null,null,null,null,0),
-    s("s33","edu-002","Тренажер по лояльности с клиентами","ТМ","U_FH18Q","Игнатов Павел Андреевич","assigned","2026-03-12T08:00:00Z",null,null,null,null,0),
-    s("s34","edu-004","Экзамен Optimum","SME","U_N2A9F","Чернов Роман Евгеньевич","assigned","2026-03-16T08:00:00Z",null,null,null,null,0),
-    s("s35","edu-002","Тренажер по лояльности с клиентами","ТМ","U_Q6Y2N","Филатова Наталья Юрьевна","assigned","2026-03-16T08:00:00Z",null,null,null,null,0),
+    s("s17","edu-004","Экзамен Optimum","90+","U_QD7RZ","Рожков Александр Игоревич","in_progress","2026-03-08T08:00:00Z","2026-03-10T14:00:00Z",null,20,null,1),
+    s("s18","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_Q6Y2N","Филатова Наталья Юрьевна","completed","2026-03-01T08:00:00Z","2026-03-03T10:00:00Z","2026-03-03T11:03:00Z",63,null,1),
+    s("s19","edu-002","Тренажер по лояльности с клиентами","Физ.лица","U_M0T5B","Королев Денис Владимирович","completed","2026-03-03T08:00:00Z","2026-03-05T09:00:00Z","2026-03-05T09:52:00Z",52,null,1),
+    s("s20","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_T1M6V","Громова Ксения Дмитриевна","completed","2026-03-02T08:00:00Z","2026-03-04T10:00:00Z","2026-03-04T11:01:00Z",61,null,1),
+    s("s21","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_P7E4J","Егорова Татьяна Борисовна","completed","2026-03-04T08:00:00Z","2026-03-06T09:00:00Z","2026-03-06T09:59:00Z",59,null,1),
+    s("s22","edu-004","Экзамен Optimum","90+","U_H9C7L","Пахомов Евгений Александрович","completed","2026-03-05T08:00:00Z","2026-03-07T10:00:00Z","2026-03-07T10:40:00Z",40,70,2),
+    s("s23","edu-004","Экзамен Optimum","90+","U_P7E4J","Егорова Татьяна Борисовна","completed","2026-03-06T08:00:00Z","2026-03-08T10:00:00Z","2026-03-08T10:41:00Z",41,81,1),
+    s("s24","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_Z8P3D","Новикова Валерия Олеговна","in_progress","2026-03-06T08:00:00Z","2026-03-08T11:00:00Z",null,28,null,1),
+    s("s25","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_H9C7L","Пахомов Евгений Александрович","in_progress","2026-03-07T08:00:00Z","2026-03-09T09:00:00Z",null,30,null,1),
+    s("s26","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_N2A9F","Чернов Роман Евгеньевич","in_progress","2026-03-08T08:00:00Z","2026-03-10T10:00:00Z",null,15,null,1),
+    s("s27","edu-004","Экзамен Optimum","90+","U_Q6Y2N","Филатова Наталья Юрьевна","in_progress","2026-03-09T08:00:00Z","2026-03-11T14:00:00Z",null,18,null,1),
+    s("s28","edu-002","Тренажер по лояльности с клиентами","Физ.лица","U_T1M6V","Громова Ксения Дмитриевна","in_progress","2026-03-10T08:00:00Z","2026-03-12T11:00:00Z",null,22,null,1),
+    s("s29","edu-003","Экзамен Basic1","ЮЛ Chat","U_M0T5B","Королев Денис Владимирович","assigned","2026-03-14T08:00:00Z",null,null,null,null,0),
+    s("s30","edu-003","Экзамен Basic1","ЮЛ Chat","U_J3R8P","Орлова Софья Артёмовна","assigned","2026-03-13T08:00:00Z",null,null,null,null,0),
+    s("s31","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_K4V1S","Баранов Олег Михайлович","assigned","2026-03-14T08:00:00Z",null,null,null,null,0),
+    s("s32","edu-002","Тренажер по лояльности с клиентами","Физ.лица","U_W2K9M","Савельева Мария Сергеевна","assigned","2026-03-15T08:00:00Z",null,null,null,null,0),
+    s("s33","edu-002","Тренажер по лояльности с клиентами","Физ.лица","U_FH18Q","Игнатов Павел Андреевич","assigned","2026-03-12T08:00:00Z",null,null,null,null,0),
+    s("s34","edu-004","Экзамен Optimum","90+","U_N2A9F","Чернов Роман Евгеньевич","assigned","2026-03-16T08:00:00Z",null,null,null,null,0),
+    s("s35","edu-002","Тренажер по лояльности с клиентами","Физ.лица","U_Q6Y2N","Филатова Наталья Юрьевна","assigned","2026-03-16T08:00:00Z",null,null,null,null,0),
     // Текущая неделя (17–23 марта 2026)
-    s("s36","edu-003","Экзамен Basic1","ДКЦ","U_R7N4X","Климова Ирина Николаевна","completed","2026-03-16T08:00:00Z","2026-03-18T10:00:00Z","2026-03-18T10:44:00Z",44,65,3),
-    s("s37","edu-004","Экзамен Optimum","SME","U_R7N4X","Климова Ирина Николаевна","completed","2026-03-18T08:00:00Z","2026-03-20T10:00:00Z","2026-03-20T10:36:00Z",36,79,1),
-    s("s38","edu-003","Экзамен Basic1","ДКЦ","U_Z8P3D","Новикова Валерия Олеговна","completed","2026-03-17T08:00:00Z","2026-03-19T10:00:00Z","2026-03-19T10:48:00Z",48,77,2),
-    s("s39","edu-004","Экзамен Optimum","SME","U_B5U0K","Елисеев Артем Константинович","completed","2026-03-19T08:00:00Z","2026-03-21T10:00:00Z","2026-03-21T10:35:00Z",35,88,1),
-    s("s40","edu-003","Экзамен Basic1","ДКЦ","U_N2A9F","Чернов Роман Евгеньевич","completed","2026-03-20T08:00:00Z","2026-03-22T10:00:00Z","2026-03-22T10:49:00Z",49,92,1),
+    s("s36","edu-003","Экзамен Basic1","ЮЛ Chat","U_R7N4X","Климова Ирина Николаевна","completed","2026-03-16T08:00:00Z","2026-03-18T10:00:00Z","2026-03-18T10:44:00Z",44,65,3),
+    s("s37","edu-004","Экзамен Optimum","90+","U_R7N4X","Климова Ирина Николаевна","completed","2026-03-18T08:00:00Z","2026-03-20T10:00:00Z","2026-03-20T10:36:00Z",36,79,1),
+    s("s38","edu-003","Экзамен Basic1","ЮЛ Chat","U_Z8P3D","Новикова Валерия Олеговна","completed","2026-03-17T08:00:00Z","2026-03-19T10:00:00Z","2026-03-19T10:48:00Z",48,77,2),
+    s("s39","edu-004","Экзамен Optimum","90+","U_B5U0K","Елисеев Артем Константинович","completed","2026-03-19T08:00:00Z","2026-03-21T10:00:00Z","2026-03-21T10:35:00Z",35,88,1),
+    s("s40","edu-003","Экзамен Basic1","ЮЛ Chat","U_N2A9F","Чернов Роман Евгеньевич","completed","2026-03-20T08:00:00Z","2026-03-22T10:00:00Z","2026-03-22T10:49:00Z",49,92,1),
   ];
 }());
 
@@ -193,8 +197,6 @@ const defaultAnalyticsState = {
   directions: [],
   selectedCourses: [],
   sortByPopularity: false,
-  selectedEmployeeId: null,
-  employeeSearchText: "",
 };
 
 let analyticsState = { ...defaultAnalyticsState };
@@ -330,9 +332,6 @@ const dom = {
   anMCompleted: document.getElementById("an-m-completed"),
   anMAvgScore: document.getElementById("an-m-avg-score"),
   anMAvgAttempts: document.getElementById("an-m-avg-attempts"),
-  anEmployeeSearch: document.getElementById("an-employee-search"),
-  anEmployeeClear: document.getElementById("an-employee-clear"),
-  anEmployeeSuggestions: document.getElementById("an-employee-suggestions"),
   anTableBody: document.getElementById("an-table-body"),
   anEmptyAnalytics: document.getElementById("an-empty-analytics"),
   deleteModalBackdrop: document.getElementById("delete-modal-backdrop"),
@@ -1776,10 +1775,6 @@ function filterAnalyticsSessions() {
     sessions = sessions.filter((s) => analyticsState.selectedCourses.includes(s.unitTitle));
   }
 
-  if (analyticsState.selectedEmployeeId) {
-    sessions = sessions.filter((s) => s.employeeId === analyticsState.selectedEmployeeId);
-  }
-
   if (analyticsState.sortByPopularity) {
     const popularity = {};
     ANALYTICS_SESSIONS.forEach((s) => {
@@ -1997,11 +1992,6 @@ function restoreAnalyticsUI() {
 
   dom.anSortPopular.checked = analyticsState.sortByPopularity;
 
-  if (analyticsState.employeeSearchText) {
-    dom.anEmployeeSearch.value = analyticsState.employeeSearchText;
-    dom.anEmployeeClear.classList.remove("hidden");
-  }
-
   syncAnalyticsResetBtn();
 }
 
@@ -2149,8 +2139,7 @@ function isAnalyticsDefault() {
     analyticsState.factories.length === 0 &&
     analyticsState.directions.length === 0 &&
     analyticsState.selectedCourses.length === 0 &&
-    !analyticsState.sortByPopularity &&
-    !analyticsState.selectedEmployeeId;
+    !analyticsState.sortByPopularity;
 }
 
 function syncAnalyticsResetBtn() {
@@ -2175,10 +2164,6 @@ function resetAnalytics() {
   populateAnCourseList();
   dom.anDdCourseLabel.textContent = "Обучение";
   dom.anSortPopular.checked = false;
-
-  dom.anEmployeeSearch.value = "";
-  dom.anEmployeeClear.classList.add("hidden");
-  dom.anEmployeeSuggestions.classList.add("hidden");
 
   closeAllAnalyticsDds();
   closePeriodPicker(false);
@@ -2233,54 +2218,6 @@ function exportAnalyticsExcel() {
     a.click();
     URL.revokeObjectURL(url);
   }
-}
-
-function getAnalyticsEmployeeSuggestions(query) {
-  if (!query || query.length < 2) return [];
-  const q = query.toLowerCase();
-  const seen = new Set();
-  const results = [];
-  ANALYTICS_SESSIONS.forEach((s) => {
-    if (!seen.has(s.employeeId) &&
-        (s.employeeName.toLowerCase().includes(q) || s.employeeId.toLowerCase().includes(q))) {
-      seen.add(s.employeeId);
-      results.push({ id: s.employeeId, name: s.employeeName });
-    }
-  });
-  return results.slice(0, 6);
-}
-
-function showEmployeeSuggestions(suggestions) {
-  if (suggestions.length === 0) {
-    dom.anEmployeeSuggestions.classList.add("hidden");
-    return;
-  }
-  dom.anEmployeeSuggestions.innerHTML = suggestions.map((emp) =>
-    `<button type="button" class="an-suggestion-item" data-empid="${escapeHtml(emp.id)}">${escapeHtml(emp.name)}<span class="an-sug-userid">${escapeHtml(emp.id)}</span></button>`
-  ).join("");
-  dom.anEmployeeSuggestions.classList.remove("hidden");
-}
-
-function selectAnalyticsEmployee(empId) {
-  const session = ANALYTICS_SESSIONS.find((s) => s.employeeId === empId);
-  if (!session) return;
-  analyticsState.selectedEmployeeId = empId;
-  analyticsState.employeeSearchText = session.employeeName;
-  dom.anEmployeeSearch.value = session.employeeName;
-  dom.anEmployeeSuggestions.classList.add("hidden");
-  dom.anEmployeeClear.classList.remove("hidden");
-  refreshAnalytics();
-  saveAnalyticsState();
-}
-
-function clearAnalyticsEmployee() {
-  analyticsState.selectedEmployeeId = null;
-  analyticsState.employeeSearchText = "";
-  dom.anEmployeeSearch.value = "";
-  dom.anEmployeeClear.classList.add("hidden");
-  dom.anEmployeeSuggestions.classList.add("hidden");
-  refreshAnalytics();
-  saveAnalyticsState();
 }
 
 function closeAllAnalyticsDds() {
@@ -2429,12 +2366,33 @@ function bindAnalyticsEvents() {
     updatePeriodPickerUI();
   });
 
+  dom.anCalendar.addEventListener("mouseover", (e) => {
+    if (!periodPickerState.isSelecting) return;
+    const dayBtn = e.target.closest(".an-cal-day");
+    if (!dayBtn) return;
+    const hoverDate = strToDate(dayBtn.dataset.date);
+    const fromDate = strToDate(periodPickerState.customFrom);
+    dom.anCalendar.querySelectorAll(".an-cal-day").forEach((btn) => {
+      const d = strToDate(btn.dataset.date);
+      const lo = hoverDate < fromDate ? hoverDate : fromDate;
+      const hi = hoverDate < fromDate ? fromDate : hoverDate;
+      btn.classList.toggle("an-cal-day--hover-range", d > lo && d < hi);
+      btn.classList.toggle("an-cal-day--hover-end", d.getTime() === hoverDate.getTime());
+    });
+  });
+
+  dom.anCalendar.addEventListener("mouseleave", () => {
+    dom.anCalendar.querySelectorAll(".an-cal-day--hover-range, .an-cal-day--hover-end").forEach((btn) => {
+      btn.classList.remove("an-cal-day--hover-range", "an-cal-day--hover-end");
+    });
+  });
+
   document.getElementById("an-period-save").addEventListener("click", () => closePeriodPicker(true));
   document.getElementById("an-period-close").addEventListener("click", () => closePeriodPicker(false));
 
   document.addEventListener("click", (e) => {
-    if (!e.target.closest("#an-dd-period")) closePeriodPicker(false);
-    if (!e.target.closest("#an-toolbar .dd")) closeAllAnalyticsDds();
+    if (e.target.isConnected && !e.target.closest("#an-dd-period")) closePeriodPicker(false);
+    if (e.target.isConnected && !e.target.closest("#an-toolbar .dd")) closeAllAnalyticsDds();
   });
 
   // ── Factory ────────────────────────────────────────────────
@@ -2496,27 +2454,6 @@ function bindAnalyticsEvents() {
 
   dom.anResetBtn.addEventListener("click", resetAnalytics);
   dom.anExportBtn.addEventListener("click", exportAnalyticsExcel);
-
-  // ── Employee search ────────────────────────────────────────
-  dom.anEmployeeSearch.addEventListener("input", () => {
-    const q = dom.anEmployeeSearch.value.trim();
-    if (!q) { clearAnalyticsEmployee(); return; }
-    analyticsState.employeeSearchText = q;
-    showEmployeeSuggestions(getAnalyticsEmployeeSuggestions(q));
-    dom.anEmployeeClear.classList.toggle("hidden", !q);
-  });
-
-  dom.anEmployeeSuggestions.addEventListener("click", (e) => {
-    const item = e.target.closest(".an-suggestion-item");
-    if (!item) return;
-    selectAnalyticsEmployee(item.dataset.empid);
-  });
-
-  dom.anEmployeeClear.addEventListener("click", clearAnalyticsEmployee);
-
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".an-employee-bar")) dom.anEmployeeSuggestions.classList.add("hidden");
-  });
 
   dom.anEmptyAnalytics.addEventListener("click", (e) => {
     if (e.target.closest(".an-inline-reset")) resetAnalytics();

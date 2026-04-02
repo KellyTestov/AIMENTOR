@@ -1038,6 +1038,16 @@ body {
   border-radius: 6px;
 }
 
+.an-cal-day--hover-range {
+  background: rgba(201, 30, 30, 0.07);
+  border-radius: 0;
+}
+
+.an-cal-day--hover-end {
+  background: rgba(201, 30, 30, 0.22) !important;
+  border-radius: 6px;
+}
+
 /* daterange inputs preserved */
 .an-date-sep {
   color: var(--muted);
@@ -1157,114 +1167,6 @@ body {
   background: rgba(21, 168, 88, 0.04);
 }
 .an-metric--done .an-metric__value { color: #0e6832; }
-
-/* Employee search bar */
-.an-employee-bar {
-  position: relative;
-  margin-bottom: 14px;
-}
-
-.an-employee-search-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface);
-  padding: 0 12px;
-  height: 40px;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.an-employee-search-wrap:focus-within {
-  border-color: rgba(201, 30, 30, 0.38);
-  box-shadow: 0 0 0 3px rgba(201, 30, 30, 0.08);
-}
-
-.an-employee-icon {
-  color: var(--muted);
-  flex-shrink: 0;
-}
-
-.an-employee-search-wrap input {
-  flex: 1;
-  border: none;
-  outline: none;
-  font: inherit;
-  font-size: 14px;
-  background: transparent;
-  color: var(--text);
-  min-width: 0;
-}
-
-.an-employee-search-wrap input::placeholder {
-  color: #9099ae;
-}
-
-.an-emp-clear {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: none;
-  background: #e5e8ef;
-  color: var(--muted);
-  font-size: 13px;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  transition: background 0.12s;
-}
-
-.an-emp-clear:hover {
-  background: #d1d5df;
-}
-
-/* Suggestions dropdown */
-.an-suggestions {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  z-index: 10;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  box-shadow: var(--shadow-md);
-  overflow: hidden;
-}
-
-.an-suggestion-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  width: 100%;
-  padding: 10px 14px;
-  border: none;
-  background: transparent;
-  font: inherit;
-  font-size: 14px;
-  color: var(--text);
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.1s;
-}
-
-.an-suggestion-item:hover {
-  background: var(--bg);
-}
-
-.an-sug-userid {
-  font-family: "Cascadia Code", "Consolas", monospace;
-  font-size: 11px;
-  color: var(--muted);
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  padding: 1px 6px;
-  flex-shrink: 0;
-}
 
 /* Table */
 .an-table-card {
