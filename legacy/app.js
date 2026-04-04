@@ -2,6 +2,7 @@
 
 const ADMIN_USERS_STORAGE_KEY = "ai-mentor-access-users-v1";
 const WIZARD_STORAGE_KEY = "ai-mentor-wizard-v2";
+const ANALYTICS_STATE_KEY = "ai-mentor-analytics-state-v1";
 
 const bootstrap = window.AI_MENTOR_BOOTSTRAP || {};
 
@@ -26,7 +27,7 @@ let allUnits = bootstrap.units || [
     title: "Тренажер по кредитным картам",
     type: "Обучающая",
     category: "Продукты",
-    factory: "КЦ",
+    factory: "Сервис",
     authorId: "u-101",
     authorName: "Роман Плишкин",
     createdAt: "2026-02-12T10:00:00Z",
@@ -41,7 +42,7 @@ let allUnits = bootstrap.units || [
     title: "Тренажер по лояльности с клиентами",
     type: "Обучающая",
     category: "Коммуникации",
-    factory: "КЦ",
+    factory: "Телемаркетинг",
     authorId: "u-101",
     authorName: "Роман Плишкин",
     createdAt: "2026-02-20T11:30:00Z",
@@ -56,7 +57,7 @@ let allUnits = bootstrap.units || [
     title: "Экзамен Basic1",
     type: "Проверяющая",
     category: "Экзамены",
-    factory: "ДКЦ",
+    factory: "Сервис",
     authorId: "u-204",
     authorName: "Ирина Платонова",
     createdAt: "2026-01-28T08:10:00Z",
@@ -71,7 +72,7 @@ let allUnits = bootstrap.units || [
     title: "Экзамен Optimum",
     type: "Проверяющая",
     category: "Экзамены",
-    factory: "Взыскание",
+    factory: "Урегулирование",
     authorId: "u-322",
     authorName: "Марина Сизова",
     createdAt: "2026-01-14T13:00:00Z",
@@ -136,50 +137,54 @@ const ANALYTICS_SESSIONS = bootstrap.analyticsSessions || (function () {
     return { id, unitId, unitTitle, direction: dir, employeeId: empId, employeeName: empName, status, assignedDate, startDate, endDate, activeTimeMinutes: activeMin, score, attempts };
   }
   return [
+    // edu-001 → Сервис / ФЛ Voice
+    // edu-002 → Телемаркетинг / Физ.лица
+    // edu-003 → Сервис / ЮЛ Chat
+    // edu-004 → Урегулирование / 90+
     // Январь 2026
-    s("s01","edu-001","Тренажер по кредитным картам","КЦ","U_QD7RZ","Рожков Александр Игоревич","completed","2026-01-18T08:00:00Z","2026-01-20T09:15:00Z","2026-01-20T10:20:00Z",65,null,1),
-    s("s02","edu-003","Экзамен Basic1","ДКЦ","U_W2K9M","Савельева Мария Сергеевна","completed","2026-01-10T08:00:00Z","2026-01-15T10:00:00Z","2026-01-15T10:50:00Z",50,72,2),
-    s("s03","edu-004","Экзамен Optimum","SME","U_FH18Q","Игнатов Павел Андреевич","completed","2026-01-05T08:00:00Z","2026-01-08T14:00:00Z","2026-01-08T14:38:00Z",38,91,1),
-    s("s04","edu-004","Экзамен Optimum","SME","U_Z8P3D","Новикова Валерия Олеговна","completed","2026-01-22T08:00:00Z","2026-01-25T11:00:00Z","2026-01-25T11:33:00Z",33,85,1),
-    s("s05","edu-002","Тренажер по лояльности с клиентами","ТМ","U_J3R8P","Орлова Софья Артёмовна","completed","2026-01-08T08:00:00Z","2026-01-12T09:00:00Z","2026-01-12T09:58:00Z",58,null,1),
+    s("s01","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_QD7RZ","Рожков Александр Игоревич","completed","2026-01-18T08:00:00Z","2026-01-20T09:15:00Z","2026-01-20T10:20:00Z",65,null,1),
+    s("s02","edu-003","Экзамен Basic1","ЮЛ Chat","U_W2K9M","Савельева Мария Сергеевна","completed","2026-01-10T08:00:00Z","2026-01-15T10:00:00Z","2026-01-15T10:50:00Z",50,72,2),
+    s("s03","edu-004","Экзамен Optimum","90+","U_FH18Q","Игнатов Павел Андреевич","completed","2026-01-05T08:00:00Z","2026-01-08T14:00:00Z","2026-01-08T14:38:00Z",38,91,1),
+    s("s04","edu-004","Экзамен Optimum","90+","U_Z8P3D","Новикова Валерия Олеговна","completed","2026-01-22T08:00:00Z","2026-01-25T11:00:00Z","2026-01-25T11:33:00Z",33,85,1),
+    s("s05","edu-002","Тренажер по лояльности с клиентами","Физ.лица","U_J3R8P","Орлова Софья Артёмовна","completed","2026-01-08T08:00:00Z","2026-01-12T09:00:00Z","2026-01-12T09:58:00Z",58,null,1),
     // Февраль 2026
-    s("s06","edu-002","Тренажер по лояльности с клиентами","ТМ","U_QD7RZ","Рожков Александр Игоревич","completed","2026-02-10T08:00:00Z","2026-02-14T09:00:00Z","2026-02-14T09:48:00Z",48,null,2),
-    s("s07","edu-003","Экзамен Basic1","ДКЦ","U_QD7RZ","Рожков Александр Игоревич","completed","2026-02-16T08:00:00Z","2026-02-20T10:00:00Z","2026-02-20T10:42:00Z",42,88,1),
-    s("s08","edu-001","Тренажер по кредитным картам","КЦ","U_W2K9M","Савельева Мария Сергеевна","completed","2026-02-06T08:00:00Z","2026-02-10T09:30:00Z","2026-02-10T10:40:00Z",70,null,1),
-    s("s09","edu-001","Тренажер по кредитным картам","КЦ","U_M0T5B","Королев Денис Владимирович","completed","2026-02-04T08:00:00Z","2026-02-08T13:00:00Z","2026-02-08T14:00:00Z",60,null,1),
-    s("s10","edu-002","Тренажер по лояльности с клиентами","ТМ","U_K4V1S","Баранов Олег Михайлович","completed","2026-02-12T08:00:00Z","2026-02-16T09:00:00Z","2026-02-16T09:55:00Z",55,null,1),
-    s("s11","edu-003","Экзамен Basic1","ДКЦ","U_K4V1S","Баранов Олег Михайлович","completed","2026-02-18T08:00:00Z","2026-02-22T10:00:00Z","2026-02-22T10:51:00Z",51,94,1),
-    s("s12","edu-003","Экзамен Basic1","ДКЦ","U_H9C7L","Пахомов Евгений Александрович","completed","2026-02-08T08:00:00Z","2026-02-12T10:00:00Z","2026-02-12T10:46:00Z",46,83,1),
-    s("s13","edu-001","Тренажер по кредитным картам","КЦ","U_J3R8P","Орлова Софья Артёмовна","completed","2026-02-14T08:00:00Z","2026-02-18T10:00:00Z","2026-02-18T11:07:00Z",67,null,1),
-    s("s14","edu-003","Экзамен Basic1","ДКЦ","U_B5U0K","Елисеев Артем Константинович","completed","2026-02-20T08:00:00Z","2026-02-24T10:00:00Z","2026-02-24T10:44:00Z",44,76,2),
-    s("s15","edu-002","Тренажер по лояльности с клиентами","ТМ","U_P7E4J","Егорова Татьяна Борисовна","completed","2026-02-02T08:00:00Z","2026-02-06T09:00:00Z","2026-02-06T09:45:00Z",45,null,1),
-    s("s16","edu-001","Тренажер по кредитным картам","КЦ","U_FH18Q","Игнатов Павел Андреевич","in_progress","2026-02-22T08:00:00Z","2026-02-25T11:00:00Z",null,35,null,1),
+    s("s06","edu-002","Тренажер по лояльности с клиентами","Физ.лица","U_QD7RZ","Рожков Александр Игоревич","completed","2026-02-10T08:00:00Z","2026-02-14T09:00:00Z","2026-02-14T09:48:00Z",48,null,2),
+    s("s07","edu-003","Экзамен Basic1","ЮЛ Chat","U_QD7RZ","Рожков Александр Игоревич","completed","2026-02-16T08:00:00Z","2026-02-20T10:00:00Z","2026-02-20T10:42:00Z",42,88,1),
+    s("s08","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_W2K9M","Савельева Мария Сергеевна","completed","2026-02-06T08:00:00Z","2026-02-10T09:30:00Z","2026-02-10T10:40:00Z",70,null,1),
+    s("s09","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_M0T5B","Королев Денис Владимирович","completed","2026-02-04T08:00:00Z","2026-02-08T13:00:00Z","2026-02-08T14:00:00Z",60,null,1),
+    s("s10","edu-002","Тренажер по лояльности с клиентами","Физ.лица","U_K4V1S","Баранов Олег Михайлович","completed","2026-02-12T08:00:00Z","2026-02-16T09:00:00Z","2026-02-16T09:55:00Z",55,null,1),
+    s("s11","edu-003","Экзамен Basic1","ЮЛ Chat","U_K4V1S","Баранов Олег Михайлович","completed","2026-02-18T08:00:00Z","2026-02-22T10:00:00Z","2026-02-22T10:51:00Z",51,94,1),
+    s("s12","edu-003","Экзамен Basic1","ЮЛ Chat","U_H9C7L","Пахомов Евгений Александрович","completed","2026-02-08T08:00:00Z","2026-02-12T10:00:00Z","2026-02-12T10:46:00Z",46,83,1),
+    s("s13","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_J3R8P","Орлова Софья Артёмовна","completed","2026-02-14T08:00:00Z","2026-02-18T10:00:00Z","2026-02-18T11:07:00Z",67,null,1),
+    s("s14","edu-003","Экзамен Basic1","ЮЛ Chat","U_B5U0K","Елисеев Артем Константинович","completed","2026-02-20T08:00:00Z","2026-02-24T10:00:00Z","2026-02-24T10:44:00Z",44,76,2),
+    s("s15","edu-002","Тренажер по лояльности с клиентами","Физ.лица","U_P7E4J","Егорова Татьяна Борисовна","completed","2026-02-02T08:00:00Z","2026-02-06T09:00:00Z","2026-02-06T09:45:00Z",45,null,1),
+    s("s16","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_FH18Q","Игнатов Павел Андреевич","in_progress","2026-02-22T08:00:00Z","2026-02-25T11:00:00Z",null,35,null,1),
     // Март 2026 (1–16)
-    s("s17","edu-004","Экзамен Optimum","SME","U_QD7RZ","Рожков Александр Игоревич","in_progress","2026-03-08T08:00:00Z","2026-03-10T14:00:00Z",null,20,null,1),
-    s("s18","edu-001","Тренажер по кредитным картам","КЦ","U_Q6Y2N","Филатова Наталья Юрьевна","completed","2026-03-01T08:00:00Z","2026-03-03T10:00:00Z","2026-03-03T11:03:00Z",63,null,1),
-    s("s19","edu-002","Тренажер по лояльности с клиентами","ТМ","U_M0T5B","Королев Денис Владимирович","completed","2026-03-03T08:00:00Z","2026-03-05T09:00:00Z","2026-03-05T09:52:00Z",52,null,1),
-    s("s20","edu-001","Тренажер по кредитным картам","КЦ","U_T1M6V","Громова Ксения Дмитриевна","completed","2026-03-02T08:00:00Z","2026-03-04T10:00:00Z","2026-03-04T11:01:00Z",61,null,1),
-    s("s21","edu-001","Тренажер по кредитным картам","КЦ","U_P7E4J","Егорова Татьяна Борисовна","completed","2026-03-04T08:00:00Z","2026-03-06T09:00:00Z","2026-03-06T09:59:00Z",59,null,1),
-    s("s22","edu-004","Экзамен Optimum","SME","U_H9C7L","Пахомов Евгений Александрович","completed","2026-03-05T08:00:00Z","2026-03-07T10:00:00Z","2026-03-07T10:40:00Z",40,70,2),
-    s("s23","edu-004","Экзамен Optimum","SME","U_P7E4J","Егорова Татьяна Борисовна","completed","2026-03-06T08:00:00Z","2026-03-08T10:00:00Z","2026-03-08T10:41:00Z",41,81,1),
-    s("s24","edu-001","Тренажер по кредитным картам","КЦ","U_Z8P3D","Новикова Валерия Олеговна","in_progress","2026-03-06T08:00:00Z","2026-03-08T11:00:00Z",null,28,null,1),
-    s("s25","edu-001","Тренажер по кредитным картам","КЦ","U_H9C7L","Пахомов Евгений Александрович","in_progress","2026-03-07T08:00:00Z","2026-03-09T09:00:00Z",null,30,null,1),
-    s("s26","edu-001","Тренажер по кредитным картам","КЦ","U_N2A9F","Чернов Роман Евгеньевич","in_progress","2026-03-08T08:00:00Z","2026-03-10T10:00:00Z",null,15,null,1),
-    s("s27","edu-004","Экзамен Optimum","SME","U_Q6Y2N","Филатова Наталья Юрьевна","in_progress","2026-03-09T08:00:00Z","2026-03-11T14:00:00Z",null,18,null,1),
-    s("s28","edu-002","Тренажер по лояльности с клиентами","ТМ","U_T1M6V","Громова Ксения Дмитриевна","in_progress","2026-03-10T08:00:00Z","2026-03-12T11:00:00Z",null,22,null,1),
-    s("s29","edu-003","Экзамен Basic1","ДКЦ","U_M0T5B","Королев Денис Владимирович","assigned","2026-03-14T08:00:00Z",null,null,null,null,0),
-    s("s30","edu-003","Экзамен Basic1","ДКЦ","U_J3R8P","Орлова Софья Артёмовна","assigned","2026-03-13T08:00:00Z",null,null,null,null,0),
-    s("s31","edu-001","Тренажер по кредитным картам","КЦ","U_K4V1S","Баранов Олег Михайлович","assigned","2026-03-14T08:00:00Z",null,null,null,null,0),
-    s("s32","edu-002","Тренажер по лояльности с клиентами","ТМ","U_W2K9M","Савельева Мария Сергеевна","assigned","2026-03-15T08:00:00Z",null,null,null,null,0),
-    s("s33","edu-002","Тренажер по лояльности с клиентами","ТМ","U_FH18Q","Игнатов Павел Андреевич","assigned","2026-03-12T08:00:00Z",null,null,null,null,0),
-    s("s34","edu-004","Экзамен Optimum","SME","U_N2A9F","Чернов Роман Евгеньевич","assigned","2026-03-16T08:00:00Z",null,null,null,null,0),
-    s("s35","edu-002","Тренажер по лояльности с клиентами","ТМ","U_Q6Y2N","Филатова Наталья Юрьевна","assigned","2026-03-16T08:00:00Z",null,null,null,null,0),
+    s("s17","edu-004","Экзамен Optimum","90+","U_QD7RZ","Рожков Александр Игоревич","in_progress","2026-03-08T08:00:00Z","2026-03-10T14:00:00Z",null,20,null,1),
+    s("s18","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_Q6Y2N","Филатова Наталья Юрьевна","completed","2026-03-01T08:00:00Z","2026-03-03T10:00:00Z","2026-03-03T11:03:00Z",63,null,1),
+    s("s19","edu-002","Тренажер по лояльности с клиентами","Физ.лица","U_M0T5B","Королев Денис Владимирович","completed","2026-03-03T08:00:00Z","2026-03-05T09:00:00Z","2026-03-05T09:52:00Z",52,null,1),
+    s("s20","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_T1M6V","Громова Ксения Дмитриевна","completed","2026-03-02T08:00:00Z","2026-03-04T10:00:00Z","2026-03-04T11:01:00Z",61,null,1),
+    s("s21","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_P7E4J","Егорова Татьяна Борисовна","completed","2026-03-04T08:00:00Z","2026-03-06T09:00:00Z","2026-03-06T09:59:00Z",59,null,1),
+    s("s22","edu-004","Экзамен Optimum","90+","U_H9C7L","Пахомов Евгений Александрович","completed","2026-03-05T08:00:00Z","2026-03-07T10:00:00Z","2026-03-07T10:40:00Z",40,70,2),
+    s("s23","edu-004","Экзамен Optimum","90+","U_P7E4J","Егорова Татьяна Борисовна","completed","2026-03-06T08:00:00Z","2026-03-08T10:00:00Z","2026-03-08T10:41:00Z",41,81,1),
+    s("s24","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_Z8P3D","Новикова Валерия Олеговна","in_progress","2026-03-06T08:00:00Z","2026-03-08T11:00:00Z",null,28,null,1),
+    s("s25","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_H9C7L","Пахомов Евгений Александрович","in_progress","2026-03-07T08:00:00Z","2026-03-09T09:00:00Z",null,30,null,1),
+    s("s26","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_N2A9F","Чернов Роман Евгеньевич","in_progress","2026-03-08T08:00:00Z","2026-03-10T10:00:00Z",null,15,null,1),
+    s("s27","edu-004","Экзамен Optimum","90+","U_Q6Y2N","Филатова Наталья Юрьевна","in_progress","2026-03-09T08:00:00Z","2026-03-11T14:00:00Z",null,18,null,1),
+    s("s28","edu-002","Тренажер по лояльности с клиентами","Физ.лица","U_T1M6V","Громова Ксения Дмитриевна","in_progress","2026-03-10T08:00:00Z","2026-03-12T11:00:00Z",null,22,null,1),
+    s("s29","edu-003","Экзамен Basic1","ЮЛ Chat","U_M0T5B","Королев Денис Владимирович","assigned","2026-03-14T08:00:00Z",null,null,null,null,0),
+    s("s30","edu-003","Экзамен Basic1","ЮЛ Chat","U_J3R8P","Орлова Софья Артёмовна","assigned","2026-03-13T08:00:00Z",null,null,null,null,0),
+    s("s31","edu-001","Тренажер по кредитным картам","ФЛ Voice","U_K4V1S","Баранов Олег Михайлович","assigned","2026-03-14T08:00:00Z",null,null,null,null,0),
+    s("s32","edu-002","Тренажер по лояльности с клиентами","Физ.лица","U_W2K9M","Савельева Мария Сергеевна","assigned","2026-03-15T08:00:00Z",null,null,null,null,0),
+    s("s33","edu-002","Тренажер по лояльности с клиентами","Физ.лица","U_FH18Q","Игнатов Павел Андреевич","assigned","2026-03-12T08:00:00Z",null,null,null,null,0),
+    s("s34","edu-004","Экзамен Optimum","90+","U_N2A9F","Чернов Роман Евгеньевич","assigned","2026-03-16T08:00:00Z",null,null,null,null,0),
+    s("s35","edu-002","Тренажер по лояльности с клиентами","Физ.лица","U_Q6Y2N","Филатова Наталья Юрьевна","assigned","2026-03-16T08:00:00Z",null,null,null,null,0),
     // Текущая неделя (17–23 марта 2026)
-    s("s36","edu-003","Экзамен Basic1","ДКЦ","U_R7N4X","Климова Ирина Николаевна","completed","2026-03-16T08:00:00Z","2026-03-18T10:00:00Z","2026-03-18T10:44:00Z",44,65,3),
-    s("s37","edu-004","Экзамен Optimum","SME","U_R7N4X","Климова Ирина Николаевна","completed","2026-03-18T08:00:00Z","2026-03-20T10:00:00Z","2026-03-20T10:36:00Z",36,79,1),
-    s("s38","edu-003","Экзамен Basic1","ДКЦ","U_Z8P3D","Новикова Валерия Олеговна","completed","2026-03-17T08:00:00Z","2026-03-19T10:00:00Z","2026-03-19T10:48:00Z",48,77,2),
-    s("s39","edu-004","Экзамен Optimum","SME","U_B5U0K","Елисеев Артем Константинович","completed","2026-03-19T08:00:00Z","2026-03-21T10:00:00Z","2026-03-21T10:35:00Z",35,88,1),
-    s("s40","edu-003","Экзамен Basic1","ДКЦ","U_N2A9F","Чернов Роман Евгеньевич","completed","2026-03-20T08:00:00Z","2026-03-22T10:00:00Z","2026-03-22T10:49:00Z",49,92,1),
+    s("s36","edu-003","Экзамен Basic1","ЮЛ Chat","U_R7N4X","Климова Ирина Николаевна","completed","2026-03-16T08:00:00Z","2026-03-18T10:00:00Z","2026-03-18T10:44:00Z",44,65,3),
+    s("s37","edu-004","Экзамен Optimum","90+","U_R7N4X","Климова Ирина Николаевна","completed","2026-03-18T08:00:00Z","2026-03-20T10:00:00Z","2026-03-20T10:36:00Z",36,79,1),
+    s("s38","edu-003","Экзамен Basic1","ЮЛ Chat","U_Z8P3D","Новикова Валерия Олеговна","completed","2026-03-17T08:00:00Z","2026-03-19T10:00:00Z","2026-03-19T10:48:00Z",48,77,2),
+    s("s39","edu-004","Экзамен Optimum","90+","U_B5U0K","Елисеев Артем Константинович","completed","2026-03-19T08:00:00Z","2026-03-21T10:00:00Z","2026-03-21T10:35:00Z",35,88,1),
+    s("s40","edu-003","Экзамен Basic1","ЮЛ Chat","U_N2A9F","Чернов Роман Евгеньевич","completed","2026-03-20T08:00:00Z","2026-03-22T10:00:00Z","2026-03-22T10:49:00Z",49,92,1),
   ];
 }());
 
@@ -190,20 +195,17 @@ const defaultAnalyticsState = {
   status: "all",
   factories: [],
   directions: [],
-  unitSearch: "",
+  selectedCourses: [],
   sortByPopularity: false,
-  selectedEmployeeId: null,
-  employeeSearchText: "",
 };
 
 let analyticsState = { ...defaultAnalyticsState };
 
 const FACTORIES = ['Доставка', 'Урегулирование', 'Сервис', 'Телемаркетинг'];
 const DIRECTION_MAP = {
-  'Доставка':       ['Малый и микро бизнес', 'Розничный бизнес'],
+  'Доставка':       ['Малый и микро бизнес', 'Розничный бизнес', 'Универсал', 'Партнёрка'],
   'Урегулирование': ['90-', '90+', 'Выездное'],
   'Сервис':         ['ФЛ Chat', 'ФЛ Voice', 'ЮЛ Chat', 'ЮЛ Voice', 'СвА', 'Эквайринг'],
-
   'Телемаркетинг':  ['Физ.лица', 'Юр.лица'],
 };
 const ALL_DIRECTIONS = [...new Set(Object.values(DIRECTION_MAP).flat())];
@@ -302,10 +304,12 @@ const dom = {
   userName: document.getElementById("user-name"),
   userRole: document.getElementById("user-role"),
   // Analytics elements
-  anPeriodTabs: document.getElementById("an-period-tabs"),
-  anDateRange: document.getElementById("an-date-range"),
-  anDateFrom: document.getElementById("an-date-from"),
-  anDateTo: document.getElementById("an-date-to"),
+  anDdPeriod: document.getElementById("an-dd-period"),
+  anDdPeriodLabel: document.getElementById("an-dd-period-label"),
+  anPickerFrom: document.getElementById("an-picker-from"),
+  anPickerTo: document.getElementById("an-picker-to"),
+  anCalTitle: document.getElementById("an-cal-title"),
+  anCalendar: document.getElementById("an-calendar"),
   anDdStatus: document.getElementById("an-dd-status"),
   anDdStatusLabel: document.getElementById("an-dd-status-label"),
   anDdFactory: document.getElementById("an-dd-factory"),
@@ -315,7 +319,10 @@ const dom = {
   anDdDirection: document.getElementById("an-dd-direction"),
   anDdDirectionLabel: document.getElementById("an-dd-direction-label"),
   anDirApply: document.getElementById("an-dir-apply"),
-  anUnitSearch: document.getElementById("an-unit-search"),
+  anDdCourse: document.getElementById("an-dd-course"),
+  anDdCourseLabel: document.getElementById("an-dd-course-label"),
+  anDdCourseList: document.getElementById("an-dd-course-list"),
+  anCourseApply: document.getElementById("an-course-apply"),
   anSortPopular: document.getElementById("an-sort-popular"),
   anResetBtn: document.getElementById("an-reset-btn"),
   anExportBtn: document.getElementById("an-export-btn"),
@@ -325,9 +332,6 @@ const dom = {
   anMCompleted: document.getElementById("an-m-completed"),
   anMAvgScore: document.getElementById("an-m-avg-score"),
   anMAvgAttempts: document.getElementById("an-m-avg-attempts"),
-  anEmployeeSearch: document.getElementById("an-employee-search"),
-  anEmployeeClear: document.getElementById("an-employee-clear"),
-  anEmployeeSuggestions: document.getElementById("an-employee-suggestions"),
   anTableBody: document.getElementById("an-table-body"),
   anEmptyAnalytics: document.getElementById("an-empty-analytics"),
   deleteModalBackdrop: document.getElementById("delete-modal-backdrop"),
@@ -414,6 +418,7 @@ function init() {
     renderNoAccess();
     return;
   }
+  loadAnalyticsState();
 
   mergeBuilderUnits();
   renderUserBlock();
@@ -656,6 +661,7 @@ function refreshView() {
   if (isAnalytics) {
     dom.sectionTitle.textContent = "Аналитика";
     dom.sectionSubtitle.textContent = "Сводка по единицам обучения";
+    updatePeriodLabel();
     refreshAnalytics();
     return;
   }
@@ -680,6 +686,8 @@ function refreshAnalytics() {
   dom.anMCompleted.textContent = String(metrics.completed);
   dom.anMAvgScore.textContent = metrics.avgScore != null ? String(metrics.avgScore) : "—";
   dom.anMAvgAttempts.textContent = metrics.avgAttempts != null ? String(metrics.avgAttempts) : "—";
+
+  saveAnalyticsState();
 
   renderAnalyticsTable(sessions);
   syncAnalyticsResetBtn();
@@ -1705,10 +1713,12 @@ function getAnalyticsDateRange() {
 
   let from;
   switch (analyticsState.period) {
-    case "week":
+    case "week": {
+      const dow = today.getDay() === 0 ? 6 : today.getDay() - 1; // Пн=0…Вс=6
       from = new Date(today);
-      from.setDate(from.getDate() - 6);
+      from.setDate(today.getDate() - dow);
       break;
+    }
     case "month":
       from = new Date(today.getFullYear(), today.getMonth(), 1);
       break;
@@ -1761,13 +1771,8 @@ function filterAnalyticsSessions() {
     sessions = sessions.filter((s) => analyticsState.directions.includes(s.direction));
   }
 
-  if (analyticsState.unitSearch) {
-    const q = analyticsState.unitSearch.toLowerCase();
-    sessions = sessions.filter((s) => s.unitTitle.toLowerCase().includes(q));
-  }
-
-  if (analyticsState.selectedEmployeeId) {
-    sessions = sessions.filter((s) => s.employeeId === analyticsState.selectedEmployeeId);
+  if (analyticsState.selectedCourses.length > 0) {
+    sessions = sessions.filter((s) => analyticsState.selectedCourses.includes(s.unitTitle));
   }
 
   if (analyticsState.sortByPopularity) {
@@ -1779,6 +1784,215 @@ function filterAnalyticsSessions() {
   }
 
   return sessions;
+}
+
+// ─── Date helpers ──────────────────────────────────────────────────────────────
+
+function dateToStr(date) {
+  if (!date) return "";
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function strToDate(str) {
+  if (!str) return null;
+  const parts = str.split("-").map(Number);
+  const d = new Date(parts[0], parts[1] - 1, parts[2]);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+// ─── Period picker state & functions ──────────────────────────────────────────
+
+const PERIOD_LABELS = {
+  week: "Текущая неделя",
+  month: "Текущий месяц",
+  quarter: "Текущий квартал",
+  year: "Текущий год",
+};
+
+const CAL_MONTH_NAMES = ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+
+let periodPickerState = {
+  period: "month",
+  customFrom: "",
+  customTo: "",
+  calYear: new Date().getFullYear(),
+  calMonth: new Date().getMonth(),
+  isSelecting: false,
+};
+
+function getPickerRange() {
+  if (periodPickerState.period === "custom") {
+    return { from: strToDate(periodPickerState.customFrom), to: strToDate(periodPickerState.customTo) };
+  }
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let from;
+  switch (periodPickerState.period) {
+    case "week": {
+      const dow = today.getDay() === 0 ? 6 : today.getDay() - 1;
+      from = new Date(today);
+      from.setDate(today.getDate() - dow);
+      break;
+    }
+    case "month":
+      from = new Date(today.getFullYear(), today.getMonth(), 1);
+      break;
+    case "quarter": {
+      const q = Math.floor(today.getMonth() / 3);
+      from = new Date(today.getFullYear(), q * 3, 1);
+      break;
+    }
+    case "year":
+      from = new Date(today.getFullYear(), 0, 1);
+      break;
+    default:
+      return { from: null, to: null };
+  }
+  return { from, to: new Date(today) };
+}
+
+function renderCalendar() {
+  const year = periodPickerState.calYear;
+  const month = periodPickerState.calMonth;
+  const { from, to } = getPickerRange();
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  dom.anCalTitle.textContent = `${CAL_MONTH_NAMES[month]} ${year}`;
+
+  const firstDay = new Date(year, month, 1);
+  let startDow = firstDay.getDay() - 1;
+  if (startDow < 0) startDow = 6;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const DOW_SHORT = ["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
+  let html = `<div class="an-cal-grid">`;
+  html += DOW_SHORT.map((d) => `<div class="an-cal-dow">${d}</div>`).join("");
+  for (let i = 0; i < startDow; i++) html += `<div></div>`;
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month, day);
+    const dateStr = dateToStr(date);
+    const toDay0 = to ? new Date(to.getFullYear(), to.getMonth(), to.getDate()) : null;
+    const isToday = date.getTime() === today.getTime();
+    const isStart = from && date.getTime() === from.getTime();
+    const isEnd = toDay0 && date.getTime() === toDay0.getTime();
+    const inRange = from && toDay0 && date > from && date < toDay0;
+
+    let cls = "an-cal-day";
+    if (isToday) cls += " an-cal-day--today";
+    if (isStart) cls += " an-cal-day--start";
+    if (isEnd && !isStart) cls += " an-cal-day--end";
+    if (inRange) cls += " an-cal-day--in-range";
+    html += `<button type="button" class="${cls}" data-date="${dateStr}">${day}</button>`;
+  }
+  html += `</div>`;
+  dom.anCalendar.innerHTML = html;
+}
+
+function updatePickerPresets() {
+  document.querySelectorAll(".an-preset-btn").forEach((btn) => {
+    btn.classList.toggle("is-active", btn.dataset.preset === periodPickerState.period);
+  });
+}
+
+function updatePickerInputs() {
+  const { from, to } = getPickerRange();
+  dom.anPickerFrom.value = from ? dateToStr(from) : "";
+  dom.anPickerTo.value = to ? dateToStr(to) : "";
+}
+
+function updatePeriodPickerUI() {
+  updatePickerPresets();
+  updatePickerInputs();
+  renderCalendar();
+}
+
+function openPeriodPicker() {
+  periodPickerState.period = analyticsState.period;
+  periodPickerState.customFrom = analyticsState.customFrom;
+  periodPickerState.customTo = analyticsState.customTo;
+  periodPickerState.isSelecting = false;
+  const { from } = getPickerRange();
+  if (from) {
+    periodPickerState.calYear = from.getFullYear();
+    periodPickerState.calMonth = from.getMonth();
+  } else {
+    const now = new Date();
+    periodPickerState.calYear = now.getFullYear();
+    periodPickerState.calMonth = now.getMonth();
+  }
+  updatePeriodPickerUI();
+  closeAllAnalyticsDds();
+  dom.anDdPeriod.classList.add("dd--open");
+}
+
+function closePeriodPicker(save) {
+  if (save) {
+    analyticsState.period = periodPickerState.period;
+    analyticsState.customFrom = periodPickerState.customFrom;
+    analyticsState.customTo = periodPickerState.customTo;
+    updatePeriodLabel();
+    refreshAnalytics();
+    syncAnalyticsResetBtn();
+  }
+  dom.anDdPeriod.classList.remove("dd--open");
+}
+
+function updatePeriodLabel() {
+  if (analyticsState.period === "custom" && analyticsState.customFrom && analyticsState.customTo) {
+    const f = strToDate(analyticsState.customFrom);
+    const t = strToDate(analyticsState.customTo);
+    const fmt = (d) => `${String(d.getDate()).padStart(2,"0")}.${String(d.getMonth()+1).padStart(2,"0")}`;
+    dom.anDdPeriodLabel.textContent = `${fmt(f)} — ${fmt(t)}`;
+  } else {
+    dom.anDdPeriodLabel.textContent = PERIOD_LABELS[analyticsState.period] || "Период";
+  }
+}
+
+// ─── Analytics state persistence ─────────────────────────────────────────────
+
+function saveAnalyticsState() {
+  try { sessionStorage.setItem(ANALYTICS_STATE_KEY, JSON.stringify(analyticsState)); } catch (e) { /* ignore */ }
+}
+
+function loadAnalyticsState() {
+  try {
+    const raw = sessionStorage.getItem(ANALYTICS_STATE_KEY);
+    if (raw) analyticsState = { ...defaultAnalyticsState, ...JSON.parse(raw) };
+  } catch (e) { /* ignore */ }
+}
+
+function restoreAnalyticsUI() {
+  updatePeriodLabel();
+
+  const statusRadio = document.querySelector(`input[name="an-status"][value="${analyticsState.status}"]`);
+  if (statusRadio) statusRadio.checked = true;
+  const statusLabels = { all: "Статус", assigned: "Назначен", in_progress: "В процессе", completed: "Завершён" };
+  dom.anDdStatusLabel.textContent = statusLabels[analyticsState.status] || "Статус";
+
+  document.querySelectorAll('input[name="an-factory"]').forEach((cb) => { cb.checked = analyticsState.factories.includes(cb.value); });
+  const fLabel = analyticsState.factories.length > 0 ? analyticsState.factories.join(", ") : "Фабрика";
+  dom.anDdFactoryLabel.textContent = fLabel.length > 15 ? fLabel.slice(0, 13) + "…" : fLabel;
+
+  populateAnDirectionList(analyticsState.factories);
+  document.querySelectorAll('input[name="an-dir"]').forEach((cb) => { cb.checked = analyticsState.directions.includes(cb.value); });
+  const dLabel = analyticsState.directions.length > 0 ? analyticsState.directions.join(", ") : "Направление";
+  dom.anDdDirectionLabel.textContent = dLabel.length > 15 ? dLabel.slice(0, 13) + "…" : dLabel;
+
+  // Курсы перестраиваем уже с учётом восстановленных фабрик/направлений
+  populateAnCourseList();
+  // Метка курса (selectedCourses мог быть скорректирован внутри populateAnCourseList)
+  const cLabel = analyticsState.selectedCourses.length > 0 ? analyticsState.selectedCourses.join(", ") : "Обучение";
+  dom.anDdCourseLabel.textContent = cLabel.length > 18 ? cLabel.slice(0, 16) + "…" : cLabel;
+
+  dom.anSortPopular.checked = analyticsState.sortByPopularity;
+
+  syncAnalyticsResetBtn();
 }
 
 function computeAnalyticsMetrics(sessions) {
@@ -1834,24 +2048,88 @@ function renderAnalyticsTable(sessions) {
     dom.anEmptyAnalytics.classList.remove("hidden");
     return;
   }
-
   dom.anEmptyAnalytics.classList.add("hidden");
 
+  // Group by unitId, preserving order of first occurrence
+  const order = [];
+  const groups = {};
   sessions.forEach((s) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${escapeHtml(s.employeeName)}</td>
-      <td><code>${escapeHtml(s.employeeId)}</code></td>
-      <td class="an-unit-cell">${escapeHtml(s.unitTitle)}</td>
-      <td><span class="an-direction-badge">${escapeHtml(s.direction)}</span></td>
-      <td>${s.startDate ? formatDate(s.startDate) : formatDate(s.assignedDate)}</td>
-      <td>${formatDate(s.endDate)}</td>
-      <td>${s.activeTimeMinutes != null && s.activeTimeMinutes > 0 ? formatMinutes(s.activeTimeMinutes) : "—"}</td>
-      <td><span class="an-status ${getStatusClass(s.status)}">${escapeHtml(getStatusLabel(s.status))}</span></td>
-      <td>${s.score != null ? s.score : "—"}</td>
-      <td>${s.attempts != null && s.attempts > 0 ? s.attempts : "—"}</td>
+    if (!groups[s.unitId]) {
+      order.push(s.unitId);
+      const unit = allUnits.find((u) => u.id === s.unitId);
+      groups[s.unitId] = {
+        unitId: s.unitId,
+        unitTitle: s.unitTitle,
+        factory: unit ? (unit.factory || "—") : "—",
+        sessions: [],
+        directions: new Set(),
+      };
+    }
+    groups[s.unitId].sessions.push(s);
+    if (s.direction) groups[s.unitId].directions.add(s.direction);
+  });
+
+  order.forEach((unitId) => {
+    const g = groups[unitId];
+    const dirs = [...g.directions].join(", ") || "—";
+
+    // ── Unit row ──────────────────────────────────────────────
+    const unitTr = document.createElement("tr");
+    unitTr.className = "an-unit-row";
+    unitTr.dataset.unitId = unitId;
+    unitTr.innerHTML = `
+      <td><button type="button" class="an-expand-btn" aria-expanded="false">▶</button></td>
+      <td class="an-unit-cell">${escapeHtml(g.unitTitle)}</td>
+      <td><span class="an-factory-badge">${escapeHtml(g.factory)}</span></td>
+      <td><span class="an-direction-badge">${escapeHtml(dirs)}</span></td>
+      <td>${g.sessions.length}<span class="an-session-count"> сес.</span></td>
     `;
-    dom.anTableBody.appendChild(tr);
+    dom.anTableBody.appendChild(unitTr);
+
+    // ── Detail row (hidden) ───────────────────────────────────
+    const detailTr = document.createElement("tr");
+    detailTr.className = "an-detail-row hidden";
+    detailTr.dataset.unitId = unitId;
+
+    const detailRows = g.sessions.map((s) => `
+      <tr>
+        <td>${escapeHtml(s.employeeName)}</td>
+        <td><code>${escapeHtml(s.employeeId)}</code></td>
+        <td>${s.startDate ? formatDate(s.startDate) : (s.assignedDate ? formatDate(s.assignedDate) : "—")}</td>
+        <td>${s.endDate ? formatDate(s.endDate) : "—"}</td>
+        <td>${s.activeTimeMinutes != null && s.activeTimeMinutes > 0 ? formatMinutes(s.activeTimeMinutes) : "—"}</td>
+        <td><span class="an-status ${getStatusClass(s.status)}">${escapeHtml(getStatusLabel(s.status))}</span></td>
+        <td>${s.score != null ? s.score : "—"}</td>
+        <td>${s.attempts != null && s.attempts > 0 ? s.attempts : "—"}</td>
+      </tr>
+    `).join("");
+
+    detailTr.innerHTML = `
+      <td colspan="5">
+        <div class="an-detail-wrap">
+          <table class="an-detail-table">
+            <thead>
+              <tr>
+                <th>ФИО</th><th>User</th><th>Дата начала</th><th>Дата завершения</th>
+                <th>Активное время</th><th>Статус</th><th>Балл</th><th>Попытки</th>
+              </tr>
+            </thead>
+            <tbody>${detailRows}</tbody>
+          </table>
+        </div>
+      </td>
+    `;
+    dom.anTableBody.appendChild(detailTr);
+
+    // Toggle expand on click
+    unitTr.addEventListener("click", () => {
+      const btn = unitTr.querySelector(".an-expand-btn");
+      const opening = !btn.classList.contains("is-open");
+      btn.classList.toggle("is-open", opening);
+      btn.textContent = opening ? "▼" : "▶";
+      btn.setAttribute("aria-expanded", String(opening));
+      detailTr.classList.toggle("hidden", !opening);
+    });
   });
 }
 
@@ -1860,9 +2138,8 @@ function isAnalyticsDefault() {
     analyticsState.status === "all" &&
     analyticsState.factories.length === 0 &&
     analyticsState.directions.length === 0 &&
-    !analyticsState.unitSearch &&
-    !analyticsState.sortByPopularity &&
-    !analyticsState.selectedEmployeeId;
+    analyticsState.selectedCourses.length === 0 &&
+    !analyticsState.sortByPopularity;
 }
 
 function syncAnalyticsResetBtn() {
@@ -1872,12 +2149,7 @@ function syncAnalyticsResetBtn() {
 function resetAnalytics() {
   analyticsState = { ...defaultAnalyticsState };
 
-  document.querySelectorAll("#an-period-tabs .an-period-tab").forEach((btn) => {
-    btn.classList.toggle("is-active", btn.dataset.period === "month");
-  });
-  dom.anDateRange.classList.add("hidden");
-  dom.anDateFrom.value = "";
-  dom.anDateTo.value = "";
+  updatePeriodLabel();
 
   const allRadio = document.querySelector('input[name="an-status"][value="all"]');
   if (allRadio) allRadio.checked = true;
@@ -1889,15 +2161,14 @@ function resetAnalytics() {
   populateAnDirectionList([]);
   dom.anDdDirectionLabel.textContent = "Направление";
 
-  dom.anUnitSearch.value = "";
+  populateAnCourseList();
+  dom.anDdCourseLabel.textContent = "Обучение";
   dom.anSortPopular.checked = false;
 
-  dom.anEmployeeSearch.value = "";
-  dom.anEmployeeClear.classList.add("hidden");
-  dom.anEmployeeSuggestions.classList.add("hidden");
-
   closeAllAnalyticsDds();
+  closePeriodPicker(false);
   refreshAnalytics();
+  saveAnalyticsState();
 }
 
 function exportAnalyticsExcel() {
@@ -1949,51 +2220,6 @@ function exportAnalyticsExcel() {
   }
 }
 
-function getAnalyticsEmployeeSuggestions(query) {
-  if (!query || query.length < 2) return [];
-  const q = query.toLowerCase();
-  const seen = new Set();
-  const results = [];
-  ANALYTICS_SESSIONS.forEach((s) => {
-    if (!seen.has(s.employeeId) &&
-        (s.employeeName.toLowerCase().includes(q) || s.employeeId.toLowerCase().includes(q))) {
-      seen.add(s.employeeId);
-      results.push({ id: s.employeeId, name: s.employeeName });
-    }
-  });
-  return results.slice(0, 6);
-}
-
-function showEmployeeSuggestions(suggestions) {
-  if (suggestions.length === 0) {
-    dom.anEmployeeSuggestions.classList.add("hidden");
-    return;
-  }
-  dom.anEmployeeSuggestions.innerHTML = suggestions.map((emp) =>
-    `<button type="button" class="an-suggestion-item" data-empid="${escapeHtml(emp.id)}">${escapeHtml(emp.name)}<span class="an-sug-userid">${escapeHtml(emp.id)}</span></button>`
-  ).join("");
-  dom.anEmployeeSuggestions.classList.remove("hidden");
-}
-
-function selectAnalyticsEmployee(empId) {
-  const session = ANALYTICS_SESSIONS.find((s) => s.employeeId === empId);
-  if (!session) return;
-  analyticsState.selectedEmployeeId = empId;
-  dom.anEmployeeSearch.value = session.employeeName;
-  dom.anEmployeeSuggestions.classList.add("hidden");
-  dom.anEmployeeClear.classList.remove("hidden");
-  refreshAnalytics();
-}
-
-function clearAnalyticsEmployee() {
-  analyticsState.selectedEmployeeId = null;
-  analyticsState.employeeSearchText = "";
-  dom.anEmployeeSearch.value = "";
-  dom.anEmployeeClear.classList.add("hidden");
-  dom.anEmployeeSuggestions.classList.add("hidden");
-  refreshAnalytics();
-}
-
 function closeAllAnalyticsDds() {
   document.querySelectorAll("#an-toolbar .dd--open").forEach((d) => d.classList.remove("dd--open"));
 }
@@ -2026,49 +2252,165 @@ function populateAnDirectionList(selectedFactories) {
   ).join("");
 }
 
+function populateAnCourseList() {
+  let units = allUnits.slice();
+
+  if (analyticsState.factories.length > 0) {
+    units = units.filter((u) => analyticsState.factories.includes(u.factory));
+  }
+
+  if (analyticsState.directions.length > 0) {
+    const unitIdsWithDir = new Set(
+      ANALYTICS_SESSIONS
+        .filter((s) => analyticsState.directions.includes(s.direction))
+        .map((s) => s.unitId)
+    );
+    units = units.filter((u) => unitIdsWithDir.has(u.id));
+  }
+
+  const titles = [...new Set(units.map((u) => u.title))].sort((a, b) => a.localeCompare(b, "ru"));
+
+  dom.anDdCourseList.innerHTML = titles.length > 0
+    ? titles.map((t) =>
+        `<label class="dd__check-item"><input type="checkbox" name="an-course" value="${escapeHtml(t)}" /> ${escapeHtml(t)}</label>`
+      ).join("")
+    : `<p style="padding:10px 12px;font-size:13px;color:var(--muted)">Нет обучений по выбранным фильтрам</p>`;
+
+  // Убираем ранее выбранные курсы, которые больше не входят в список
+  if (analyticsState.selectedCourses.length > 0) {
+    analyticsState.selectedCourses = analyticsState.selectedCourses.filter((c) => titles.includes(c));
+    const cLabel = analyticsState.selectedCourses.length > 0 ? analyticsState.selectedCourses.join(", ") : "Обучение";
+    dom.anDdCourseLabel.textContent = cLabel.length > 18 ? cLabel.slice(0, 16) + "…" : cLabel;
+  }
+
+  // Восстанавливаем чекбоксы для ранее выбранных (если они ещё в списке)
+  if (analyticsState.selectedCourses.length > 0) {
+    document.querySelectorAll('input[name="an-course"]').forEach((cb) => {
+      cb.checked = analyticsState.selectedCourses.includes(cb.value);
+    });
+  }
+}
+
 function bindAnalyticsEvents() {
-  [dom.anDdStatus, dom.anDdFactory, dom.anDdDirection].forEach(bindAnalyticsDd);
+  [dom.anDdStatus, dom.anDdFactory, dom.anDdDirection, dom.anDdCourse].forEach(bindAnalyticsDd);
 
   populateAnFactoryList();
   populateAnDirectionList([]);
+  populateAnCourseList();
+  restoreAnalyticsUI();
 
+  // ── Period picker ──────────────────────────────────────────
+  dom.anDdPeriod.querySelector(".dd__trigger").addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (dom.anDdPeriod.classList.contains("dd--open")) {
+      closePeriodPicker(false);
+    } else {
+      openPeriodPicker();
+    }
+  });
+
+  document.querySelectorAll(".an-preset-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      periodPickerState.period = btn.dataset.preset;
+      periodPickerState.customFrom = "";
+      periodPickerState.customTo = "";
+      periodPickerState.isSelecting = false;
+      updatePeriodPickerUI();
+    });
+  });
+
+  dom.anPickerFrom.addEventListener("change", () => {
+    periodPickerState.customFrom = dom.anPickerFrom.value;
+    if (periodPickerState.customFrom) { periodPickerState.period = "custom"; updatePickerPresets(); }
+    renderCalendar();
+  });
+
+  dom.anPickerTo.addEventListener("change", () => {
+    periodPickerState.customTo = dom.anPickerTo.value;
+    if (periodPickerState.customTo) { periodPickerState.period = "custom"; updatePickerPresets(); }
+    renderCalendar();
+  });
+
+  document.getElementById("an-cal-prev").addEventListener("click", () => {
+    periodPickerState.calMonth--;
+    if (periodPickerState.calMonth < 0) { periodPickerState.calMonth = 11; periodPickerState.calYear--; }
+    renderCalendar();
+  });
+
+  document.getElementById("an-cal-next").addEventListener("click", () => {
+    periodPickerState.calMonth++;
+    if (periodPickerState.calMonth > 11) { periodPickerState.calMonth = 0; periodPickerState.calYear++; }
+    renderCalendar();
+  });
+
+  dom.anCalendar.addEventListener("click", (e) => {
+    const dayBtn = e.target.closest(".an-cal-day");
+    if (!dayBtn) return;
+    const dateStr = dayBtn.dataset.date;
+    if (!periodPickerState.isSelecting) {
+      periodPickerState.customFrom = dateStr;
+      periodPickerState.customTo = "";
+      periodPickerState.period = "custom";
+      periodPickerState.isSelecting = true;
+    } else {
+      const from = strToDate(periodPickerState.customFrom);
+      const clicked = strToDate(dateStr);
+      if (clicked < from) {
+        periodPickerState.customTo = periodPickerState.customFrom;
+        periodPickerState.customFrom = dateStr;
+      } else {
+        periodPickerState.customTo = dateStr;
+      }
+      periodPickerState.isSelecting = false;
+    }
+    updatePeriodPickerUI();
+  });
+
+  dom.anCalendar.addEventListener("mouseover", (e) => {
+    if (!periodPickerState.isSelecting) return;
+    const dayBtn = e.target.closest(".an-cal-day");
+    if (!dayBtn) return;
+    const hoverDate = strToDate(dayBtn.dataset.date);
+    const fromDate = strToDate(periodPickerState.customFrom);
+    dom.anCalendar.querySelectorAll(".an-cal-day").forEach((btn) => {
+      const d = strToDate(btn.dataset.date);
+      const lo = hoverDate < fromDate ? hoverDate : fromDate;
+      const hi = hoverDate < fromDate ? fromDate : hoverDate;
+      btn.classList.toggle("an-cal-day--hover-range", d > lo && d < hi);
+      btn.classList.toggle("an-cal-day--hover-end", d.getTime() === hoverDate.getTime());
+    });
+  });
+
+  dom.anCalendar.addEventListener("mouseleave", () => {
+    dom.anCalendar.querySelectorAll(".an-cal-day--hover-range, .an-cal-day--hover-end").forEach((btn) => {
+      btn.classList.remove("an-cal-day--hover-range", "an-cal-day--hover-end");
+    });
+  });
+
+  document.getElementById("an-period-save").addEventListener("click", () => closePeriodPicker(true));
+  document.getElementById("an-period-close").addEventListener("click", () => closePeriodPicker(false));
+
+  document.addEventListener("click", (e) => {
+    if (e.target.isConnected && !e.target.closest("#an-dd-period")) closePeriodPicker(false);
+    if (e.target.isConnected && !e.target.closest("#an-toolbar .dd")) closeAllAnalyticsDds();
+  });
+
+  // ── Factory ────────────────────────────────────────────────
   dom.anFactoryApply.addEventListener("click", () => {
     analyticsState.factories = [...document.querySelectorAll('input[name="an-factory"]:checked')].map((cb) => cb.value);
     const label = analyticsState.factories.length > 0 ? analyticsState.factories.join(", ") : "Фабрика";
     dom.anDdFactoryLabel.textContent = label.length > 15 ? label.slice(0, 13) + "…" : label;
-    // Перестраиваем список направлений под выбранные фабрики и сбрасываем их выбор
     populateAnDirectionList(analyticsState.factories);
     analyticsState.directions = [];
     dom.anDdDirectionLabel.textContent = "Направление";
+    populateAnCourseList();
     closeAllAnalyticsDds();
     refreshAnalytics();
     syncAnalyticsResetBtn();
+    saveAnalyticsState();
   });
 
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest("#an-toolbar .dd")) closeAllAnalyticsDds();
-  });
-
-  dom.anPeriodTabs.addEventListener("click", (e) => {
-    const tab = e.target.closest(".an-period-tab");
-    if (!tab) return;
-    document.querySelectorAll(".an-period-tab").forEach((t) => t.classList.remove("is-active"));
-    tab.classList.add("is-active");
-    analyticsState.period = tab.dataset.period;
-    dom.anDateRange.classList.toggle("hidden", analyticsState.period !== "custom");
-    if (analyticsState.period !== "custom") refreshAnalytics();
-  });
-
-  dom.anDateFrom.addEventListener("change", () => {
-    analyticsState.customFrom = dom.anDateFrom.value;
-    if (analyticsState.period === "custom" && analyticsState.customFrom && analyticsState.customTo) refreshAnalytics();
-  });
-
-  dom.anDateTo.addEventListener("change", () => {
-    analyticsState.customTo = dom.anDateTo.value;
-    if (analyticsState.period === "custom" && analyticsState.customFrom && analyticsState.customTo) refreshAnalytics();
-  });
-
+  // ── Status ─────────────────────────────────────────────────
   document.querySelectorAll('input[name="an-status"]').forEach((radio) => {
     radio.addEventListener("change", () => {
       analyticsState.status = radio.value;
@@ -2076,56 +2418,42 @@ function bindAnalyticsEvents() {
       dom.anDdStatusLabel.textContent = labels[radio.value] || "Статус";
       closeAllAnalyticsDds();
       refreshAnalytics();
+      saveAnalyticsState();
     });
   });
 
+  // ── Direction ──────────────────────────────────────────────
   dom.anDirApply.addEventListener("click", () => {
     analyticsState.directions = [...document.querySelectorAll('input[name="an-dir"]:checked')].map((cb) => cb.value);
-    const label = analyticsState.directions.length > 0
-      ? analyticsState.directions.join(", ")
-      : "Направление";
+    const label = analyticsState.directions.length > 0 ? analyticsState.directions.join(", ") : "Направление";
     dom.anDdDirectionLabel.textContent = label.length > 15 ? label.slice(0, 13) + "…" : label;
+    populateAnCourseList();
     closeAllAnalyticsDds();
     refreshAnalytics();
+    syncAnalyticsResetBtn();
+    saveAnalyticsState();
   });
 
-  dom.anUnitSearch.addEventListener("input", () => {
-    analyticsState.unitSearch = dom.anUnitSearch.value.trim();
+  // ── Course ─────────────────────────────────────────────────
+  dom.anCourseApply.addEventListener("click", () => {
+    analyticsState.selectedCourses = [...document.querySelectorAll('input[name="an-course"]:checked')].map((cb) => cb.value);
+    const label = analyticsState.selectedCourses.length > 0 ? analyticsState.selectedCourses.join(", ") : "Обучение";
+    dom.anDdCourseLabel.textContent = label.length > 18 ? label.slice(0, 16) + "…" : label;
+    closeAllAnalyticsDds();
     refreshAnalytics();
+    syncAnalyticsResetBtn();
+    saveAnalyticsState();
   });
 
+  // ── Popularity sort ────────────────────────────────────────
   dom.anSortPopular.addEventListener("change", () => {
     analyticsState.sortByPopularity = dom.anSortPopular.checked;
     refreshAnalytics();
+    saveAnalyticsState();
   });
 
   dom.anResetBtn.addEventListener("click", resetAnalytics);
   dom.anExportBtn.addEventListener("click", exportAnalyticsExcel);
-
-  dom.anEmployeeSearch.addEventListener("input", () => {
-    const q = dom.anEmployeeSearch.value.trim();
-    if (!q) {
-      clearAnalyticsEmployee();
-      return;
-    }
-    analyticsState.employeeSearchText = q;
-    showEmployeeSuggestions(getAnalyticsEmployeeSuggestions(q));
-    dom.anEmployeeClear.classList.toggle("hidden", !q);
-  });
-
-  dom.anEmployeeSuggestions.addEventListener("click", (e) => {
-    const item = e.target.closest(".an-suggestion-item");
-    if (!item) return;
-    selectAnalyticsEmployee(item.dataset.empid);
-  });
-
-  dom.anEmployeeClear.addEventListener("click", clearAnalyticsEmployee);
-
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".an-employee-bar")) {
-      dom.anEmployeeSuggestions.classList.add("hidden");
-    }
-  });
 
   dom.anEmptyAnalytics.addEventListener("click", (e) => {
     if (e.target.closest(".an-inline-reset")) resetAnalytics();

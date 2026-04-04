@@ -150,32 +150,44 @@
         <!-- Панель фильтров — структура как в каталоге -->
         <div class="catalog-toolbar" id="an-toolbar">
 
-          <!-- Поиск по названию тренажёра — полноширинный, как в каталоге -->
-          <div class="toolbar-search">
-            <label for="an-unit-search">
-              <span>Поиск</span>
-              <div class="toolbar-search__wrap">
-                <svg class="toolbar-search__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input id="an-unit-search" type="search" placeholder="По названию тренажёра" autocomplete="off" />
-              </div>
-            </label>
-          </div>
-
-          <!-- Строка контролов: период + статус + направление + популярность + кнопки -->
+          <!-- Строка контролов: период + статус + направление + обучение + популярность + кнопки -->
           <div class="toolbar-controls">
 
             <!-- Период -->
-            <div class="an-period-tabs" id="an-period-tabs">
-              <button class="an-period-tab" type="button" data-period="week">Неделя</button>
-              <button class="an-period-tab is-active" type="button" data-period="month">Месяц</button>
-              <button class="an-period-tab" type="button" data-period="quarter">Квартал</button>
-              <button class="an-period-tab" type="button" data-period="year">Год</button>
-              <button class="an-period-tab" type="button" data-period="custom">Произвольный</button>
-            </div>
-            <div class="an-daterange hidden" id="an-date-range">
-              <input type="date" id="an-date-from" class="an-date-input" />
-              <span class="an-date-sep">—</span>
-              <input type="date" id="an-date-to" class="an-date-input" />
+            <div class="dd dd--period" id="an-dd-period">
+              <button class="dd__trigger" type="button" id="an-dd-period-btn">
+                <span id="an-dd-period-label">Текущий месяц</span>
+                <svg class="dd__arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="an-period-panel" id="an-period-panel">
+                <div class="an-period-body">
+                  <div class="an-period-left">
+                    <div class="an-period-presets">
+                      <button type="button" class="an-preset-btn is-active" data-preset="month">Текущий месяц</button>
+                      <button type="button" class="an-preset-btn" data-preset="week">Текущая неделя</button>
+                      <button type="button" class="an-preset-btn" data-preset="quarter">Текущий квартал</button>
+                      <button type="button" class="an-preset-btn" data-preset="year">Текущий год</button>
+                    </div>
+                    <div class="an-period-inputs">
+                      <input type="date" id="an-picker-from" class="an-date-input" />
+                      <span class="an-date-sep">—</span>
+                      <input type="date" id="an-picker-to" class="an-date-input" />
+                    </div>
+                  </div>
+                  <div class="an-calendar-wrap">
+                    <div class="an-cal-header">
+                      <button type="button" class="an-cal-nav" id="an-cal-prev">&#8249;</button>
+                      <span class="an-cal-month" id="an-cal-title"></span>
+                      <button type="button" class="an-cal-nav" id="an-cal-next">&#8250;</button>
+                    </div>
+                    <div id="an-calendar"></div>
+                  </div>
+                </div>
+                <div class="an-period-footer">
+                  <button type="button" class="btn btn--ghost" id="an-period-close">Закрыть</button>
+                  <button type="button" class="btn btn--primary" id="an-period-save">Сохранить</button>
+                </div>
+              </div>
             </div>
 
             <!-- Статус -->
@@ -217,6 +229,18 @@
                 <div class="dd__footer">
                   <button class="dd__apply" type="button" id="an-dir-apply">Применить</button>
                 </div>
+              </div>
+            </div>
+
+            <!-- Название обучения -->
+            <div class="dd" id="an-dd-course">
+              <button class="dd__trigger" type="button" id="an-dd-course-btn">
+                <span id="an-dd-course-label">Обучение</span>
+                <svg class="dd__arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="dd__panel" id="an-dd-course-panel">
+                <div class="dd__list" id="an-dd-course-list"></div>
+                <div class="dd__footer"><button class="dd__apply" type="button" id="an-course-apply">Применить</button></div>
               </div>
             </div>
 
@@ -263,32 +287,17 @@
           </div>
         </div>
 
-        <!-- Поиск по сотруднику -->
-        <div class="an-employee-bar">
-          <div class="an-employee-search-wrap">
-            <svg class="an-employee-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <input id="an-employee-search" type="search" placeholder="Поиск по ФИО или userID сотрудника" autocomplete="off" />
-            <button class="an-emp-clear hidden" id="an-employee-clear" type="button" aria-label="Сбросить фильтр сотрудника">✕</button>
-          </div>
-          <div class="an-suggestions hidden" id="an-employee-suggestions"></div>
-        </div>
-
         <!-- Таблица -->
         <div class="an-table-card">
           <div class="an-table-wrap">
             <table class="an-table">
               <thead>
                 <tr>
-                  <th>ФИО</th>
-                  <th>User</th>
-                  <th>Тренажёр</th>
+                  <th class="an-th-toggle"></th>
+                  <th>Название обучения</th>
+                  <th>Фабрика</th>
                   <th>Направление</th>
-                  <th>Дата начала</th>
-                  <th>Дата завершения</th>
-                  <th>Активное время</th>
-                  <th>Статус</th>
-                  <th>Балл</th>
-                  <th>Попытки</th>
+                  <th>Сессий</th>
                 </tr>
               </thead>
               <tbody id="an-table-body"></tbody>
