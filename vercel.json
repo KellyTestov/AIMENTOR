@@ -1,0 +1,8 @@
+{
+  "buildCommand": "cd ai-mentor-react && npm install && npm run build",
+  "outputDirectory": "ai-mentor-react/dist",
+  "framework": null,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
