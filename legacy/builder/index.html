@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Конструктор — AI-Ментор</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/builder/builder.css" />
+</head>
+<body>
+  <div class="bld-shell">
+
+    <!-- ══════════ HEADER ══════════ -->
+    <header class="bld-header">
+      <div class="bld-header__left">
+        <a href="../index.html" class="bld-back" id="back-link" data-catalog-href="../index.html">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          Каталог
+        </a>
+        <div class="bld-header__div" aria-hidden="true"></div>
+        <input class="bld-title-input" id="unit-title-input" type="text"
+               placeholder="Название обучения" maxlength="200" autocomplete="off" />
+      </div>
+      <div class="bld-header__right">
+        <button class="bld-btn bld-btn--ghost" id="btn-check" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          Проверить
+        </button>
+        <button class="bld-btn bld-btn--ghost" id="btn-save" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          Сохранить
+        </button>
+        <button class="bld-btn bld-btn--primary" id="btn-publish" type="button">Опубликовать</button>
+        <div class="bld-more-wrap">
+          <button class="bld-btn bld-btn--ghost bld-btn--icon" id="btn-more" type="button"
+                  aria-label="Дополнительные действия" aria-expanded="false" aria-haspopup="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                 fill="currentColor" aria-hidden="true">
+              <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+            </svg>
+          </button>
+          <div class="bld-dropdown hidden" id="more-dropdown" role="menu">
+            <button class="bld-dropdown__item" data-more-action="history" role="menuitem" type="button">
+              История версий
+            </button>
+            <button class="bld-dropdown__item" data-more-action="duplicate" role="menuitem" type="button">
+              Дублировать
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ══════════ BODY ══════════ -->
+    <div class="bld-body">
+
+      <!-- ── LEFT PANEL (structure) ── -->
+      <aside class="bld-left" aria-label="Структура обучения">
+        <div class="bld-left__head">
+          <span class="bld-left__title">Структура</span>
+          <button class="bld-icon-btn" id="add-block-btn" type="button" title="Добавить блок">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+        </div>
+        <nav class="bld-tree-wrap">
+          <ul class="bld-tree" id="bld-tree" role="tree" aria-label="Дерево структуры обучения"></ul>
+        </nav>
+      </aside>
+
+      <!-- ── CENTER (content editor) ── -->
+      <main class="bld-center" id="bld-center" aria-live="polite"></main>
+
+      <!-- ── RIGHT PANEL (inspector) ── -->
+      <aside class="bld-right" aria-label="Настройки выбранного элемента">
+        <div class="bld-right__head">
+          <span class="bld-right__title" id="inspector-title">Инспектор</span>
+        </div>
+        <div class="bld-right__body" id="inspector-body"></div>
+      </aside>
+
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="bld-toast" id="bld-toast" role="status" aria-live="polite" aria-hidden="true"></div>
+
+  <!-- ══════════ PUBLISH MODAL ══════════ -->
+  <div class="bld-modal-backdrop hidden" id="publish-modal-backdrop" role="dialog"
+       aria-modal="true" aria-labelledby="publish-modal-title">
+    <div class="bld-modal">
+      <button class="bld-modal__close" id="publish-modal-close" type="button" aria-label="Закрыть">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <div class="bld-modal__icon" aria-hidden="true">📤</div>
+      <h2 class="bld-modal__title" id="publish-modal-title">Публикация обучения</h2>
+      <p class="bld-modal__desc">Выберите режим публикации единицы обучения</p>
+      <div class="bld-modal__options">
+        <button class="bld-modal__option" id="publish-modal-test" type="button">
+          <span class="bld-modal__option-icon" aria-hidden="true">🧪</span>
+          <span class="bld-modal__option-body">
+            <span class="bld-modal__option-title">Тестирование</span>
+            <span class="bld-modal__option-desc">Предварительная проверка единицы обучения с возможностью внесения изменений</span>
+          </span>
+        </button>
+        <button class="bld-modal__option bld-modal__option--primary" id="publish-modal-direct" type="button">
+          <span class="bld-modal__option-icon" aria-hidden="true">🚀</span>
+          <span class="bld-modal__option-body">
+            <span class="bld-modal__option-title">Опубликовать</span>
+            <span class="bld-modal__option-desc">Опубликовать без дополнительной проверки</span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ UNSAVED CHANGES MODAL ══════════ -->
+  <div class="bld-modal-backdrop hidden" id="unsaved-modal-backdrop" role="dialog"
+       aria-modal="true" aria-labelledby="unsaved-modal-title">
+    <div class="bld-modal">
+      <div class="bld-modal__icon" aria-hidden="true">⚠️</div>
+      <h2 class="bld-modal__title" id="unsaved-modal-title">Изменения не сохранены</h2>
+      <p class="bld-modal__desc">Вы внесли изменения в единицу обучения, но не сохранили их. Если перейти в каталог, изменения могут быть потеряны.</p>
+      <div class="bld-modal__actions">
+        <button class="bld-btn bld-btn--ghost" id="unsaved-modal-stay" type="button">Продолжить редактирование</button>
+        <button class="bld-btn bld-btn--danger" id="unsaved-modal-leave" type="button">Перейти в каталог</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ BUILDER CROP MODAL ══════════ -->
+  <div class="bld-modal-backdrop hidden" id="bld-crop-backdrop" role="dialog"
+       aria-modal="true" aria-labelledby="bld-crop-title">
+    <div class="bld-crop-dialog">
+      <div class="bld-crop-header">
+        <span class="bld-crop-title" id="bld-crop-title">Обложка обучения</span>
+        <button class="bld-modal__close" id="bld-crop-close" type="button" aria-label="Закрыть">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="bld-crop-viewport" id="bld-crop-viewport">
+        <img id="bld-crop-img" src="" alt="" draggable="false" />
+      </div>
+      <div class="bld-crop-zoom-bar">
+        <button class="bld-crop-zoom-btn" id="bld-crop-zoom-out" type="button" aria-label="Уменьшить">−</button>
+        <input class="bld-crop-zoom-range" type="range" id="bld-crop-zoom-range" min="1" max="3" step="0.01" value="1" />
+        <button class="bld-crop-zoom-btn" id="bld-crop-zoom-in" type="button" aria-label="Увеличить">+</button>
+      </div>
+      <div class="bld-crop-actions">
+        <button class="bld-btn bld-btn--ghost" id="bld-crop-cancel" type="button">Отмена</button>
+        <button class="bld-btn bld-btn--primary" id="bld-crop-apply" type="button">Применить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ ONBOARDING PREVIEW MODAL ══════════ -->
+  <div class="bld-modal-backdrop hidden" id="ob-preview-backdrop" role="dialog"
+       aria-modal="true" aria-labelledby="ob-preview-title">
+    <div class="ob-preview-dialog">
+      <div class="ob-preview-header">
+        <span class="ob-preview-title" id="ob-preview-title">Предпросмотр онбординга</span>
+        <button class="bld-modal__close" id="ob-preview-close" type="button" aria-label="Закрыть">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="ob-preview-frame" id="ob-preview-frame"></div>
+    </div>
+  </div>
+
+  <script src="/builder/builder.js"></script>
+</body>
+</html>

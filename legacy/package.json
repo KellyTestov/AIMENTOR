@@ -1,0 +1,19 @@
+{
+  "name": "ai-mentor",
+  "version": "1.0.0",
+  "description": "AI-Ментор — платформа для создания и прохождения обучения",
+  "type": "module",
+  "scripts": {
+    "dev": "npx serve .",
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "ai-mentor",
+    "learning",
+    "training",
+    "education"
+  ],
+  "author": "Alfa-Bank",
+  "license": "UNLICENSED",
+  "private": true
+}

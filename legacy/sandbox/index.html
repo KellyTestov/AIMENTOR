@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Тестовая среда — AI-Ментор</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/sandbox/sandbox.css" />
+</head>
+<body>
+
+  <!-- ══════════ HEADER ══════════ -->
+  <header class="sb-header">
+    <div class="sb-header__left">
+      <button class="sb-back-btn" id="btn-back-to-builder" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Вернуться в конструктор
+      </button>
+      <!-- Таймер экзамена (только для режима экзамена) -->
+      <div class="sb-timer hidden" id="sb-timer" aria-live="polite" aria-label="Таймер экзамена">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <span id="sb-timer-val">00:00:00</span>
+      </div>
+      <!-- Таймер текущего вопроса (только для режима экзамена) -->
+      <div class="sb-timer sb-qtimer hidden" id="sb-qtimer" aria-live="polite" aria-label="Таймер текущего вопроса">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20z"/>
+          <path d="M12 8v4l2 2"/>
+          <line x1="12" y1="2" x2="12" y2="4"/>
+        </svg>
+        <span class="sb-qtimer__label">вопрос</span>
+        <span id="sb-qtimer-val">00:00</span>
+      </div>
+    </div>
+    <div class="sb-header__center">
+      <div class="sb-header__unit-label">Название единицы обучения</div>
+      <span class="sb-header__title" id="sb-unit-title">Загрузка...</span>
+    </div>
+    <div class="sb-header__right">
+      <!-- Кнопка данных клиента (только для режима экзамена) -->
+      <button class="sb-client-btn hidden" id="btn-show-client" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        Показать данные клиента
+      </button>
+      <span class="sb-header__badge" id="sb-mode-badge">Тестовая среда</span>
+    </div>
+  </header>
+
+  <!-- ══════════ BODY ══════════ -->
+  <div class="sb-body">
+    <div class="sb-chat-wrap">
+      <!-- Роль-метка для экзамена -->
+      <div class="sb-role-bar hidden" id="sb-role-bar">
+        <span class="sb-role-bar__client" id="sb-role-client-label">💬 Клиент</span>
+        <span class="sb-role-bar__sep">—</span>
+        <span class="sb-role-bar__user">Вы — сотрудник</span>
+      </div>
+      <div class="sb-chat" id="sb-chat" aria-live="polite" aria-label="Диалог тестирования"></div>
+      <div class="sb-input-area" id="sb-input-area">
+        <textarea class="sb-input" id="sb-input" rows="1"
+                  placeholder="Введите ответ..." aria-label="Поле ввода" disabled></textarea>
+        <button class="sb-send-btn" id="sb-send-btn" type="button" aria-label="Отправить" disabled>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+               stroke-linejoin="round" aria-hidden="true">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 1. ПРАВИЛА ЭКЗАМЕНА ══════════ -->
+  <div class="sb-modal-backdrop hidden" id="exam-rules-modal" role="dialog"
+       aria-modal="true" aria-labelledby="exam-rules-title">
+    <div class="sb-modal sb-modal--wide">
+      <div class="sb-modal__icon" aria-hidden="true">📋</div>
+      <h2 class="sb-modal__title" id="exam-rules-title">Правила экзамена</h2>
+      <div class="sb-rules-body">
+        <ul class="sb-rules-list">
+          <li>Экзамен проходит в формате диалога с клиентом</li>
+          <li>Отвечайте на вопросы в свободной форме, как при реальном звонке</li>
+          <li>Таймер запускается с момента нажатия «Старт экзамена» и не останавливается</li>
+          <li>После ответа на все вопросы экзамен завершается автоматически</li>
+          <li>Результаты экзамена направляются руководителю на ручную проверку</li>
+        </ul>
+      </div>
+      <div class="sb-modal__actions">
+        <button class="sb-modal__btn sb-modal__btn--secondary" id="exam-rules-back-btn" type="button">
+          Вернуться в обучение
+        </button>
+        <button class="sb-modal__btn sb-modal__btn--primary" id="exam-rules-start-btn" type="button">
+          Старт экзамена
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 2. ДАННЫЕ КЛИЕНТА ══════════ -->
+  <div class="sb-modal-backdrop hidden" id="client-modal" role="dialog"
+       aria-modal="true" aria-labelledby="client-modal-title">
+    <div class="sb-modal sb-modal--wide">
+      <button class="sb-modal__close" id="client-modal-close" type="button" aria-label="Закрыть">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <div class="sb-modal__icon" aria-hidden="true">👤</div>
+      <h2 class="sb-modal__title" id="client-modal-title">Карточка клиента</h2>
+      <div class="sb-client-card" id="sb-client-card">
+        <!-- Заполняется JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 3. ОШИБКА СИСТЕМЫ ══════════ -->
+  <div class="sb-modal-backdrop hidden" id="error-modal" role="alertdialog"
+       aria-modal="true" aria-labelledby="error-modal-title">
+    <div class="sb-modal">
+      <div class="sb-modal__icon" aria-hidden="true">⚠️</div>
+      <h2 class="sb-modal__title" id="error-modal-title">Ошибка системы</h2>
+      <p class="sb-modal__desc">Произошла техническая ошибка. Таймер остановлен.<br>
+        Обновите страницу, чтобы продолжить с того места, где остановились.</p>
+      <button class="sb-modal__btn sb-modal__btn--primary sb-modal__btn--full"
+              id="error-refresh-btn" type="button">
+        Обновить страницу
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════ 4. ВОЗОБНОВИТЬ ЭКЗАМЕН (после закрытия браузера при ошибке) ══════════ -->
+  <div class="sb-modal-backdrop hidden" id="resume-modal" role="dialog"
+       aria-modal="true" aria-labelledby="resume-modal-title">
+    <div class="sb-modal">
+      <div class="sb-modal__icon" aria-hidden="true">⚡</div>
+      <h2 class="sb-modal__title" id="resume-modal-title">Незавершённый экзамен</h2>
+      <p class="sb-modal__desc">При предыдущей попытке произошла техническая ошибка.<br>
+        Вы можете продолжить экзамен с того места, где остановились.</p>
+      <button class="sb-modal__btn sb-modal__btn--primary sb-modal__btn--full"
+              id="resume-continue-btn" type="button">
+        Продолжить экзамен
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════ 5. ЗАВЕРШЕНИЕ (общий, контент задаётся JS) ══════════ -->
+  <div class="sb-modal-backdrop hidden" id="completion-modal" role="dialog"
+       aria-modal="true" aria-labelledby="completion-modal-title">
+    <div class="sb-modal sb-modal--wide" id="completion-modal-inner">
+      <!-- Заполняется JS -->
+    </div>
+  </div>
+
+  <!-- ══════════ 6. ОТЧЁТ ТРЕНАЖЁРА ══════════ -->
+  <div class="sb-modal-backdrop hidden" id="report-modal" role="dialog"
+       aria-modal="true" aria-labelledby="report-modal-title">
+    <div class="sb-modal sb-modal--wide sb-modal--scroll">
+      <div class="sb-modal__icon" aria-hidden="true">📊</div>
+      <h2 class="sb-modal__title" id="report-modal-title">Результаты тренировки</h2>
+      <div id="report-body" class="sb-report-body">
+        <!-- Заполняется JS -->
+      </div>
+      <div class="sb-modal__actions">
+        <button class="sb-modal__btn sb-modal__btn--secondary" id="report-back-btn" type="button">
+          Вернуться в конструктор
+        </button>
+        <button class="sb-modal__btn sb-modal__btn--primary" id="report-publish-btn" type="button">
+          Опубликовать
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 7. ЗАГРУЗКА ══════════ -->
+  <div class="sb-modal-backdrop hidden" id="loading-modal" role="dialog" aria-modal="true"
+       aria-label="Публикация в процессе">
+    <div class="sb-modal sb-modal--compact">
+      <div class="sb-loader" aria-hidden="true"><div class="sb-loader__ring"></div></div>
+      <p class="sb-modal__title">Публикуем...</p>
+      <p class="sb-modal__desc">Пожалуйста, подождите</p>
+    </div>
+  </div>
+
+  <!-- ══════════ 9. УСПЕХ ══════════ -->
+  <div class="sb-modal-backdrop hidden" id="success-modal" role="dialog"
+       aria-modal="true" aria-labelledby="success-modal-title">
+    <div class="sb-modal">
+      <div class="sb-modal__icon" aria-hidden="true">✅</div>
+      <h2 class="sb-modal__title" id="success-modal-title">Успешно опубликовано!</h2>
+      <p class="sb-modal__desc">Единица обучения опубликована и доступна сотрудникам выбранной бизнес-линии.</p>
+      <div class="sb-modal__actions">
+        <button class="sb-modal__btn sb-modal__btn--secondary" id="success-back-btn" type="button">
+          Вернуться в конструктор
+        </button>
+        <button class="sb-modal__btn sb-modal__btn--primary" id="success-catalog-btn" type="button">
+          Вернуться в каталог
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/sandbox/sandbox.js"></script>
+</body>
+</html>
