@@ -36,7 +36,7 @@ export default function OnboardingEditor({ node }) {
               className="tree-act-btn tree-act-btn--del"
               style={{ position: 'absolute', top: 0, right: 0 }}
               onClick={() => removeElement(idx)}
-              title="Удалить блок"
+              title="Удалить"
             >×</button>
           )}
           <div className="field-block">
@@ -45,7 +45,7 @@ export default function OnboardingEditor({ node }) {
               className="cv-inp"
               value={el.heading || ''}
               onChange={e => updateEl(idx, { heading: e.target.value })}
-              placeholder="Заголовок онбординга..."
+              placeholder="Например: Добро пожаловать в тренажер по кредитной карте"
             />
           </div>
           <div className="field-block">
@@ -55,7 +55,7 @@ export default function OnboardingEditor({ node }) {
               rows={4}
               value={el.text || ''}
               onChange={e => updateEl(idx, { text: e.target.value })}
-              placeholder="Опишите, о чём это обучение..."
+              placeholder="Например: В этом тренажере вы научитесь правильно предлагать кредитные карты клиентам, обрабатывать возражения и проводить сделки"
             />
           </div>
         </div>
@@ -63,17 +63,17 @@ export default function OnboardingEditor({ node }) {
 
       {elements.length < 2 && (
         <button className="add-dashed" onClick={addElement}>
-          + Добавить блок текста
+          Добавить еще один элемент
         </button>
       )}
 
       <div className="field-block" style={{ marginTop: 16 }}>
-        <label className="field-lbl">Текст кнопки старта</label>
+        <label className="field-lbl">Текст кнопки</label>
         <input
           className="cv-inp"
           value={content.startBtnText || ''}
           onChange={e => updateNodeFull(node.id, { ...content, startBtnText: e.target.value })}
-          placeholder="Начать обучение"
+          placeholder="Начать"
         />
       </div>
     </div>

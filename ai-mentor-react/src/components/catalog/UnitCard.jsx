@@ -17,7 +17,7 @@ export default function UnitCard({ unit, currentUser, onAction }) {
   const isPublished = unit.publicationStatus === 'published'
   const coverSrc = unit.coverUrl || getPlaceholderCover(unit.id)
 
-  const isOwner = currentUser?.rights?.isAdmin || currentUser?.id === unit.authorId
+  const canEdit = currentUser?.rights?.isAdmin || currentUser?.id === unit.authorId
 
   // Закрываем меню при клике снаружи
   useEffect(() => {
@@ -38,44 +38,46 @@ export default function UnitCard({ unit, currentUser, onAction }) {
       {/* Обложка */}
       <div className="card__media-wrap">
         <img src={coverSrc} alt="" className="card__media" aria-hidden="true" />
-        {/* Меню карточки */}
-        {isOwner && (
-          <div className="card__menu" ref={menuRef}>
-            <button
-              className="card__menu-toggle"
-              type="button"
-              aria-label="Действия с единицей обучения"
-              aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((v) => !v)}
-            >
-              ···
-            </button>
-            {menuOpen && (
-              <ul className="card__menu-list" role="menu">
-                <li role="none">
-                  <button className="card__menu-item" role="menuitem" type="button" onClick={() => action('open')}>
-                    Открыть обучение
-                  </button>
-                </li>
-                <li role="none">
-                  <button className="card__menu-item" role="menuitem" type="button" onClick={() => action('edit')}>
-                    Редактировать единицу
-                  </button>
-                </li>
-                <li role="none">
-                  <button className="card__menu-item" role="menuitem" type="button" onClick={() => action('toggle-publicity')}>
-                    {isPublished ? 'Скрыть' : 'Опубликовать'}
-                  </button>
-                </li>
-                <li role="none">
-                  <button className="card__menu-item card__menu-item--danger" role="menuitem" type="button" onClick={() => action('delete')}>
-                    Удалить
-                  </button>
-                </li>
-              </ul>
-            )}
-          </div>
-        )}
+        {/* Меню карточки — всегда видно */}
+        <div className="card__menu" ref={menuRef}>
+          <button
+            className="card__menu-toggle"
+            type="button"
+            aria-label="Действия с единицей обучения"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            ···
+          </button>
+          {menuOpen && (
+            <ul className="card__menu-list" role="menu">
+              <li role="none">
+                <button className="card__menu-item" role="menuitem" type="button" onClick={() => action('open')}>
+                  Открыть обучение
+                </button>
+              </li>
+              {canEdit && (
+                <>
+                  <li role="none">
+                    <button className="card__menu-item" role="menuitem" type="button" onClick={() => action('edit')}>
+                      Редактировать единицу
+                    </button>
+                  </li>
+                  <li role="none">
+                    <button className="card__menu-item" role="menuitem" type="button" onClick={() => action('toggle-publicity')}>
+                      {isPublished ? 'Скрыть' : 'Опубликовать'}
+                    </button>
+                  </li>
+                  <li role="none">
+                    <button className="card__menu-item card__menu-item--danger" role="menuitem" type="button" onClick={() => action('delete')}>
+                      Удалить
+                    </button>
+                  </li>
+                </>
+              )}
+            </ul>
+          )}
+        </div>
       </div>
 
       {/* Тело */}
@@ -85,8 +87,8 @@ export default function UnitCard({ unit, currentUser, onAction }) {
           {unit.durationLabel && (
             <span className="meta-badge">{unit.durationLabel}</span>
           )}
-          <AuthorIcon name={unit.authorName} />
           <StatusBadge status={unit.publicationStatus} />
+          <AuthorIcon name={unit.authorName} />
         </div>
       </div>
     </article>

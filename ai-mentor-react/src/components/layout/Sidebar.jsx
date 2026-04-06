@@ -4,7 +4,7 @@ import { initials } from '../../core/utils.js'
 const NAV_ITEMS = [
   { id: 'catalog',   label: 'Каталог обучения',   right: 'canViewCatalog',   icon: '/mortarboard.png' },
   { id: 'analytics', label: 'Аналитика',           right: 'canViewAnalytics', icon: '/analytics.png' },
-  { id: 'admin',     label: 'Управление доступом', right: 'canManageUsers',   icon: '/admin-dashboard.png' },
+  { id: 'admin',     label: 'Админ-панель',         right: 'canManageUsers',   icon: '/admin-dashboard.png' },
 ]
 
 export default function Sidebar({ activeSection, onNavigate }) {

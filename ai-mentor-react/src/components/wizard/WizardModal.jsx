@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useForm } from 'react-hook-form'
 import Cropper from 'react-easy-crop'
 import { useAppStore } from '../../stores/appStore.js'
+import StatusBadge from '../shared/StatusBadge.jsx'
 import { storage } from '../../core/storage.js'
 import { STORAGE_KEYS, FACTORIES, DIRECTION_MAP, UNIT_CATEGORIES, UNIT_TOPICS, UNIT_DURATIONS } from '../../core/constants.js'
 import { generateId, initials } from '../../core/utils.js'
@@ -34,18 +35,18 @@ async function getCroppedImg(imageSrc, croppedAreaPixels) {
 function StepType({ onSelect }) {
   return (
     <div className="wizard__content">
-      <h2 className="wizard__heading">Выберите тип обучения</h2>
-      <p className="wizard__lead">Определите формат: тренажёр для отработки навыков или экзамен для проверки знаний.</p>
+      <h2 className="wizard__heading">Создание обучения</h2>
+      <p className="wizard__lead">Выберите тип обучения для создания</p>
       <div className="wizard__type-cards">
         <button className="wizard-type-card" type="button" onClick={() => onSelect('trainer')}>
           <span className="wizard-type-card__icon">🎯</span>
           <span className="wizard-type-card__name">Тренажёр</span>
-          <span className="wizard-type-card__hint">Обучение через диалог с AI-ментором. Сотрудник отрабатывает навыки с подсказками.</span>
+          <span className="wizard-type-card__hint">Обучающий диалог с теорией и практикой</span>
         </button>
         <button className="wizard-type-card" type="button" onClick={() => onSelect('exam')}>
           <span className="wizard-type-card__icon">📋</span>
           <span className="wizard-type-card__name">Экзамен</span>
-          <span className="wizard-type-card__hint">Проверка знаний в формате диалога. Оценка и отчёт направляются руководителю.</span>
+          <span className="wizard-type-card__hint">Проверка знаний без теоретической части</span>
         </button>
       </div>
     </div>
@@ -55,20 +56,21 @@ function StepType({ onSelect }) {
 // ── Шаг 2: Выбор метода ────────────────────────────────────
 
 function StepMethod({ type, onSelect, onShowTemplates }) {
+  const typeLabel = type === 'trainer' ? 'тренажёра' : 'экзамена'
   return (
     <div className="wizard__content">
-      <h2 className="wizard__heading">Как создать обучение?</h2>
-      <p className="wizard__lead">Начните с нуля или возьмите готовый шаблон для ускорения работы.</p>
+      <h2 className="wizard__heading">Способ создания</h2>
+      <p className="wizard__lead">Выберите способ создания {typeLabel}</p>
       <div className="wizard__type-cards">
         <button className="wizard-type-card" type="button" onClick={() => onSelect('new')}>
-          <span className="wizard-type-card__icon">✏️</span>
-          <span className="wizard-type-card__name">С нуля</span>
-          <span className="wizard-type-card__hint">Создайте новую единицу обучения самостоятельно.</span>
+          <span className="wizard-type-card__icon">✨</span>
+          <span className="wizard-type-card__name">Новое</span>
+          <span className="wizard-type-card__hint">Создать новый {typeLabel} с нуля</span>
         </button>
         <button className="wizard-type-card" type="button" onClick={onShowTemplates}>
           <span className="wizard-type-card__icon">📂</span>
           <span className="wizard-type-card__name">Из шаблона</span>
-          <span className="wizard-type-card__hint">Выберите существующую единицу как основу и адаптируйте её.</span>
+          <span className="wizard-type-card__hint">Использовать существующий {typeLabel} как шаблон</span>
         </button>
       </div>
     </div>
@@ -129,18 +131,18 @@ function StepForm({ type, currentUser, units, onSubmit }) {
               <div className="wf-grid">
                 {/* Название */}
                 <div className="wf-field wf-field--span2">
-                  <label className="wf-label">Название <span className="wf-req">*</span></label>
-                  <input className="wf-input" type="text" placeholder="Введите название обучения" maxLength={200}
+                  <label className="wf-label">Название обучения <span className="wf-req">*</span></label>
+                  <input className="wf-input" type="text" placeholder="Введите название" maxLength={200}
                     {...register('title', { required: true, validate: (v) => v.trim().length > 0 })} />
                 </div>
                 {/* Описание */}
                 <div className="wf-field wf-field--span2">
-                  <label className="wf-label">Описание</label>
-                  <textarea className="wf-input wf-textarea" placeholder="Краткое описание (необязательно)" {...register('description')} />
+                  <label className="wf-label">Описание обучения <span className="wf-req">*</span></label>
+                  <textarea className="wf-input wf-textarea" placeholder="Краткое описание содержания" {...register('description', { required: true, validate: (v) => v.trim().length > 0 })} />
                 </div>
                 {/* Тема */}
                 <div className="wf-field">
-                  <label className="wf-label">Тема <span className="wf-req">*</span></label>
+                  <label className="wf-label">Тема обучения <span className="wf-req">*</span></label>
                   <select className="wf-input wf-select" {...register('topic', { required: true })}>
                     <option value="">Выберите тему</option>
                     {UNIT_TOPICS.map((t) => <option key={t} value={t}>{t}</option>)}
@@ -148,7 +150,7 @@ function StepForm({ type, currentUser, units, onSubmit }) {
                 </div>
                 {/* Категория */}
                 <div className="wf-field">
-                  <label className="wf-label">Категория <span className="wf-req">*</span></label>
+                  <label className="wf-label">Категория обучения <span className="wf-req">*</span></label>
                   <select className="wf-input wf-select" {...register('category', { required: true })}>
                     <option value="">Выберите категорию</option>
                     {UNIT_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -156,9 +158,9 @@ function StepForm({ type, currentUser, units, onSubmit }) {
                 </div>
                 {/* Длительность */}
                 <div className="wf-field">
-                  <label className="wf-label">Длительность <span className="wf-req">*</span></label>
+                  <label className="wf-label">Время прохождения <span className="wf-req">*</span></label>
                   <select className="wf-input wf-select" {...register('duration', { required: true })}>
-                    <option value="">Выберите длительность</option>
+                    <option value="">Выберите время</option>
                     {UNIT_DURATIONS.map((d) => <option key={d} value={d}>{d}</option>)}
                   </select>
                 </div>
@@ -198,8 +200,9 @@ function StepForm({ type, currentUser, units, onSubmit }) {
                           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
                         </svg>
                         <div className="wf-cover__label-text">
-                          <span className="wf-cover__text">Загрузить обложку</span>
-                          <span className="wf-cover__subtext">PNG, JPG, WEBP до 10 МБ · Рекомендуется 16:9</span>
+                          <span className="wf-cover__text">Перетащите изображение сюда</span>
+                          <span className="wf-cover__subtext">или нажмите для выбора файла</span>
+                          <span className="wf-cover__subtext">PNG, JPG · до 10 МБ</span>
                         </div>
                         <input
                           ref={coverInputRef}
@@ -215,21 +218,21 @@ function StepForm({ type, currentUser, units, onSubmit }) {
               </div>
 
               <div className="wf-footer">
-                <p className="wf-note">* Обязательные поля</p>
+                <p className="wf-note">* — обязательные поля</p>
                 <button
                   className="btn btn--primary wf-submit"
                   type="submit"
                   form="wizard-form"
                   disabled={!isValid || !coverSrc}
                 >
-                  Создать и открыть конструктор
+                  Подтвердить
                 </button>
               </div>
             </div>
 
             {/* Превью */}
             <div className="wf-preview">
-              <p className="wf-preview__label">Превью карточки</p>
+              <p className="wf-preview__label">Предпросмотр карточки</p>
               <div className="wf-preview__card">
                 <div className="card" style={{ pointerEvents: 'none' }}>
                   <div className="card__media-wrap">
@@ -240,6 +243,14 @@ function StepForm({ type, currentUser, units, onSubmit }) {
                     <div className="card__meta">
                       {duration && <span className="meta-badge">{duration}</span>}
                       <span className="meta-badge" style={{ marginLeft: 'auto' }}>Приватное</span>
+                      {currentUser && (
+                        <span className="author-icon" title={currentUser.name}>
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="13" height="13" aria-hidden="true">
+                            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+                          </svg>
+                          <span className="author-tooltip">{currentUser.name}</span>
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -289,6 +300,7 @@ function StepForm({ type, currentUser, units, onSubmit }) {
 
 function TemplateCatalog({ type, units, onSelect, onClose }) {
   const typeLabel = type === 'trainer' ? 'Обучающая' : 'Проверяющая'
+  const typePlural = type === 'trainer' ? 'тренажеры' : 'экзамены'
   const available = units.filter((u) => u.type === typeLabel)
 
   return createPortal(
@@ -297,26 +309,38 @@ function TemplateCatalog({ type, units, onSelect, onClose }) {
         <div className="tmpl-catalog__header">
           <button className="btn btn--ghost" type="button" onClick={onClose}>← Назад</button>
           <div className="tmpl-catalog__titles">
-            <h2 className="tmpl-catalog__title">Выберите шаблон</h2>
-            <p className="tmpl-catalog__sub">Тип: {typeLabel}</p>
+            <h2 className="tmpl-catalog__title">Выбор шаблона</h2>
+            <p className="tmpl-catalog__sub">Выберите {typePlural} для использования в качестве шаблона</p>
           </div>
           <button className="wizard__close-btn" type="button" onClick={onClose} aria-label="Закрыть">×</button>
         </div>
         {available.length === 0 ? (
           <div className="empty-state" style={{ margin: '20px 22px' }}>
-            <h2>Нет шаблонов</h2>
-            <p>Пока нет опубликованных единиц данного типа.</p>
+            <h2>Нет доступных шаблонов</h2>
+            <p>Для выбранного типа обучений пока нет созданных единиц.</p>
           </div>
         ) : (
           <div className="catalog-grid" style={{ overflow: 'auto', padding: '20px 22px 24px', flex: 1 }}>
             {available.map((u) => (
-              <article key={u.id} className="card" style={{ cursor: 'pointer' }} onClick={() => onSelect(u)}>
+              <article key={u.id} className="card">
                 <div className="card__media-wrap">
                   <img src={u.coverUrl || PROMPT_COVERS[0]} alt="" className="card__media" />
                 </div>
                 <div className="card__body">
                   <h3 className="card__title">{u.title}</h3>
-                  <button className="btn btn--ghost tmpl-select-btn" type="button">Использовать</button>
+                  <div className="card__meta">
+                    {u.durationLabel && <span className="meta-badge">{u.durationLabel}</span>}
+                    <StatusBadge status={u.publicationStatus} />
+                    {u.authorName && (
+                      <span className="author-icon" title={u.authorName}>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="13" height="13" aria-hidden="true">
+                          <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+                        </svg>
+                        <span className="author-tooltip">{u.authorName}</span>
+                      </span>
+                    )}
+                  </div>
+                  <button className="btn btn--secondary tmpl-select-btn" type="button" onClick={() => onSelect(u)}>Выбрать</button>
                 </div>
               </article>
             ))}
@@ -407,7 +431,7 @@ export default function WizardModal({ open, onClose }) {
             <div />
           )}
           <h2 className="wizard__heading-inline">
-            {step === 1 ? 'Создать обучение' : step === 2 ? 'Способ создания' : 'Настройки обучения'}
+            {step === 1 ? 'Создать обучение' : step === 2 ? 'Способ создания' : 'Настройка обучения'}
           </h2>
           <button className="wizard__close-btn" type="button" onClick={handleClose} aria-label="Закрыть">×</button>
         </div>

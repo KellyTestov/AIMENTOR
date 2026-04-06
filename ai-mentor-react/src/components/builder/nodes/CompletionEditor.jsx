@@ -68,7 +68,7 @@ export default function CompletionEditor({ node }) {
 
       {elements.length < 2 && (
         <button className="add-dashed" style={{ marginTop: 8 }} onClick={addElement}>
-          + Добавить блок текста
+          Добавить элемент
         </button>
       )}
     </div>

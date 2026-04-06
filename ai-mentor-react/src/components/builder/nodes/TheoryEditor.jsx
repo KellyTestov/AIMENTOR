@@ -97,6 +97,25 @@ export default function TheoryEditor({ node }) {
           onChange={e => save({ nextBtnText: e.target.value })}
           placeholder="Далее"
         />
+        <button
+          className="bld-btn bld-btn--primary"
+          type="button"
+          disabled
+          style={{ marginTop: 8, opacity: 0.6, cursor: 'default', pointerEvents: 'none' }}
+        >
+          {content.nextBtnText || 'Далее'}
+        </button>
+      </div>
+
+      <div className="field-block">
+        <label className="field-lbl">Промпт</label>
+        <textarea
+          className="cv-textarea"
+          rows={4}
+          value={content.prompt || ''}
+          onChange={e => save({ prompt: e.target.value })}
+          placeholder="Введите промпт для генерации теоретического контента..."
+        />
       </div>
 
       <div className="enrich-section">

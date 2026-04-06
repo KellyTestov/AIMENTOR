@@ -1,15 +1,15 @@
 import { useState, useRef, useEffect } from 'react'
 
 const SORT_OPTIONS = [
-  { value: 'updated_desc', label: 'Последнее изменение' },
-  { value: 'created_desc', label: 'Дата создания' },
-  { value: 'name_asc',     label: 'По названию' },
+  { value: 'updated_desc', label: 'Сначала новые изменения' },
+  { value: 'created_desc', label: 'Сначала новые создания' },
+  { value: 'name_asc',     label: 'По алфавиту А-Я' },
 ]
 
 export default function SortDropdown({ value, onChange }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
-  const label = SORT_OPTIONS.find((o) => o.value === value)?.label || 'Сортировка'
+  const label = 'Сортировка'
 
   useEffect(() => {
     function handler(e) {

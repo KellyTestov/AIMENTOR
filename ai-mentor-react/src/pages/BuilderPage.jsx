@@ -98,7 +98,7 @@ export default function BuilderPage() {
             className={`bld-btn${isPublished ? ' bld-btn--ghost' : ' bld-btn--primary'}`}
             onClick={handlePublish}
           >
-            {isPublished ? 'Скрыть' : 'Опубликовать'}
+            {isPublished ? 'Снять с публикации' : 'Опубликовать'}
           </button>
         </div>
       </header>

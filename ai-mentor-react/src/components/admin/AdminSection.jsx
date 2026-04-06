@@ -54,10 +54,10 @@ export default function AdminSection() {
         <div className="admin-card__head">
           <div className="admin-card__titles">
             <h2>
-              Пользователи
-              <span className="admin-count">{filtered.length}</span>
+              Пользователи с доступом
+              <span className="admin-count">{accessUsers.length}</span>
             </h2>
-            <p>Управление доступом и ролями</p>
+            <p>Управление ролями доступа в AI-Ментор</p>
           </div>
           <label className="admin-search-label">
             <span className="sr-only">Поиск</span>

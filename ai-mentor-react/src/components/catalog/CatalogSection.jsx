@@ -34,7 +34,7 @@ export default function CatalogSection({ onOpenWizard }) {
 
   // Доступные типы и фабрики из данных
   const unitTypes = useMemo(() => [...new Set(visibleUnits.map((u) => u.type).filter(Boolean))], [visibleUnits])
-  const unitFactories = useMemo(() => FACTORIES.filter((f) => visibleUnits.some((u) => u.factory === f)), [visibleUnits])
+  const unitFactories = FACTORIES
 
   // Направления — зависят от выбранных фабрик
   const availableDirections = useMemo(() => {
