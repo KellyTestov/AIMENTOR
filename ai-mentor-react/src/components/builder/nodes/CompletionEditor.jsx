@@ -28,7 +28,7 @@ export default function CompletionEditor({ node }) {
       <h2 className="cv-heading">
         <span className="cv-heading-icon">🏁</span>Завершение
       </h2>
-      <p className="cv-subheading">Экран по окончании обучения</p>
+      <p className="cv-subheading">Завершающий экран после прохождения</p>
 
       {elements.length === 0 && (
         <p style={{ color: 'var(--muted-lt)', fontSize: 13, margin: '4px 0' }}>Нет блоков</p>

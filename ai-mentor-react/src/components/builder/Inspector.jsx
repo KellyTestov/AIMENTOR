@@ -200,7 +200,7 @@ function QuestionInspector({ node, updateNode }) {
 
   return (
     <IGroup icon="📖" label="Информация из A-Book" defaultOpen>
-      <p className="ig-desc">Выберите рубрику, из которой AI будет получать справочную информацию</p>
+      <p className="ig-desc">Выберите рубрику, из которой AI будет получать справочную информацию для этого вопроса</p>
       <IField label="Область поиска">
         <select value={s.abookRubric || ''} onChange={bindSelect('abookRubric')}>
           <option value="">Выберите рубрику...</option>
@@ -226,6 +226,10 @@ function QuestionInspector({ node, updateNode }) {
             <option value="deposits">Вклады</option>
             <option value="insurance">Страхование</option>
           </select>
+          <select style={{ marginTop: 8 }} value={s.abookArticles || ''} onChange={bindSelect('abookArticles')}>
+            <option value="">Статьи раздела</option>
+          </select>
+          <div className="ig-hint">При выборе статей поиск будет осуществляться только по ним</div>
         </IField>
       )}
     </IGroup>
@@ -274,6 +278,10 @@ function TheoryInspector({ node, updateNode }) {
             <option value="deposits">Вклады</option>
             <option value="insurance">Страхование</option>
           </select>
+          <select style={{ marginTop: 8 }} value={s.abookArticles || ''} onChange={bindSelect('abookArticles')}>
+            <option value="">Статьи раздела</option>
+          </select>
+          <div className="ig-hint">При выборе статей поиск будет осуществляться только по ним</div>
         </IField>
       )}
     </IGroup>
@@ -284,7 +292,11 @@ function PassthroughInspector({ node }) {
   return (
     <div className="insp-empty">
       <div className="insp-empty__icon">{ICONS[node.type] || '•'}</div>
-      <div className="insp-empty__text">Нет настроек</div>
+      <div className="insp-empty__text">
+        Настройки этого элемента управляются на уровне родительских сущностей.
+        <br /><br />
+        Выберите <strong>Вопрос</strong>, <strong>Кейс</strong> или <strong>Раздел</strong>, чтобы настроить параметры.
+      </div>
     </div>
   )
 }
@@ -297,7 +309,7 @@ export default function Inspector() {
   let title = 'Инспектор'
   let body  = (
     <div className="insp-empty">
-      <div className="insp-empty__icon">⚙️</div>
+      <div className="insp-empty__icon">🎛️</div>
       <div className="insp-empty__text">Выберите элемент в структуре, чтобы увидеть его настройки</div>
     </div>
   )

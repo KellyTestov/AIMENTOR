@@ -234,6 +234,25 @@ export const useBuilderStore = create((set, get) => ({
     set({ unit: updated, isDirty: true })
   },
 
+  addTopBlock() {
+    const { unit } = get()
+    if (!unit) return
+    const updated = JSON.parse(JSON.stringify(unit))
+    const q    = makeNode('question', 'Вопрос 1',  [], { text: '', criteria: [], hints: [], feedback: '' })
+    const case1 = makeNode('case',   'Кейс 1',    [q],    { description: '', clientCard: {} })
+    const sec1  = makeNode('section', 'Раздел 1', [case1], {})
+    const count = (updated.children || []).filter(c => c.type === 'practice').length
+    const prac  = makeNode('practice', `Практический блок ${count + 1}`, [sec1], {})
+    const completionIdx = updated.children.findIndex(c => c.type === 'completion')
+    if (completionIdx !== -1) {
+      updated.children.splice(completionIdx, 0, prac)
+    } else {
+      updated.children.push(prac)
+    }
+    builderService.saveUnit(updated)
+    set({ unit: updated, selectedId: prac.id, isDirty: true })
+  },
+
   publish() {
     const { unit } = get()
     if (!unit) return

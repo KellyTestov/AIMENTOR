@@ -15,6 +15,9 @@ export default function TheoryEditor({ node }) {
   const isLocked    = loading || isResponded || isApproved
   const allFilled   = queries.every(q => (q.text || '').trim().length > 0)
 
+  // Show lock overlay if no rubric selected
+  const hasRubric = !!node.settings?.abookRubric
+
   function save(patch) {
     updateNodeFull(node.id, { ...content, elements, queries, ...patch })
   }
@@ -57,7 +60,7 @@ export default function TheoryEditor({ node }) {
   }
 
   return (
-    <div className="cv">
+    <div className="cv" style={{ position: 'relative' }}>
       <div className="cv-title-row">
         <span className="cv-heading-icon">📄</span>
         <input
@@ -69,6 +72,10 @@ export default function TheoryEditor({ node }) {
         />
       </div>
 
+      <p className="cv-subheading">Обучение сотрудника. Вы можете настроить теорию, которая будет отображена сотруднику</p>
+
+      <div className="cv-section-lbl">Описание</div>
+
       {elements.map((el, idx) => (
         <div key={el.id} className="field-block">
           <label className="field-lbl">Заголовок</label>
@@ -76,7 +83,7 @@ export default function TheoryEditor({ node }) {
             className="cv-inp"
             value={el.heading || ''}
             onChange={e => updateEl(idx, { heading: e.target.value })}
-            placeholder="Заголовок раздела..."
+            placeholder="Введите заголовок..."
           />
           <label className="field-lbl" style={{ marginTop: 8 }}>Текст</label>
           <textarea
@@ -84,40 +91,39 @@ export default function TheoryEditor({ node }) {
             rows={6}
             value={el.text || ''}
             onChange={e => updateEl(idx, { text: e.target.value })}
-            placeholder="Содержимое теоретического материала..."
+            placeholder="Введите описание к теоретическому материалу..."
           />
         </div>
       ))}
 
-      <div className="field-block">
-        <label className="field-lbl">Текст кнопки «Далее»</label>
-        <input
-          className="cv-inp"
-          value={content.nextBtnText || ''}
-          onChange={e => save({ nextBtnText: e.target.value })}
-          placeholder="Далее"
-        />
-        <button
-          className="bld-btn bld-btn--primary"
-          type="button"
-          disabled
-          style={{ marginTop: 8, opacity: 0.6, cursor: 'default', pointerEvents: 'none' }}
-        >
-          {content.nextBtnText || 'Далее'}
-        </button>
+      {/* "Переход к следующему блоку" section */}
+      <div className="enrich-section">
+        <div className="enrich-section__title">Переход к следующему блоку</div>
+        <p className="enrich-section__desc">
+          После прочтения теории сотруднику отображается кнопка для перехода к следующему шагу обучения. Здесь вы можете настроить её текст — он будет виден пользователю в чате.
+        </p>
+        <div className="field-block">
+          <label className="field-lbl">Текст кнопки</label>
+          <input
+            className="cv-inp"
+            value={content.nextBtnText || ''}
+            onChange={e => save({ nextBtnText: e.target.value })}
+            placeholder="Ознакомился, далее"
+          />
+          <div className="next-btn-preview" style={{ marginTop: 8 }}>
+            <span className="next-btn-preview__lbl">Предпросмотр</span>
+            <button className="next-btn-demo" type="button" disabled>
+              <span>{content.nextBtnText || 'Ознакомился, далее'}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div className="field-block">
-        <label className="field-lbl">Промпт</label>
-        <textarea
-          className="cv-textarea"
-          rows={4}
-          value={content.prompt || ''}
-          onChange={e => save({ prompt: e.target.value })}
-          placeholder="Введите промпт для генерации теоретического контента..."
-        />
-      </div>
-
+      {/* Enrich section */}
       <div className="enrich-section">
         <div className="enrich-section__title-row">
           <span className="enrich-section__title">Обогащение из базы знаний</span>
@@ -126,6 +132,21 @@ export default function TheoryEditor({ node }) {
           <div className="query-card__header">
             <span className="query-card__title">Тестовые запросы в A-Book</span>
           </div>
+
+          {/* Промпт — первый элемент внутри query-card */}
+          <div className="query-item query-item--prompt">
+            <div className="query-item__header">
+              <span className="query-item__label">Промпт</span>
+            </div>
+            <textarea
+              className={`query-textarea${isLocked ? ' query-textarea--locked' : ''}`}
+              disabled={isLocked}
+              value={content.prompt || ''}
+              onChange={e => save({ prompt: e.target.value })}
+              placeholder="Например: Оформи полученную информацию из ABook в виде обучающего текста простым языком"
+            />
+          </div>
+
           <div>
             {queries.map((q, i) => (
               <div key={q.id} className="query-item">
@@ -140,7 +161,7 @@ export default function TheoryEditor({ node }) {
                   disabled={isLocked}
                   value={q.text || ''}
                   onChange={e => updateQuery(i, e.target.value)}
-                  placeholder="Например: Какая комиссия за услугу уведомлений..."
+                  placeholder="Например: Какая комиссия за услугу уведомлений по дебетовой карте"
                 />
               </div>
             ))}
@@ -179,6 +200,18 @@ export default function TheoryEditor({ node }) {
           </div>
         </div>
       </div>
+
+      {/* Lock overlay when rubric not selected */}
+      {!hasRubric && (
+        <div className="theory-lock-overlay">
+          <div className="theory-lock-msg">
+            <div className="theory-lock-msg__icon">🔗</div>
+            <div className="theory-lock-msg__title">Выберите рубрику</div>
+            <div className="theory-lock-msg__sub">Укажите рубрику A-Book в панели настроек справа, чтобы продолжить настройку блока теории</div>
+            <div className="theory-lock-msg__arrow">Настройки →</div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
