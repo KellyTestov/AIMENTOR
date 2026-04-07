@@ -1,5 +1,9 @@
 import { SelectWithTags } from '@alfalab/core-components/select-with-tags/esm'
 
+// SelectWithTags internal defaultMatch uses option.value, but OptionShape uses option.key
+const matchByKey = (option, inputValue) =>
+  (option.key || '').toLowerCase().includes((inputValue || '').toLowerCase())
+
 /**
  * Мульти-фильтр с тегами, скрывающимися при переполнении
  * value: 'all' | string | string[]
@@ -21,6 +25,7 @@ export default function FilterDropdown({ label, options, value, onChange }) {
       options={selectOptions}
       selected={selectedOptions}
       onChange={handleChange}
+      match={matchByKey}
       collapseTagList
       size={40}
       optionsListWidth="content"
