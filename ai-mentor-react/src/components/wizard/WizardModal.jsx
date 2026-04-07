@@ -13,6 +13,7 @@ import { Input } from '@alfalab/core-components/input/esm'
 import { Textarea } from '@alfalab/core-components/textarea/esm'
 import { Select } from '@alfalab/core-components/select/esm'
 import { Modal } from '@alfalab/core-components/modal/esm'
+import { Dropzone } from '@alfalab/core-components/dropzone/esm'
 
 // ── Утилиты кроппера ───────────────────────────────────────
 
@@ -93,8 +94,6 @@ function StepForm({ type, currentUser, units, onSubmit }) {
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
-  const [isDragOver, setIsDragOver] = useState(false)
-
   const selectedFactory = watch('factory')
   const directions = selectedFactory ? DIRECTION_MAP[selectedFactory] || [] : []
 
@@ -233,18 +232,18 @@ function StepForm({ type, currentUser, units, onSubmit }) {
                 {/* Обложка */}
                 <div className="wf-field wf-field--span2">
                   <label className="wf-label">Обложка <span className="wf-req">*</span></label>
-                  <div
-                    className={`wf-cover${isDragOver ? ' is-drag-over' : ''}`}
-                    onDragOver={(e) => { e.preventDefault(); setIsDragOver(true) }}
-                    onDragLeave={() => setIsDragOver(false)}
-                    onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFile(e.dataTransfer.files[0]) }}
-                  >
-                    {coverSrc ? (
-                      <div className="wf-cover__preview-wrap">
-                        <img src={coverSrc} alt="Обложка" className="wf-cover__preview" />
-                        <button className="wf-cover__clear" type="button" onClick={() => setCoverSrc(null)}>×</button>
-                      </div>
-                    ) : (
+                  {coverSrc ? (
+                    <div className="wf-cover__preview-wrap">
+                      <img src={coverSrc} alt="Обложка" className="wf-cover__preview" />
+                      <button className="wf-cover__clear" type="button" onClick={() => setCoverSrc(null)}>×</button>
+                    </div>
+                  ) : (
+                    <Dropzone
+                      block
+                      text="Перетащите изображение сюда"
+                      className="wf-dropzone"
+                      onDrop={(files) => handleFile(files[0])}
+                    >
                       <label className="wf-cover__label" style={{ cursor: 'pointer' }}>
                         <svg className="wf-cover__upload-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
                           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
@@ -262,8 +261,8 @@ function StepForm({ type, currentUser, units, onSubmit }) {
                           onChange={(e) => handleFile(e.target.files[0])}
                         />
                       </label>
-                    )}
-                  </div>
+                    </Dropzone>
+                  )}
                 </div>
               </div>
 

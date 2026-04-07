@@ -65,7 +65,12 @@
       "Bash(mv builder/ sandbox/ src/ legacy/)",
       "Bash(mv robot.png mortarboard.png analytics.png admin-dashboard.png legacy/)",
       "Bash(mv premium.jpg premium_2.jpg MMB-89.png RB-34.png legacy/)",
-      "Bash(mv AIMentorDemo.spec launcher.py package.json legacy/)"
+      "Bash(mv AIMentorDemo.spec launcher.py package.json legacy/)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:core-ds.github.io)",
+      "Bash(grep -n \"\\\\$\" \"f:/ownerpagementor/ai-mentor-react/node_modules/@alfalab/core-components-vars/mixins.css\")",
+      "Bash(grep -v \"^$\")",
+      "Bash(xargs grep:*)"
     ]
   }
 }

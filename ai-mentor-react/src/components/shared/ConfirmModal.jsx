@@ -13,13 +13,14 @@ export default function ConfirmModal({ open, title, description, onConfirm, onCa
         </Modal.Content>
       )}
       <Modal.Controls
+        layout="space-between"
         primary={
-          <Button view="accent" size={48} block onClick={onConfirm}>
+          <Button view="accent" size={48} onClick={onConfirm}>
             {confirmLabel}
           </Button>
         }
         secondary={
-          <Button view="outlined" size={48} block onClick={onCancel}>
+          <Button view="outlined" size={48} onClick={onCancel}>
             Отмена
           </Button>
         }

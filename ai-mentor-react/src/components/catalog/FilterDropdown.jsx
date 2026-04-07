@@ -1,7 +1,7 @@
-import { Select } from '@alfalab/core-components/select/esm'
+import { SelectWithTags } from '@alfalab/core-components/select-with-tags/esm'
 
 /**
- * Мульти-чекбокс дропдаун для фильтрации
+ * Мульти-фильтр с тегами, скрывающимися при переполнении
  * value: 'all' | string | string[]
  */
 export default function FilterDropdown({ label, options, value, onChange }) {
@@ -11,17 +11,17 @@ export default function FilterDropdown({ label, options, value, onChange }) {
   const selectedOptions = selected.map((v) => ({ key: v, content: v }))
 
   function handleChange({ selectedMultiple }) {
-    const keys = (selectedMultiple || []).map((o) => o.key)
+    const keys = [...new Set((selectedMultiple || []).map((o) => (typeof o === 'string' ? o : o.key)))]
     onChange(keys.length === 0 ? 'all' : keys)
   }
 
   return (
-    <Select
+    <SelectWithTags
       label={label}
       options={selectOptions}
       selected={selectedOptions}
       onChange={handleChange}
-      multiple
+      collapseTagList
       size={40}
       optionsListWidth="content"
     />

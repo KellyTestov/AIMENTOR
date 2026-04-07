@@ -200,6 +200,7 @@ export default function AnalyticsSection() {
             value={unitSearch}
             onChange={(_, { value }) => setFilter('unitSearch', value)}
             clear
+            block
           />
           <Checkbox
             label="По популярности"
