@@ -3,8 +3,8 @@ import { Button } from '@alfalab/core-components/button/esm'
 
 export default function ConfirmModal({ open, title, description, onConfirm, onCancel, confirmLabel = 'Подтвердить', danger = false }) {
   return (
-    <Modal open={open} onClose={onCancel} size={500} hasCloser={false}>
-      <Modal.Header title={title} />
+    <Modal open={open} onClose={onCancel} size={500}>
+      <Modal.Header title={title} hasCloser={false} />
       {description && (
         <Modal.Content>
           <p style={{ margin: 0, fontSize: 14, color: 'var(--color-light-text-secondary, #6b7280)', lineHeight: 1.5 }}

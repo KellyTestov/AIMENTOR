@@ -333,9 +333,14 @@ body {
 
 .toolbar-controls {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.filter-dropdown-wrap {
+  width: 176px;
+  flex-shrink: 0;
 }
 
 /* ─── Custom dropdown (dd) ─── */
@@ -1456,6 +1461,21 @@ body {
   min-width: 180px;
 }
 
+/* Admin search — reasonable width, not full-block */
+.admin-search {
+  width: 280px;
+}
+
+/* Admin role column — equal width for Tag and Select */
+.admin-role-cell {
+  width: 180px;
+  min-width: 180px;
+}
+
+.admin-role-cell [class*="select__"] {
+  width: 100%;
+}
+
 .admin-role-select {
   width: 180px;
   border: 1px solid var(--border);
@@ -1663,11 +1683,8 @@ body {
 }
 
 .wizard {
-  width: min(600px, calc(100% - 32px));
-  border-radius: 20px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  box-shadow: var(--shadow-dialog);
+  /* Wizard is rendered inside alfalab Modal — no standalone decoration needed */
+  width: 100%;
   overflow: hidden;
 }
 

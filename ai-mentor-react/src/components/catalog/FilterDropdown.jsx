@@ -20,15 +20,18 @@ export default function FilterDropdown({ label, options, value, onChange }) {
   }
 
   return (
-    <SelectWithTags
-      label={label}
-      options={selectOptions}
-      selected={selectedOptions}
-      onChange={handleChange}
-      match={matchByKey}
-      collapseTagList
-      size={40}
-      optionsListWidth="content"
-    />
+    <div className="filter-dropdown-wrap">
+      <SelectWithTags
+        label={label}
+        options={selectOptions}
+        selected={selectedOptions}
+        onChange={handleChange}
+        match={matchByKey}
+        collapseTagList
+        block
+        size={40}
+        optionsListWidth="content"
+      />
+    </div>
   )
 }

@@ -69,7 +69,7 @@ export default function AdminSection() {
             value={search}
             onChange={(_, { value }) => setSearch(value)}
             clear
-            block
+            className="admin-search"
             aria-label="Поиск пользователей"
           />
         </div>
@@ -104,12 +104,13 @@ export default function AdminSection() {
                         </span>
                       </td>
                       <td><code>{user.userId}</code></td>
-                      <td>
+                      <td className="admin-role-cell">
                         {isProtected ? (
-                          <Tag view="filled" size={32} disabled>{user.role}</Tag>
+                          <Tag view="filled" size={40} disabled style={{ width: '100%', justifyContent: 'center' }}>{user.role}</Tag>
                         ) : (
                           <Select
                             size={40}
+                            block
                             options={ROLE_OPTIONS.map((r) => ({ key: r, content: r }))}
                             selected={{ key: user.role, content: user.role }}
                             onChange={({ selected }) => selected && handleRoleChange(user.userId, selected.key, user.role, user.fullName)}
