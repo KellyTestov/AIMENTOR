@@ -333,14 +333,9 @@ body {
 
 .toolbar-controls {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-}
-
-.filter-dropdown-wrap {
-  width: 176px;
-  flex-shrink: 0;
 }
 
 /* ─── Custom dropdown (dd) ─── */

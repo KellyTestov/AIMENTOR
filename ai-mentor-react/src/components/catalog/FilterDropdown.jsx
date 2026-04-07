@@ -1,11 +1,7 @@
-import { SelectWithTags } from '@alfalab/core-components/select-with-tags/esm'
-
-// SelectWithTags internal defaultMatch uses option.value, but OptionShape uses option.key
-const matchByKey = (option, inputValue) =>
-  (option.key || '').toLowerCase().includes((inputValue || '').toLowerCase())
+import { Select } from '@alfalab/core-components/select/esm'
 
 /**
- * Мульти-фильтр с тегами, скрывающимися при переполнении
+ * Мульти-фильтр с компактным отображением выбранных значений
  * value: 'all' | string | string[]
  */
 export default function FilterDropdown({ label, options, value, onChange }) {
@@ -15,23 +11,26 @@ export default function FilterDropdown({ label, options, value, onChange }) {
   const selectedOptions = selected.map((v) => ({ key: v, content: v }))
 
   function handleChange({ selectedMultiple }) {
-    const keys = [...new Set((selectedMultiple || []).map((o) => (typeof o === 'string' ? o : o.key)))]
+    const keys = [...new Set((selectedMultiple || []).map((o) => o.key))]
     onChange(keys.length === 0 ? 'all' : keys)
   }
 
+  function valueRenderer({ selectedMultiple }) {
+    if (!selectedMultiple || selectedMultiple.length === 0) return null
+    if (selectedMultiple.length === 1) return selectedMultiple[0].content
+    return `${selectedMultiple[0].content} +${selectedMultiple.length - 1}`
+  }
+
   return (
-    <div className="filter-dropdown-wrap">
-      <SelectWithTags
-        label={label}
-        options={selectOptions}
-        selected={selectedOptions}
-        onChange={handleChange}
-        match={matchByKey}
-        collapseTagList
-        block
-        size={40}
-        optionsListWidth="content"
-      />
-    </div>
+    <Select
+      label={label}
+      options={selectOptions}
+      selected={selectedOptions}
+      onChange={handleChange}
+      valueRenderer={valueRenderer}
+      multiple
+      size={40}
+      optionsListWidth="content"
+    />
   )
 }
