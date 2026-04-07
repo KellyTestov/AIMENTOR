@@ -1,0 +1,7 @@
+/* Alfa Bank core-components CSS variables — safe subset (no PostCSS mixin syntax) */
+@import '@alfalab/core-components-vars/colors-bluetint.css';
+@import '@alfalab/core-components-vars/colors-addons.css';
+@import '@alfalab/core-components-vars/shadows-bluetint.css';
+@import '@alfalab/core-components-vars/border-radius.css';
+@import '@alfalab/core-components-vars/gaps.css';
+@import '@alfalab/core-components-vars/common.css';

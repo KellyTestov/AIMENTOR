@@ -1,6 +1,6 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import Cropper from 'react-easy-crop'
 import { useAppStore } from '../../stores/appStore.js'
 import StatusBadge from '../shared/StatusBadge.jsx'
@@ -8,6 +8,11 @@ import { storage } from '../../core/storage.js'
 import { STORAGE_KEYS, FACTORIES, DIRECTION_MAP, UNIT_CATEGORIES, UNIT_TOPICS, UNIT_DURATIONS } from '../../core/constants.js'
 import { generateId, initials } from '../../core/utils.js'
 import { PROMPT_COVERS } from '../../shared/mock/units.js'
+import { Button } from '@alfalab/core-components/button/esm'
+import { Input } from '@alfalab/core-components/input/esm'
+import { Textarea } from '@alfalab/core-components/textarea/esm'
+import { Select } from '@alfalab/core-components/select/esm'
+import { Modal } from '@alfalab/core-components/modal/esm'
 
 // ── Утилиты кроппера ───────────────────────────────────────
 
@@ -80,7 +85,7 @@ function StepMethod({ type, onSelect, onShowTemplates }) {
 // ── Шаг 3: Форма ───────────────────────────────────────────
 
 function StepForm({ type, currentUser, units, onSubmit }) {
-  const { register, handleSubmit, watch, formState: { isValid } } = useForm({ mode: 'onChange' })
+  const { register, handleSubmit, watch, control, formState: { isValid } } = useForm({ mode: 'onChange' })
 
   const [coverSrc, setCoverSrc] = useState(null)       // base64 для отображения
   const [cropSrc, setCropSrc] = useState(null)          // исходник для кроппера
@@ -131,54 +136,99 @@ function StepForm({ type, currentUser, units, onSubmit }) {
               <div className="wf-grid">
                 {/* Название */}
                 <div className="wf-field wf-field--span2">
-                  <label className="wf-label">Название обучения <span className="wf-req">*</span></label>
-                  <input className="wf-input" type="text" placeholder="Введите название" maxLength={200}
-                    {...register('title', { required: true, validate: (v) => v.trim().length > 0 })} />
+                  <Input
+                    label="Название обучения *"
+                    labelView="outer"
+                    size={48}
+                    block
+                    placeholder="Введите название"
+                    maxLength={200}
+                    {...register('title', { required: true, validate: (v) => v.trim().length > 0 })}
+                    onChange={(e) => register('title').onChange(e)}
+                  />
                 </div>
                 {/* Описание */}
                 <div className="wf-field wf-field--span2">
-                  <label className="wf-label">Описание обучения <span className="wf-req">*</span></label>
-                  <textarea className="wf-input wf-textarea" placeholder="Краткое описание содержания" {...register('description', { required: true, validate: (v) => v.trim().length > 0 })} />
+                  <Textarea
+                    label="Описание обучения *"
+                    labelView="outer"
+                    size={48}
+                    block
+                    placeholder="Краткое описание содержания"
+                    {...register('description', { required: true, validate: (v) => v.trim().length > 0 })}
+                    onChange={(e) => register('description').onChange(e)}
+                  />
                 </div>
                 {/* Тема */}
                 <div className="wf-field">
-                  <label className="wf-label">Тема обучения <span className="wf-req">*</span></label>
-                  <select className="wf-input wf-select" {...register('topic', { required: true })}>
-                    <option value="">Выберите тему</option>
-                    {UNIT_TOPICS.map((t) => <option key={t} value={t}>{t}</option>)}
-                  </select>
+                  <Controller control={control} name="topic" rules={{ required: true }} render={({ field }) => (
+                    <Select
+                      label="Тема обучения *"
+                      size={48}
+                      block
+                      options={UNIT_TOPICS.map((t) => ({ key: t, content: t }))}
+                      selected={field.value ? { key: field.value, content: field.value } : null}
+                      onChange={({ selected }) => field.onChange(selected?.key || '')}
+                      optionsListWidth="field"
+                    />
+                  )} />
                 </div>
                 {/* Категория */}
                 <div className="wf-field">
-                  <label className="wf-label">Категория обучения <span className="wf-req">*</span></label>
-                  <select className="wf-input wf-select" {...register('category', { required: true })}>
-                    <option value="">Выберите категорию</option>
-                    {UNIT_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
+                  <Controller control={control} name="category" rules={{ required: true }} render={({ field }) => (
+                    <Select
+                      label="Категория обучения *"
+                      size={48}
+                      block
+                      options={UNIT_CATEGORIES.map((c) => ({ key: c, content: c }))}
+                      selected={field.value ? { key: field.value, content: field.value } : null}
+                      onChange={({ selected }) => field.onChange(selected?.key || '')}
+                      optionsListWidth="field"
+                    />
+                  )} />
                 </div>
                 {/* Длительность */}
                 <div className="wf-field">
-                  <label className="wf-label">Время прохождения <span className="wf-req">*</span></label>
-                  <select className="wf-input wf-select" {...register('duration', { required: true })}>
-                    <option value="">Выберите время</option>
-                    {UNIT_DURATIONS.map((d) => <option key={d} value={d}>{d}</option>)}
-                  </select>
+                  <Controller control={control} name="duration" rules={{ required: true }} render={({ field }) => (
+                    <Select
+                      label="Время прохождения *"
+                      size={48}
+                      block
+                      options={UNIT_DURATIONS.map((d) => ({ key: d, content: d }))}
+                      selected={field.value ? { key: field.value, content: field.value } : null}
+                      onChange={({ selected }) => field.onChange(selected?.key || '')}
+                      optionsListWidth="field"
+                    />
+                  )} />
                 </div>
                 {/* Фабрика */}
                 <div className="wf-field">
-                  <label className="wf-label">Фабрика <span className="wf-req">*</span></label>
-                  <select className="wf-input wf-select" {...register('factory', { required: true })}>
-                    <option value="">Выберите фабрику</option>
-                    {FACTORIES.map((f) => <option key={f} value={f}>{f}</option>)}
-                  </select>
+                  <Controller control={control} name="factory" rules={{ required: true }} render={({ field }) => (
+                    <Select
+                      label="Фабрика *"
+                      size={48}
+                      block
+                      options={FACTORIES.map((f) => ({ key: f, content: f }))}
+                      selected={field.value ? { key: field.value, content: field.value } : null}
+                      onChange={({ selected }) => field.onChange(selected?.key || '')}
+                      optionsListWidth="field"
+                    />
+                  )} />
                 </div>
                 {/* Направление */}
                 <div className="wf-field">
-                  <label className="wf-label">Направление</label>
-                  <select className="wf-input wf-select" {...register('direction')} disabled={directions.length === 0}>
-                    <option value="">Выберите направление</option>
-                    {directions.map((d) => <option key={d} value={d}>{d}</option>)}
-                  </select>
+                  <Controller control={control} name="direction" render={({ field }) => (
+                    <Select
+                      label="Направление"
+                      size={48}
+                      block
+                      disabled={directions.length === 0}
+                      options={directions.map((d) => ({ key: d, content: d }))}
+                      selected={field.value ? { key: field.value, content: field.value } : null}
+                      onChange={({ selected }) => field.onChange(selected?.key || '')}
+                      optionsListWidth="field"
+                    />
+                  )} />
                 </div>
                 {/* Обложка */}
                 <div className="wf-field wf-field--span2">
@@ -219,14 +269,15 @@ function StepForm({ type, currentUser, units, onSubmit }) {
 
               <div className="wf-footer">
                 <p className="wf-note">* — обязательные поля</p>
-                <button
-                  className="btn btn--primary wf-submit"
+                <Button
+                  view="accent"
+                  size={48}
                   type="submit"
                   form="wizard-form"
                   disabled={!isValid || !coverSrc}
                 >
                   Подтвердить
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -285,8 +336,8 @@ function StepForm({ type, currentUser, units, onSubmit }) {
               <button className="crop-zoom-btn" type="button" onClick={() => setZoom((z) => Math.min(3, z + 0.1))}>+</button>
             </div>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <button className="btn btn--ghost" type="button" onClick={() => setShowCropper(false)}>Отмена</button>
-              <button className="btn btn--primary" type="button" onClick={applyCrop}>Применить</button>
+              <Button view="outlined" size={40} onClick={() => setShowCropper(false)}>Отмена</Button>
+              <Button view="accent" size={40} onClick={applyCrop}>Применить</Button>
             </div>
           </div>
         </div>,
@@ -307,7 +358,7 @@ function TemplateCatalog({ type, units, onSelect, onClose }) {
     <div className="modal-backdrop tmpl-backdrop" style={{ zIndex: 40 }}>
       <div className="tmpl-catalog">
         <div className="tmpl-catalog__header">
-          <button className="btn btn--ghost" type="button" onClick={onClose}>← Назад</button>
+          <Button view="outlined" size={40} onClick={onClose}>← Назад</Button>
           <div className="tmpl-catalog__titles">
             <h2 className="tmpl-catalog__title">Выбор шаблона</h2>
             <p className="tmpl-catalog__sub">Выберите {typePlural} для использования в качестве шаблона</p>
@@ -340,7 +391,7 @@ function TemplateCatalog({ type, units, onSelect, onClose }) {
                       </span>
                     )}
                   </div>
-                  <button className="btn btn--secondary tmpl-select-btn" type="button" onClick={() => onSelect(u)}>Выбрать</button>
+                  <Button view="secondary" size={40} onClick={() => onSelect(u)}>Выбрать</Button>
                 </div>
               </article>
             ))}
@@ -418,54 +469,53 @@ export default function WizardModal({ open, onClose }) {
     window.location.href = newUnit.editUrl
   }
 
-  if (!open) return null
+  return (
+    <>
+      <Modal open={open} onClose={handleClose} size={step === 3 ? 800 : 500} hasCloser={false}>
+          <div className={`wizard${step === 3 ? ' wizard--step3' : ''}`}>
+            {/* Шапка */}
+            <div className={`wizard__top${step === 3 ? ' wizard__top--form' : ''}`}>
+              {step > 1 ? (
+                <Button view="text" size={40} onClick={() => setStep((s) => s - 1)}>← Назад</Button>
+              ) : (
+                <div />
+              )}
+              <h2 className="wizard__heading-inline">
+                {step === 1 ? 'Создать обучение' : step === 2 ? 'Способ создания' : 'Настройка обучения'}
+              </h2>
+              <button className="wizard__close-btn" type="button" onClick={handleClose} aria-label="Закрыть">×</button>
+            </div>
 
-  return createPortal(
-    <div className="modal-backdrop wizard-backdrop" style={{ zIndex: 30 }}>
-      <div className={`wizard${step === 3 ? ' wizard--step3' : ''}`}>
-        {/* Шапка */}
-        <div className={`wizard__top${step === 3 ? ' wizard__top--form' : ''}`}>
-          {step > 1 ? (
-            <button className="wizard__back-btn" type="button" onClick={() => setStep((s) => s - 1)}>← Назад</button>
-          ) : (
-            <div />
-          )}
-          <h2 className="wizard__heading-inline">
-            {step === 1 ? 'Создать обучение' : step === 2 ? 'Способ создания' : 'Настройка обучения'}
-          </h2>
-          <button className="wizard__close-btn" type="button" onClick={handleClose} aria-label="Закрыть">×</button>
-        </div>
+            {/* Прогресс */}
+            <div className="wizard__progress">
+              {[1, 2, 3].map((n) => (
+                <div key={n} className={`wizard__progress-seg${step >= n ? ' is-fill' : ''}`} />
+              ))}
+            </div>
 
-        {/* Прогресс */}
-        <div className="wizard__progress">
-          {[1, 2, 3].map((n) => (
-            <div key={n} className={`wizard__progress-seg${step >= n ? ' is-fill' : ''}`} />
-          ))}
-        </div>
-
-        {/* Контент */}
-        {step === 1 && <StepType onSelect={selectType} />}
-        {step === 2 && <StepMethod type={unitType} onSelect={selectMethod} onShowTemplates={() => setShowTemplates(true)} />}
-        {step === 3 && (
-          <StepForm
-            type={unitType}
-            currentUser={currentUser}
-            units={units}
-            onSubmit={handleSubmitForm}
-          />
-        )}
-      </div>
+            {/* Контент */}
+            {step === 1 && <StepType onSelect={selectType} />}
+            {step === 2 && <StepMethod type={unitType} onSelect={selectMethod} onShowTemplates={() => setShowTemplates(true)} />}
+            {step === 3 && (
+              <StepForm
+                type={unitType}
+                currentUser={currentUser}
+                units={units}
+                onSubmit={handleSubmitForm}
+              />
+            )}
+          </div>
+      </Modal>
 
       {/* Каталог шаблонов */}
       {showTemplates && (
         <TemplateCatalog
           type={unitType}
           units={units}
-          onSelect={(u) => { setShowTemplates(false); setStep(3) }}
+          onSelect={() => { setShowTemplates(false); setStep(3) }}
           onClose={() => setShowTemplates(false)}
         />
       )}
-    </div>,
-    document.body,
+    </>
   )
 }

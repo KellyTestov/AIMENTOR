@@ -4,6 +4,10 @@ import { useAnalyticsStore } from '../../stores/analyticsStore.js'
 import { FACTORIES, ALL_DIRECTIONS, DIRECTION_MAP } from '../../core/constants.js'
 import { formatDate } from '../../core/utils.js'
 import FilterDropdown from '../catalog/FilterDropdown.jsx'
+import { Button } from '@alfalab/core-components/button/esm'
+import { Input } from '@alfalab/core-components/input/esm'
+import { Checkbox } from '@alfalab/core-components/checkbox/esm'
+import { Select } from '@alfalab/core-components/select/esm'
 
 const PERIODS = [
   { id: 'week',    label: 'Неделя' },
@@ -180,31 +184,30 @@ export default function AnalyticsSection() {
         </div>
         {/* Фильтры */}
         <div className="toolbar-controls">
-          <select
-            className="an-period-tab"
-            value={status}
-            onChange={(e) => setFilter('status', e.target.value)}
-            style={{ height: 32, borderRadius: 8, border: '1px solid var(--border)', padding: '0 10px', fontSize: 13, cursor: 'pointer' }}
-          >
-            {STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
+          <Select
+            label="Статус"
+            options={STATUS_OPTIONS.map((o) => ({ key: o.value, content: o.label }))}
+            selected={{ key: status, content: STATUS_OPTIONS.find((o) => o.value === status)?.label || status }}
+            onChange={({ selected }) => selected && setFilter('status', selected.key)}
+            size={40}
+            optionsListWidth="content"
+          />
           <FilterDropdown label="Фабрика" options={FACTORIES} value={factories.length ? factories : 'all'} onChange={(v) => setFilter('factories', v === 'all' ? [] : Array.isArray(v) ? v : [v])} />
           <FilterDropdown label="Направление" options={availableDirections} value={directions.length ? directions : 'all'} onChange={(v) => setFilter('directions', v === 'all' ? [] : Array.isArray(v) ? v : [v])} />
-          <input
-            style={{ height: 34, border: '1px solid var(--border)', borderRadius: 8, padding: '0 10px', fontSize: 13, background: 'var(--surface)' }}
-            type="search"
+          <Input
+            size={40}
             placeholder="Поиск по обучению..."
             value={unitSearch}
-            onChange={(e) => setFilter('unitSearch', e.target.value)}
+            onChange={(_, { value }) => setFilter('unitSearch', value)}
+            clear
           />
-          <label className="an-popular-label">
-            <input type="checkbox" checked={sortByPopularity} onChange={(e) => setFilter('sortByPopularity', e.target.checked)} />
-            По популярности
-          </label>
-          <button className="btn btn--ghost an-export-btn" type="button" onClick={exportData}>
-            Экспорт
-          </button>
-          <button className="btn btn--ghost" type="button" onClick={reset}>Сбросить</button>
+          <Checkbox
+            label="По популярности"
+            checked={sortByPopularity}
+            onChange={(_, { checked }) => setFilter('sortByPopularity', checked)}
+          />
+          <Button view="outlined" size={40} onClick={exportData}>Экспорт</Button>
+          <Button view="outlined" size={40} onClick={reset}>Сбросить</Button>
         </div>
       </div>
 
@@ -233,7 +236,7 @@ export default function AnalyticsSection() {
             onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
           />
           {selectedEmployeeId && (
-            <button className="an-emp-clear" type="button" onClick={() => { setFilter('selectedEmployeeId', null); setEmpText('') }}>×</button>
+            <button className="an-emp-clear" type="button" aria-label="Очистить" onClick={() => { setFilter('selectedEmployeeId', null); setEmpText('') }}>×</button>
           )}
         </div>
         {showSuggestions && suggestions.length > 0 && (
@@ -288,7 +291,7 @@ export default function AnalyticsSection() {
       ) : (
         <div className="empty-state">
           <h2>Нет данных</h2>
-          <p>Попробуйте изменить фильтры или <button className="an-inline-reset" type="button" onClick={reset}>сбросить</button></p>
+          <p>Попробуйте изменить фильтры или <Button view="text" size={40} onClick={reset}>сбросить</Button></p>
         </div>
       )}
     </section>

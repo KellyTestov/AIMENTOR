@@ -9,6 +9,8 @@ import FilterDropdown from './FilterDropdown.jsx'
 import SortDropdown from './SortDropdown.jsx'
 import UnitCard from './UnitCard.jsx'
 import ConfirmModal from '../shared/ConfirmModal.jsx'
+import { Input } from '@alfalab/core-components/input/esm'
+import { Button } from '@alfalab/core-components/button/esm'
 
 export default function CatalogSection({ onOpenWizard }) {
   const navigate = useNavigate()
@@ -136,23 +138,15 @@ export default function CatalogSection({ onOpenWizard }) {
     <section className="section section--catalog" aria-label="Каталог обучения">
       {/* Тулбар */}
       <div className="catalog-toolbar">
-        <div className="toolbar-search">
-          <label>
-            <span className="sr-only">Поиск</span>
-            <div className="toolbar-search__wrap">
-              <svg className="toolbar-search__icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-              </svg>
-              <input
-                type="search"
-                placeholder="По названию обучения"
-                value={filters.search}
-                onChange={(e) => setFilter('search', e.target.value)}
-                aria-label="Поиск по названию"
-              />
-            </div>
-          </label>
-        </div>
+        <Input
+          size={40}
+          placeholder="По названию обучения"
+          value={filters.search}
+          onChange={(_, { value }) => setFilter('search', value)}
+          clear
+          type="search"
+          aria-label="Поиск по названию"
+        />
 
         <div className="toolbar-controls">
           <FilterDropdown
@@ -181,9 +175,9 @@ export default function CatalogSection({ onOpenWizard }) {
           />
           <SortDropdown value={filters.sort} onChange={(v) => setFilter('sort', v)} />
           {!isDefault() && (
-            <button className="btn btn--ghost" id="reset-filters" onClick={reset} type="button">
+            <Button view="outlined" size={40} onClick={reset}>
               Сбросить
-            </button>
+            </Button>
           )}
         </div>
       </div>

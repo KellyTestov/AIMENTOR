@@ -6,6 +6,7 @@ import AnalyticsSection from '../components/analytics/AnalyticsSection.jsx'
 import AdminSection from '../components/admin/AdminSection.jsx'
 import WizardModal from '../components/wizard/WizardModal.jsx'
 import Toast from '../components/shared/Toast.jsx'
+import { Button } from '@alfalab/core-components/button/esm'
 
 const SECTION_META = {
   catalog:   { title: 'Каталог обучения',   subtitle: 'Единицы обучения созданные на платформе AI-ментора' },
@@ -50,9 +51,9 @@ export default function HomePage() {
             <p className="workspace__subtitle">{meta.subtitle}</p>
           </div>
           {activeSection === 'catalog' && rights.canCreate && (
-            <button className="btn btn--primary" type="button" onClick={() => setWizardOpen(true)}>
+            <Button view="accent" size={40} onClick={() => setWizardOpen(true)}>
               Создать обучение
-            </button>
+            </Button>
           )}
         </header>
 

@@ -2,6 +2,9 @@ import { useState, useMemo } from 'react'
 import { useAppStore } from '../../stores/appStore.js'
 import { REQUIRED_SERVICE_USERS } from '../../shared/mock/users.js'
 import ConfirmModal from '../shared/ConfirmModal.jsx'
+import { Input } from '@alfalab/core-components/input/esm'
+import { Button } from '@alfalab/core-components/button/esm'
+import { Select } from '@alfalab/core-components/select/esm'
 
 const ROLE_OPTIONS = ['Редактор', 'Аналитик', 'Администратор']
 const PROTECTED_IDS = new Set(REQUIRED_SERVICE_USERS.map((u) => u.userId))
@@ -59,15 +62,14 @@ export default function AdminSection() {
             </h2>
             <p>Управление ролями доступа в AI-Ментор</p>
           </div>
-          <label className="admin-search-label">
-            <span className="sr-only">Поиск</span>
-            <input
-              type="search"
-              placeholder="Поиск по имени, ID, роли..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </label>
+          <Input
+            size={40}
+            placeholder="Поиск по имени, ID, роли..."
+            value={search}
+            onChange={(_, { value }) => setSearch(value)}
+            clear
+            aria-label="Поиск пользователей"
+          />
         </div>
 
         <div className="admin-table-wrap">
@@ -104,26 +106,24 @@ export default function AdminSection() {
                         {isProtected ? (
                           <span className="service-role-badge">{user.role}</span>
                         ) : (
-                          <select
-                            className="admin-role-select"
-                            value={user.role}
-                            onChange={(e) => handleRoleChange(user.userId, e.target.value, user.role, user.fullName)}
-                          >
-                            {ROLE_OPTIONS.map((r) => (
-                              <option key={r} value={r}>{r}</option>
-                            ))}
-                          </select>
+                          <Select
+                            size={40}
+                            options={ROLE_OPTIONS.map((r) => ({ key: r, content: r }))}
+                            selected={{ key: user.role, content: user.role }}
+                            onChange={({ selected }) => selected && handleRoleChange(user.userId, selected.key, user.role, user.fullName)}
+                            optionsListWidth="content"
+                          />
                         )}
                       </td>
                       <td>
-                        <button
-                          className="admin-action-btn"
-                          type="button"
+                        <Button
+                          view="outlined"
+                          size={40}
                           disabled={isProtected}
                           onClick={() => handleRevoke(user.userId, user.fullName)}
                         >
                           Забрать доступ
-                        </button>
+                        </Button>
                       </td>
                     </tr>
                   )

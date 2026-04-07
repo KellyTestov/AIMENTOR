@@ -1,20 +1,9 @@
-import { createPortal } from 'react-dom'
+import { Modal as AlfaModal } from '@alfalab/core-components/modal/esm'
 
-export default function Modal({ open, onClose, children, className = '', zIndex = 20 }) {
-  if (!open) return null
-
-  return createPortal(
-    <div
-      className="modal-backdrop"
-      style={{ zIndex }}
-      role="dialog"
-      aria-modal="true"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose?.() }}
-    >
-      <div className={`modal-dialog ${className}`} onClick={(e) => e.stopPropagation()}>
-        {children}
-      </div>
-    </div>,
-    document.body,
+export default function Modal({ open, onClose, children, size = 500 }) {
+  return (
+    <AlfaModal open={open} onClose={onClose} size={size} hasCloser={false}>
+      {children}
+    </AlfaModal>
   )
 }

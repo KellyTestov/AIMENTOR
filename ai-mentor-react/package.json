@@ -10,6 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@alfalab/core-components": "^50.9.0",
+    "@alfalab/core-components-config": "^1.1.0",
+    "@alfalab/core-components-stack-context": "^1.0.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-easy-crop": "^5.5.7",
