@@ -460,7 +460,6 @@ body {
   border: 1px solid var(--border);
   background: var(--surface);
   border-radius: 14px;
-  overflow: hidden;
   display: grid;
   grid-template-rows: auto 1fr;
   transition: box-shadow 0.18s ease, border-color 0.18s ease;
@@ -480,6 +479,7 @@ body {
   align-items: center;
   justify-content: center;
   aspect-ratio: 16 / 9;
+  border-radius: 13px 13px 0 0;
 }
 
 .card__status {
@@ -1458,7 +1458,7 @@ body {
 
 /* Admin search — reasonable width, not full-block */
 .admin-search {
-  width: 280px;
+  width: 400px;
 }
 
 /* Admin role column — equal width for Tag and Select */
@@ -1674,7 +1674,7 @@ body {
 }
 
 .crop-backdrop {
-  z-index: 50;
+  z-index: 1100;
 }
 
 .wizard {
@@ -2171,7 +2171,7 @@ body {
    ═══════════════════════════════════════════════════════════════════════ */
 
 .tmpl-backdrop {
-  z-index: 40;
+  z-index: 1100;
 }
 
 .tmpl-catalog {

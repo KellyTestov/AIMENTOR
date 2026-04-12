@@ -39,46 +39,47 @@ export default function UnitCard({ unit, currentUser, onAction }) {
       {/* Обложка */}
       <div className="card__media-wrap">
         <img src={coverSrc} alt="" className="card__media" aria-hidden="true" />
-        {/* Меню карточки — всегда видно */}
-        <div className="card__menu" ref={menuRef}>
-          <button
-            className="card__menu-toggle"
-            type="button"
-            aria-label="Действия с единицей обучения"
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((v) => !v)}
-          >
-            ···
-          </button>
-          {menuOpen && (
-            <ul className="card__menu-list" role="menu">
-              <li role="none">
-                <button className="card__menu-item" role="menuitem" type="button" onClick={() => action('open')}>
-                  Открыть обучение
-                </button>
-              </li>
-              {canEdit && (
-                <>
-                  <li role="none">
-                    <button className="card__menu-item" role="menuitem" type="button" onClick={() => action('edit')}>
-                      Редактировать единицу
-                    </button>
-                  </li>
-                  <li role="none">
-                    <button className="card__menu-item" role="menuitem" type="button" onClick={() => action('toggle-publicity')}>
-                      {isPublished ? 'Скрыть' : 'Опубликовать'}
-                    </button>
-                  </li>
-                  <li role="none">
-                    <button className="card__menu-item card__menu-item--danger" role="menuitem" type="button" onClick={() => action('delete')}>
-                      Удалить
-                    </button>
-                  </li>
-                </>
-              )}
-            </ul>
-          )}
-        </div>
+      </div>
+
+      {/* Меню карточки — вынесено на уровень card, чтобы не обрезалось overflow */}
+      <div className="card__menu" ref={menuRef}>
+        <button
+          className="card__menu-toggle"
+          type="button"
+          aria-label="Действия с единицей обучения"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((v) => !v)}
+        >
+          ···
+        </button>
+        {menuOpen && (
+          <ul className="card__menu-list" role="menu">
+            <li role="none">
+              <button className="card__menu-item" role="menuitem" type="button" onClick={() => action('open')}>
+                Открыть обучение
+              </button>
+            </li>
+            {canEdit && (
+              <>
+                <li role="none">
+                  <button className="card__menu-item" role="menuitem" type="button" onClick={() => action('edit')}>
+                    Редактировать единицу
+                  </button>
+                </li>
+                <li role="none">
+                  <button className="card__menu-item" role="menuitem" type="button" onClick={() => action('toggle-publicity')}>
+                    {isPublished ? 'Скрыть' : 'Опубликовать'}
+                  </button>
+                </li>
+                <li role="none">
+                  <button className="card__menu-item card__menu-item--danger" role="menuitem" type="button" onClick={() => action('delete')}>
+                    Удалить
+                  </button>
+                </li>
+              </>
+            )}
+          </ul>
+        )}
       </div>
 
       {/* Тело */}

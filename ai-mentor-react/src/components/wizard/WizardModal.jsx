@@ -312,7 +312,7 @@ function StepForm({ type, currentUser, units, onSubmit }) {
 
       {/* Кроппер */}
       {showCropper && createPortal(
-        <div className="modal-backdrop" style={{ zIndex: 50 }}>
+        <div className="modal-backdrop" style={{ zIndex: 1100 }}>
           <div className="crop-dialog">
             <div className="crop-dialog__head">
               <h3 className="crop-dialog__title">Обложка обучения</h3>
@@ -354,7 +354,7 @@ function TemplateCatalog({ type, units, onSelect, onClose }) {
   const available = units.filter((u) => u.type === typeLabel)
 
   return createPortal(
-    <div className="modal-backdrop tmpl-backdrop" style={{ zIndex: 40 }}>
+    <div className="modal-backdrop tmpl-backdrop" style={{ zIndex: 1100 }}>
       <div className="tmpl-catalog">
         <div className="tmpl-catalog__header">
           <Button view="outlined" size={40} onClick={onClose}>← Назад</Button>

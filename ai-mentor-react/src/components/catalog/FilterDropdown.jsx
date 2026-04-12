@@ -5,10 +5,10 @@ import { Select } from '@alfalab/core-components/select/esm'
  * value: 'all' | string | string[]
  */
 export default function FilterDropdown({ label, options, value, onChange }) {
+  // selected — массив строк-ключей (или пустой массив для 'all')
   const selected = value === 'all' ? [] : Array.isArray(value) ? value : [value]
 
   const selectOptions = options.map((opt) => ({ key: opt, content: opt }))
-  const selectedOptions = selected.map((v) => ({ key: v, content: v }))
 
   function handleChange({ selectedMultiple }) {
     const keys = [...new Set((selectedMultiple || []).map((o) => o.key))]
@@ -25,10 +25,11 @@ export default function FilterDropdown({ label, options, value, onChange }) {
     <Select
       label={label}
       options={selectOptions}
-      selected={selectedOptions}
+      selected={selected}
       onChange={handleChange}
       valueRenderer={valueRenderer}
       multiple
+      allowUnselect
       size={40}
       optionsListWidth="content"
     />

@@ -5,7 +5,6 @@ import ConfirmModal from '../shared/ConfirmModal.jsx'
 import { Input } from '@alfalab/core-components/input/esm'
 import { Button } from '@alfalab/core-components/button/esm'
 import { Select } from '@alfalab/core-components/select/esm'
-import { Tag } from '@alfalab/core-components/tag/esm'
 
 const ROLE_OPTIONS = ['Редактор', 'Аналитик', 'Администратор']
 const PROTECTED_IDS = new Set(REQUIRED_SERVICE_USERS.map((u) => u.userId))
@@ -61,7 +60,6 @@ export default function AdminSection() {
               Пользователи с доступом
               <span className="admin-count">{accessUsers.length}</span>
             </h2>
-            <p>Управление ролями доступа в AI-Ментор</p>
           </div>
           <Input
             size={40}
@@ -70,6 +68,7 @@ export default function AdminSection() {
             onChange={(_, { value }) => setSearch(value)}
             clear
             className="admin-search"
+            style={{ width: 400 }}
             aria-label="Поиск пользователей"
           />
         </div>
@@ -106,7 +105,13 @@ export default function AdminSection() {
                       <td><code>{user.userId}</code></td>
                       <td className="admin-role-cell">
                         {isProtected ? (
-                          <Tag view="filled" size={40} disabled style={{ width: '100%', justifyContent: 'center' }}>{user.role}</Tag>
+                          <Select
+                            size={40}
+                            block
+                            disabled
+                            options={[{ key: user.role, content: user.role }]}
+                            selected={{ key: user.role, content: user.role }}
+                          />
                         ) : (
                           <Select
                             size={40}
