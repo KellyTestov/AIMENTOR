@@ -5,7 +5,7 @@ import Cropper from 'react-easy-crop'
 import { useAppStore } from '../../stores/appStore.js'
 import StatusBadge from '../shared/StatusBadge.jsx'
 import { storage } from '../../core/storage.js'
-import { STORAGE_KEYS, FACTORIES, DIRECTION_MAP, UNIT_CATEGORIES, UNIT_TOPICS, UNIT_DURATIONS } from '../../core/constants.js'
+import { STORAGE_KEYS, FACTORIES, DIRECTION_MAP, UNIT_CATEGORIES, UNIT_TOPICS, UNIT_DURATIONS, TRAINER_SUBTYPES } from '../../core/constants.js'
 import { generateId, initials } from '../../core/utils.js'
 import { PROMPT_COVERS } from '../../shared/mock/units.js'
 import { Button } from '@alfalab/core-components/button/esm'
@@ -59,7 +59,47 @@ function StepType({ onSelect }) {
   )
 }
 
-// ── Шаг 2: Выбор метода ────────────────────────────────────
+// ── Шаг 2: Выбор подтипа тренажёра ────────────────────────
+
+function StepTrainerSubtype({ onSelect }) {
+  const subtypes = [
+    {
+      id: TRAINER_SUBTYPES.SKILL,
+      icon: '🎯',
+      name: 'Навыковый',
+      hint: 'Отработка практических навыков через сценарии',
+    },
+    {
+      id: TRAINER_SUBTYPES.DIALOG,
+      icon: '💬',
+      name: 'Диалоговый',
+      hint: 'Обучение через диалог с виртуальным клиентом',
+    },
+    {
+      id: TRAINER_SUBTYPES.PRODUCT,
+      icon: '📦',
+      name: 'Продуктовый',
+      hint: 'Изучение продуктов и их характеристик',
+    },
+  ]
+  return (
+    <div className="wizard__content">
+      <h2 className="wizard__heading">Тип тренажёра</h2>
+      <p className="wizard__lead">Выберите вид тренажёра для создания</p>
+      <div className="wizard__type-cards wizard__type-cards--3">
+        {subtypes.map((s) => (
+          <button key={s.id} className="wizard-type-card" type="button" onClick={() => onSelect(s.id)}>
+            <span className="wizard-type-card__icon">{s.icon}</span>
+            <span className="wizard-type-card__name">{s.name}</span>
+            <span className="wizard-type-card__hint">{s.hint}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Шаг 3: Выбор метода ────────────────────────────────────
 
 function StepMethod({ type, onSelect, onShowTemplates }) {
   const typeLabel = type === 'trainer' ? 'тренажёра' : 'экзамена'
@@ -410,24 +450,48 @@ export default function WizardModal({ open, onClose }) {
   const addUnit = useAppStore((s) => s.addUnit)
 
   const [step, setStep] = useState(1)
-  const [unitType, setUnitType] = useState(null)  // 'trainer' | 'exam'
+  const [unitType, setUnitType] = useState(null)       // 'trainer' | 'exam'
+  const [trainerSubtype, setTrainerSubtype] = useState(null)  // 'skill' | 'dialog' | 'product'
   const [showTemplates, setShowTemplates] = useState(false)
 
   function handleClose() {
     setStep(1)
     setUnitType(null)
+    setTrainerSubtype(null)
     setShowTemplates(false)
     onClose()
   }
 
+  function handleBack() {
+    if (step === 2) { setStep(1) }
+    else if (step === 3) { setStep(unitType === 'trainer' ? 2 : 1) }
+    else if (step === 4) { setStep(3) }
+  }
+
   function selectType(type) {
     setUnitType(type)
-    setStep(2)
+    setStep(type === 'trainer' ? 2 : 3)
+  }
+
+  function selectSubtype(subtype) {
+    setTrainerSubtype(subtype)
+    setStep(3)
   }
 
   function selectMethod(method) {
-    if (method === 'new') setStep(3)
+    if (method === 'new') setStep(4)
   }
+
+  // Progress: trainers have 4 visual steps, exams have 3
+  const totalProgress = unitType === 'trainer' ? 4 : 3
+  function getVisualStep(s) {
+    if (unitType !== 'exam') return s
+    if (s === 1) return 1
+    if (s === 3) return 2
+    if (s === 4) return 3
+    return s
+  }
+  const visualStep = getVisualStep(step)
 
   function handleSubmitForm(data) {
     const id = generateId('edu')
@@ -455,10 +519,11 @@ export default function WizardModal({ open, onClose }) {
     const stored = storage.getObject(STORAGE_KEYS.BUILDER_DATA, {})
     stored[id] = {
       ...newUnit,
-      type:          unitType,
-      _isNew:        true,
-      durationLabel: data.duration,
-      coverDataUrl:  data.coverSrc,
+      type:            unitType,
+      trainerSubtype:  trainerSubtype || null,
+      _isNew:          true,
+      durationLabel:   data.duration,
+      coverDataUrl:    data.coverSrc,
     }
     storage.setObject(STORAGE_KEYS.BUILDER_DATA, stored)
 
@@ -470,32 +535,36 @@ export default function WizardModal({ open, onClose }) {
 
   return (
     <>
-      <Modal open={open} onClose={handleClose} size={step === 3 ? 800 : 500} hasCloser={false}>
-          <div className={`wizard${step === 3 ? ' wizard--step3' : ''}`}>
+      <Modal open={open} onClose={handleClose} size={step === 4 ? 800 : 500} hasCloser={false}>
+          <div className={`wizard${step === 4 ? ' wizard--step3' : ''}`}>
             {/* Шапка */}
-            <div className={`wizard__top${step === 3 ? ' wizard__top--form' : ''}`}>
+            <div className={`wizard__top${step === 4 ? ' wizard__top--form' : ''}`}>
               {step > 1 ? (
-                <Button view="text" size={40} onClick={() => setStep((s) => s - 1)}>← Назад</Button>
+                <Button view="text" size={40} onClick={handleBack}>← Назад</Button>
               ) : (
                 <div />
               )}
               <h2 className="wizard__heading-inline">
-                {step === 1 ? 'Создать обучение' : step === 2 ? 'Способ создания' : 'Настройка обучения'}
+                {step === 1 ? 'Создать обучение'
+                  : step === 2 ? 'Тип тренажёра'
+                  : step === 3 ? 'Способ создания'
+                  : 'Настройка обучения'}
               </h2>
               <button className="wizard__close-btn" type="button" onClick={handleClose} aria-label="Закрыть">×</button>
             </div>
 
             {/* Прогресс */}
             <div className="wizard__progress">
-              {[1, 2, 3].map((n) => (
-                <div key={n} className={`wizard__progress-seg${step >= n ? ' is-fill' : ''}`} />
+              {Array.from({ length: totalProgress }, (_, i) => i + 1).map((n) => (
+                <div key={n} className={`wizard__progress-seg${visualStep >= n ? ' is-fill' : ''}`} />
               ))}
             </div>
 
             {/* Контент */}
             {step === 1 && <StepType onSelect={selectType} />}
-            {step === 2 && <StepMethod type={unitType} onSelect={selectMethod} onShowTemplates={() => setShowTemplates(true)} />}
-            {step === 3 && (
+            {step === 2 && <StepTrainerSubtype onSelect={selectSubtype} />}
+            {step === 3 && <StepMethod type={unitType} onSelect={selectMethod} onShowTemplates={() => setShowTemplates(true)} />}
+            {step === 4 && (
               <StepForm
                 type={unitType}
                 currentUser={currentUser}
@@ -511,7 +580,7 @@ export default function WizardModal({ open, onClose }) {
         <TemplateCatalog
           type={unitType}
           units={units}
-          onSelect={() => { setShowTemplates(false); setStep(3) }}
+          onSelect={() => { setShowTemplates(false); setStep(4) }}
           onClose={() => setShowTemplates(false)}
         />
       )}

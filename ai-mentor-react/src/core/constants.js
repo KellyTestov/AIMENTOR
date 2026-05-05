@@ -74,6 +74,19 @@ export const UNIT_TYPE_LABELS = {
   [UNIT_TYPES.EXAM]: 'Проверяющая',
 };
 
+/* ── Подтипы тренажёра ───────────────────────────────── */
+export const TRAINER_SUBTYPES = {
+  SKILL: 'skill',
+  DIALOG: 'dialog',
+  PRODUCT: 'product',
+};
+
+export const TRAINER_SUBTYPE_LABELS = {
+  [TRAINER_SUBTYPES.SKILL]: 'Навыковый',
+  [TRAINER_SUBTYPES.DIALOG]: 'Диалоговый',
+  [TRAINER_SUBTYPES.PRODUCT]: 'Продуктовый',
+};
+
 /* ── Статусы публикации ─────────────────────────────── */
 export const PUBLICATION_STATUS = {
   DRAFT: 'draft',

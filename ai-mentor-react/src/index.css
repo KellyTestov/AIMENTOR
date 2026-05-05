@@ -1837,6 +1837,10 @@ body {
   gap: 12px;
 }
 
+.wizard__type-cards--3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
 .wizard-type-card {
   border: 1.5px solid var(--border);
   border-radius: 14px;
