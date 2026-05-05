@@ -104,6 +104,7 @@ export default function BuilderPage() {
     setShowPublishModal(false)
     if (mode === 'sandbox') {
       save()
+      sessionStorage.setItem('sb-origin', 'builder')
       navigate(`/sandbox?id=${unit.id}`)
     } else {
       publish()

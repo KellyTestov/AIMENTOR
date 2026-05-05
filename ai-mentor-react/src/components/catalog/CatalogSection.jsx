@@ -81,13 +81,9 @@ export default function CatalogSection({ onOpenWizard }) {
 
   function handleAction(type, unit) {
     if (type === 'open') {
-      // Builder units (in localStorage) → React sandbox; mock units → external launchUrl
-      const all = storage.getObject(STORAGE_KEYS.BUILDER_DATA, {})
-      if (all[unit.id]) {
-        navigate(`/sandbox?id=${unit.id}`)
-      } else {
-        window.open(unit.launchUrl, '_blank', 'noopener,noreferrer')
-      }
+      ensureBuilderData(unit)
+      sessionStorage.setItem('sb-origin', 'catalog')
+      navigate(`/sandbox?id=${unit.id}`)
     } else if (type === 'edit') {
       ensureBuilderData(unit)
       sessionStorage.setItem('bld-pending-id', unit.id)

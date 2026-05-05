@@ -23,6 +23,7 @@ export default function SandboxPage() {
   const [showClient,  setShowClient]  = useState(false)
   const [publishing,  setPublishing]  = useState(false)
   const [published,   setPublished]   = useState(false)
+  const [origin,      setOrigin]      = useState('catalog')  // 'catalog' | 'builder'
 
   // Load unit
   useEffect(() => {
@@ -31,6 +32,9 @@ export default function SandboxPage() {
       sessionStorage.removeItem('sb-pending-id')
       loadUnit(id)
     }
+    const src = sessionStorage.getItem('sb-origin') || 'catalog'
+    sessionStorage.removeItem('sb-origin')
+    setOrigin(src)
   }, [searchParams, loadUnit])
 
   // Auto-start trainer greeting once unit loaded
@@ -51,7 +55,11 @@ export default function SandboxPage() {
 
   function handleBack() {
     clearSession()
-    goToBuilder()
+    if (origin === 'builder') {
+      goToBuilder()
+    } else {
+      navigate('/')
+    }
   }
 
   function handlePublish() {
@@ -94,7 +102,9 @@ export default function SandboxPage() {
       {/* Header */}
       <header className="sb-header">
         <div className="sb-header__left">
-          <button className="sb-back-btn" onClick={handleBack}>← Вернуться в конструктор</button>
+          <button className="sb-back-btn" onClick={handleBack}>
+            {origin === 'builder' ? '← Вернуться в конструктор' : '← В каталог'}
+          </button>
         </div>
         <div className="sb-header__center">
           <span className="sb-header__unit-label">Тестовая среда</span>
