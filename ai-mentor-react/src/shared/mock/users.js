@@ -79,7 +79,7 @@ export const MOCK_CURRENT_USER = {
     canViewAnalytics: true,
     canManageUsers: true,
     canCreate: true,
-    isAdmin: false,
+    isAdmin: true,
     allowedUnitIds: ["edu-001", "edu-002", "edu-003", "edu-004"],
   },
 };
