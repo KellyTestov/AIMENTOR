@@ -85,7 +85,11 @@ function extractClientInfo(unit) {
     products: cc.products
       ? cc.products.split(',').map(s => s.trim()).filter(Boolean)
       : MOCK_CLIENT.products,
-    request:  cc.request  || MOCK_CLIENT.request,
+    request:      cc.request      || MOCK_CLIENT.request,
+    creditDetails: cc.creditDetails || {},
+    contractTerms: cc.contractTerms || {},
+    interestRates: cc.interestRates || {},
+    cardInfo:      cc.cardInfo      || {},
   }
 }
 

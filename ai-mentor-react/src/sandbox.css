@@ -299,15 +299,25 @@ html, body {
 
 /* ── Карточка клиента ───────────────────────────── */
 .sb-client-card { text-align: left; margin-bottom: 4px; }
+
+.sb-cc-section { margin-bottom: 12px; }
+.sb-cc-section__title {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--muted); padding: 8px 0 4px;
+  border-bottom: 2px solid var(--border-sub, #edf0f7); margin-bottom: 2px;
+}
+.sb-cc-section:first-child .sb-cc-section__title { padding-top: 0; }
+
 .sb-client-row {
-  display: grid; grid-template-columns: 100px 1fr; gap: 8px; align-items: baseline;
-  padding: 8px 0; border-bottom: 1px solid var(--border-sub, #edf0f7);
+  display: grid; grid-template-columns: 200px 1fr; gap: 8px; align-items: baseline;
+  padding: 7px 0; border-bottom: 1px solid var(--border-sub, #edf0f7);
   font-size: 13px;
 }
 .sb-client-row:last-child { border-bottom: none; }
-.sb-client-label { font-weight: 700; color: var(--muted); font-size: 12px; }
+.sb-client-label { font-weight: 600; color: var(--muted); font-size: 12px; }
+.sb-client-empty { color: var(--muted); opacity: 0.5; }
 .sb-client-row--highlight { background: #fff8f8; border-radius: var(--radius-sm);
-  padding: 8px; margin-top: 4px; grid-template-columns: 100px 1fr; }
+  padding: 7px 8px; grid-template-columns: 200px 1fr; }
 
 /* ── Отчёт тренажёра ────────────────────────────── */
 .sb-report-body { text-align: left; margin-bottom: 20px; }

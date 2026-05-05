@@ -1,7 +1,22 @@
 import { useSandboxStore } from '../../stores/sandboxStore.js'
+import { CLIENT_CARD_SECTIONS } from '../../core/constants.js'
+
+const PERSONAL_FIELDS = [
+  { key: 'name',     label: 'ФИО' },
+  { key: 'phone',    label: 'Телефон' },
+  { key: 'account',  label: 'Счёт' },
+  { key: 'status',   label: 'Статус' },
+  { key: 'products', label: 'Продукты' },
+  { key: 'request',  label: 'Запрос' },
+]
 
 export default function ClientCard({ onClose }) {
   const c = useSandboxStore(s => s.client)
+
+  function displayValue(val) {
+    if (Array.isArray(val)) return val.length ? val.join(', ') : null
+    return val || null
+  }
 
   return (
     <div className="sb-modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
@@ -13,31 +28,43 @@ export default function ClientCard({ onClose }) {
         </button>
         <div className="sb-modal__icon" aria-hidden="true">👤</div>
         <h2 className="sb-modal__title">Данные клиента</h2>
+
         <div className="sb-client-card" id="sb-client-card">
-          <div className="sb-client-row">
-            <span className="sb-client-label">ФИО</span>
-            <span>{c.name}</span>
+
+          {/* Личные данные */}
+          <div className="sb-cc-section">
+            <div className="sb-cc-section__title">Личные данные клиента</div>
+            {PERSONAL_FIELDS.map(f => {
+              const val = displayValue(c[f.key])
+              return (
+                <div key={f.key} className={`sb-client-row${f.key === 'request' ? ' sb-client-row--highlight' : ''}`}>
+                  <span className="sb-client-label">{f.label}</span>
+                  <span className={val ? '' : 'sb-client-empty'}>{val || '—'}</span>
+                </div>
+              )
+            })}
           </div>
-          <div className="sb-client-row">
-            <span className="sb-client-label">Телефон</span>
-            <span>{c.phone}</span>
-          </div>
-          <div className="sb-client-row">
-            <span className="sb-client-label">Счёт</span>
-            <span>{c.account}</span>
-          </div>
-          <div className="sb-client-row">
-            <span className="sb-client-label">Статус</span>
-            <span>{c.status}</span>
-          </div>
-          <div className="sb-client-row">
-            <span className="sb-client-label">Продукты</span>
-            <span>{c.products.join(', ')}</span>
-          </div>
-          <div className="sb-client-row sb-client-row--highlight">
-            <span className="sb-client-label">Запрос</span>
-            <span>{c.request}</span>
-          </div>
+
+          {/* Все разделы из карточки клиента */}
+          {CLIENT_CARD_SECTIONS.map(sec => {
+            const secData = c[sec.key] || {}
+            const hasAny = sec.fields.some(f => secData[f.key])
+            return (
+              <div key={sec.key} className="sb-cc-section">
+                <div className="sb-cc-section__title">{sec.title}</div>
+                {sec.fields.map(f => {
+                  const val = secData[f.key] || null
+                  return (
+                    <div key={f.key} className="sb-client-row">
+                      <span className="sb-client-label">{f.label}</span>
+                      <span className={val ? '' : 'sb-client-empty'}>{val || '—'}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            )
+          })}
+
         </div>
       </div>
     </div>
