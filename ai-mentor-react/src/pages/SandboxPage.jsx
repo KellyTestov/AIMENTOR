@@ -94,7 +94,7 @@ export default function SandboxPage() {
       {/* Header */}
       <header className="sb-header">
         <div className="sb-header__left">
-          <button className="sb-back-btn" onClick={handleBack}>← Конструктор</button>
+          <button className="sb-back-btn" onClick={handleBack}>← Вернуться в конструктор</button>
         </div>
         <div className="sb-header__center">
           <span className="sb-header__unit-label">Тестовая среда</span>

@@ -102,12 +102,13 @@ export default function BuilderPage() {
 
   function handlePublishOption(mode) {
     setShowPublishModal(false)
-    publish()
-    setSaveFlash(true)
-    setTimeout(() => setSaveFlash(false), 2000)
     if (mode === 'sandbox') {
-      setMoreToast('Юнит отправлен на тестирование')
-      setTimeout(() => setMoreToast(null), 2500)
+      save()
+      navigate(`/sandbox?id=${unit.id}`)
+    } else {
+      publish()
+      setSaveFlash(true)
+      setTimeout(() => setSaveFlash(false), 2000)
     }
   }
 

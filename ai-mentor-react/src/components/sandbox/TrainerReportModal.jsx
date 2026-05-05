@@ -55,7 +55,7 @@ export default function TrainerReportModal({ onBack, onPublish }) {
 
         <div className="sb-modal__actions">
           <button className="sb-modal__btn sb-modal__btn--secondary" onClick={onBack} id="report-back-btn">
-            ← В конструктор
+            Вернуться в конструктор
           </button>
           <button className="sb-modal__btn sb-modal__btn--primary" onClick={onPublish} id="report-publish-btn">
             Опубликовать

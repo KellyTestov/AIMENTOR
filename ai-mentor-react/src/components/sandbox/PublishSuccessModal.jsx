@@ -8,18 +8,18 @@ export default function PublishSuccessModal({ onBackToBuilder, onCatalog }) {
         <div className="sb-modal__actions" style={{ flexDirection: 'column' }}>
           <button
             className="sb-modal__btn sb-modal__btn--primary sb-modal__btn--full"
-            onClick={onCatalog}
-            id="success-catalog-btn"
+            onClick={onBackToBuilder}
+            id="success-back-btn"
           >
-            Перейти в каталог
+            Вернуться в конструктор
           </button>
           <button
             className="sb-modal__btn sb-modal__btn--secondary sb-modal__btn--full"
-            onClick={onBackToBuilder}
-            id="success-back-btn"
+            onClick={onCatalog}
+            id="success-catalog-btn"
             style={{ marginTop: 8 }}
           >
-            В конструктор
+            Вернуться в каталог
           </button>
         </div>
       </div>
