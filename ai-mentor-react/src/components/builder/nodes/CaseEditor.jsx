@@ -110,6 +110,37 @@ export default function CaseEditor({ node }) {
       <div className="field-block">
         <div className="field-lbl" style={{ marginBottom: 10 }}>Карточка клиента</div>
         <div className="client-card">
+
+          {/* Личные данные клиента */}
+          <div className="cc-group is-open cc-group--personal">
+            <div className="cc-group__head cc-group__head--static">
+              <span>Личные данные клиента</span>
+            </div>
+            <div className="cc-group__body">
+              {[
+                { key: 'name',     label: 'ФИО клиента',           ph: 'Иванова Мария Петровна' },
+                { key: 'phone',    label: 'Телефон',                ph: '+7 (999) 123-45-67' },
+                { key: 'account',  label: 'Номер счёта',            ph: '40817810000000001234' },
+                { key: 'status',   label: 'Статус',                 ph: 'Активный клиент' },
+                { key: 'products', label: 'Продукты (через запятую)', ph: 'Дебетовая карта, Накопительный счёт' },
+                { key: 'request',  label: 'Запрос клиента',         ph: 'Вопрос по комиссии за уведомления' },
+              ].map(f => (
+                <div key={f.key} className="cc-row">
+                  <span className="cc-row__label">{f.label}</span>
+                  <input
+                    className="cc-row__input"
+                    value={clientCard[f.key] || ''}
+                    placeholder={f.ph}
+                    onChange={e => updateNodeFull(node.id, {
+                      ...content,
+                      clientCard: { ...clientCard, [f.key]: e.target.value },
+                    })}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
           {CC_SECTIONS.map((sec, si) => (
             <div key={sec.key} className={`cc-group${openSections.has(sec.key) ? ' is-open' : ''}`}>
               <button className="cc-group__head" type="button" onClick={() => toggleSection(sec.key)}>

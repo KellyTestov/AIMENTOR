@@ -1,8 +1,7 @@
-import { useState } from 'react'
-import { MOCK_CLIENT } from '../../stores/sandboxStore.js'
+import { useSandboxStore } from '../../stores/sandboxStore.js'
 
 export default function ClientCard({ onClose }) {
-  const c = MOCK_CLIENT
+  const c = useSandboxStore(s => s.client)
 
   return (
     <div className="sb-modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>

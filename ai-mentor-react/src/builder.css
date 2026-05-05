@@ -1844,6 +1844,17 @@ select.cu-edit-input { appearance: auto; cursor: pointer; }
 .cc-group { border-bottom: 1px solid var(--border-sub); }
 .cc-group:last-child { border-bottom: none; }
 
+.cc-group--personal { border-bottom: 2px solid var(--border); margin-bottom: 2px; }
+.cc-group__head--static {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--bg);
+  font: 600 12px/1.3 Manrope, sans-serif;
+  color: var(--text);
+  cursor: default;
+}
+
 .cc-group__head {
   display: flex;
   align-items: center;

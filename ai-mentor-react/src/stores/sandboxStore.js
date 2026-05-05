@@ -66,6 +66,29 @@ function loadSavedSession() {
 }
 function clearSession() { localStorage.removeItem(SESSION_KEY) }
 
+function extractClientInfo(unit) {
+  function findFirstCase(node) {
+    if (node.type === 'case') return node
+    for (const child of (node.children || [])) {
+      const found = findFirstCase(child)
+      if (found) return found
+    }
+    return null
+  }
+  const firstCase = findFirstCase(unit)
+  const cc = firstCase?.content?.clientCard || {}
+  return {
+    name:     cc.name     || MOCK_CLIENT.name,
+    phone:    cc.phone    || MOCK_CLIENT.phone,
+    account:  cc.account  || MOCK_CLIENT.account,
+    status:   cc.status   || MOCK_CLIENT.status,
+    products: cc.products
+      ? cc.products.split(',').map(s => s.trim()).filter(Boolean)
+      : MOCK_CLIENT.products,
+    request:  cc.request  || MOCK_CLIENT.request,
+  }
+}
+
 export { MOCK_CLIENT, MOCK_CORRECT, MOCK_HINTS, saveSession, loadSavedSession, clearSession }
 
 let _msgId = 0
@@ -91,16 +114,17 @@ export const useSandboxStore = create((set, get) => ({
         return
       }
 
+      const client = extractClientInfo(unit)
+
       // Check saved session
       const saved = loadSavedSession()
       if (saved && saved.unitId === id) {
-        set({ unit, session: saved, messages: saved.messages || [], elapsed: saved.elapsedSeconds || 0 })
+        set({ unit, client, session: saved, messages: saved.messages || [], elapsed: saved.elapsedSeconds || 0 })
         if (saved.phase === 'done') {
           set({ phase: 'done' })
         } else if (unit.type !== 'trainer' && saved.phase === 'running') {
           set({ phase: 'resume' })
         } else {
-          // trainer restore: just continue
           set({ phase: 'running' })
         }
       } else {
@@ -114,7 +138,7 @@ export const useSandboxStore = create((set, get) => ({
           errorOccurred: false,
         }
         saveSession(session)
-        set({ unit, session, messages: [], elapsed: 0, phase: unit.type !== 'trainer' ? 'rules' : 'idle' })
+        set({ unit, client, session, messages: [], elapsed: 0, phase: unit.type !== 'trainer' ? 'rules' : 'idle' })
       }
     } catch {
       set({ error: 'Ошибка загрузки обучения.', phase: 'error' })
