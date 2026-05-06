@@ -67,16 +67,24 @@ function loadSavedSession() {
 function clearSession() { localStorage.removeItem(SESSION_KEY) }
 
 function extractClientInfo(unit) {
-  function findFirstCase(node) {
-    if (node.type === 'case') return node
-    for (const child of (node.children || [])) {
-      const found = findFirstCase(child)
-      if (found) return found
-    }
-    return null
+  // Collect all case nodes from the entire unit tree
+  const cases = []
+  function collectCases(node) {
+    if (node.type === 'case') cases.push(node)
+    ;(node.children || []).forEach(collectCases)
   }
-  const firstCase = findFirstCase(unit)
-  const cc = firstCase?.content?.clientCard || {}
+  collectCases(unit)
+
+  // Prefer a case that has any credit card section data; fall back to first case
+  const hasCardData = (c) => {
+    const card = c?.content?.clientCard || {}
+    return ['creditDetails','contractTerms','interestRates','cardInfo'].some(k =>
+      card[k] && Object.values(card[k]).some(v => v && v.toString().trim())
+    )
+  }
+  const bestCase = cases.find(hasCardData) || cases[0] || null
+  const cc = bestCase?.content?.clientCard || {}
+
   return {
     name:     cc.name     || MOCK_CLIENT.name,
     phone:    cc.phone    || MOCK_CLIENT.phone,

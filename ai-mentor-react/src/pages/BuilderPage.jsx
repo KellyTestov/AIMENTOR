@@ -104,6 +104,8 @@ export default function BuilderPage() {
     setShowPublishModal(false)
     if (mode === 'sandbox') {
       save()
+      // Clear any stale sandbox session so fresh data is always loaded
+      localStorage.removeItem('ai-mentor-sandbox-session-v1')
       sessionStorage.setItem('sb-origin', 'builder')
       navigate(`/sandbox?id=${unit.id}`)
     } else {

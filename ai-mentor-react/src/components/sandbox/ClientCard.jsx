@@ -48,16 +48,18 @@ export default function ClientCard({ onClose }) {
           {/* Все разделы из карточки клиента */}
           {CLIENT_CARD_SECTIONS.map(sec => {
             const secData = c[sec.key] || {}
-            const hasAny = sec.fields.some(f => secData[f.key])
+            const hasAny = sec.fields.some(f => secData[f.key] && String(secData[f.key]).trim())
+            if (!hasAny) return null
             return (
               <div key={sec.key} className="sb-cc-section">
                 <div className="sb-cc-section__title">{sec.title}</div>
                 {sec.fields.map(f => {
-                  const val = secData[f.key] || null
+                  const val = secData[f.key] ? String(secData[f.key]).trim() : null
+                  if (!val) return null
                   return (
                     <div key={f.key} className="sb-client-row">
                       <span className="sb-client-label">{f.label}</span>
-                      <span className={val ? '' : 'sb-client-empty'}>{val || '—'}</span>
+                      <span>{val}</span>
                     </div>
                   )
                 })}
