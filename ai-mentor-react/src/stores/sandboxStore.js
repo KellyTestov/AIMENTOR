@@ -101,6 +101,24 @@ function extractClientInfo(unit) {
   }
 }
 
+export function extractClientFromCase(caseNode) {
+  const cc = caseNode?.content?.clientCard || {}
+  return {
+    name:     cc.name     || MOCK_CLIENT.name,
+    phone:    cc.phone    || MOCK_CLIENT.phone,
+    account:  cc.account  || MOCK_CLIENT.account,
+    status:   cc.status   || MOCK_CLIENT.status,
+    products: cc.products
+      ? cc.products.split(',').map(s => s.trim()).filter(Boolean)
+      : MOCK_CLIENT.products,
+    request:      cc.request      || MOCK_CLIENT.request,
+    creditDetails: cc.creditDetails || {},
+    contractTerms: cc.contractTerms || {},
+    interestRates: cc.interestRates || {},
+    cardInfo:      cc.cardInfo      || {},
+  }
+}
+
 export { MOCK_CLIENT, MOCK_CORRECT, MOCK_HINTS, saveSession, loadSavedSession, clearSession }
 
 let _msgId = 0
@@ -190,6 +208,8 @@ export const useSandboxStore = create((set, get) => ({
   },
   tickQuestion() { set(s => ({ questionElapsed: s.questionElapsed + 1 })) },
   resetQuestionTimer() { set({ questionElapsed: 0 }) },
+
+  setClient(client) { set({ client }) },
 
   clearSession() {
     clearSession()

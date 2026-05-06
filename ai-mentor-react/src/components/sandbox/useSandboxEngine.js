@@ -8,6 +8,7 @@ import {
   flattenQuestions,
   getNodeHtml,
   findParentCase,
+  extractClientFromCase,
   MOCK_CORRECT,
   MOCK_HINTS,
 } from '../../stores/sandboxStore.js'
@@ -52,8 +53,12 @@ export function useSandboxEngine() {
 
     const q      = questions[idx]
     const parent = findParentCase(unit, q)
-    let html = ''
 
+    if (parent?.type === 'case') {
+      store.setClient(extractClientFromCase(parent))
+    }
+
+    let html = ''
     if (parent?.type === 'case' && parent.content?.description?.trim()) {
       html += `<div class="sb-msg__case"><em>Кейс: ${parent.content.description}</em></div>`
     }
@@ -116,8 +121,12 @@ export function useSandboxEngine() {
 
     const q      = questions[idx]
     const parent = findParentCase(unit, q)
-    let html = ''
 
+    if (parent?.type === 'case') {
+      store.setClient(extractClientFromCase(parent))
+    }
+
+    let html = ''
     if (parent?.type === 'case' && parent.content?.description?.trim()) {
       html += `<div class="sb-msg__case">${parent.content.description}</div>`
     }

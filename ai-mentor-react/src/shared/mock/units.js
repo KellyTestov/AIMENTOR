@@ -95,6 +95,21 @@ export const MOCK_UNITS = [
     launchUrl: "./sandbox/?id=edu-004",
     editUrl: "./builder/?id=edu-004",
   }),
+  createUnit({
+    id: "cltv-exam-001",
+    title: "Экзамен CLTV",
+    type: "Проверяющая",
+    category: "Экзамены",
+    factory: "Сервис",
+    authorId: "u-101",
+    authorName: "Роман Плишкин",
+    createdAt: "2026-05-06T08:00:00Z",
+    updatedAt: "2026-05-06T08:00:00Z",
+    durationLabel: "~30 мин",
+    publicationStatus: "published",
+    launchUrl: "./sandbox/?id=cltv-exam-001",
+    editUrl: "./builder/?id=cltv-exam-001",
+  }),
 ];
 
 /**
