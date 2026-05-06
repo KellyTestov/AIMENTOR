@@ -152,6 +152,29 @@ export function useSandboxEngine() {
     setTimeout(() => store.setPhase('done'), 800)
   }
 
+  // ── THEORY STEPS (optional, trainer only) ────────────────────────────────
+  async function trainerTheoryStep(idx) {
+    const { unit } = useSandboxStore.getState()
+    const onboarding = unit.children?.find(c => c.type === 'onboarding')
+    const steps = onboarding?.content?.theorySteps || []
+
+    if (idx >= steps.length) {
+      store.updateSession({ phase: 'running', questionIndex: 0, errors: [] })
+      await botSay('<p>Отлично! Начинаем тренировку. Отвечайте на возражения клиентов, используя правило трёх шагов.</p>', 400)
+      await trainerAskQuestion()
+      return
+    }
+
+    const step = steps[idx]
+    const isLast = idx === steps.length - 1
+    let html = step.heading ? `<p><strong>${step.heading}</strong></p>` : ''
+    html += `<p>${(step.text || '').replace(/\n/g, '<br/>')}</p>`
+    html += `<p><em>Напишите <strong>«Дальше»</strong>, чтобы ${isLast ? 'начать тренировку' : 'продолжить'}.</em></p>`
+
+    await botSay(html, 600)
+    store.updateSession({ phase: 'theory', theoryIndex: idx })
+  }
+
   // ── PUBLIC API ────────────────────────────────────
   const handleInput = useCallback(async (text) => {
     const { unit, session, isBusy } = useSandboxStore.getState()
@@ -162,9 +185,21 @@ export function useSandboxEngine() {
     if (unit.type === 'trainer') {
       if (session.phase === 'greeting') {
         if (/^старт$/i.test(text.trim())) {
-          await trainerStart()
+          const onboarding = unit.children?.find(c => c.type === 'onboarding')
+          const theorySteps = onboarding?.content?.theorySteps || []
+          if (theorySteps.length > 0) {
+            await trainerTheoryStep(0)
+          } else {
+            await trainerStart()
+          }
         } else {
           await botSay('<p>Введите <strong>«Старт»</strong>, чтобы начать тренировку.</p>', 350)
+        }
+      } else if (session.phase === 'theory') {
+        if (/^дальше$/i.test(text.trim())) {
+          await trainerTheoryStep((session.theoryIndex ?? 0) + 1)
+        } else {
+          await botSay('<p>Напишите <strong>«Дальше»</strong>, чтобы перейти к следующему блоку.</p>', 350)
         }
       } else if (session.phase === 'running') {
         await trainerHandleAnswer(text)
