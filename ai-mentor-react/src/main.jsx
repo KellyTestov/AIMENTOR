@@ -9,8 +9,10 @@ import { getUnits } from './shared/mock/units.js'
 import { getCurrentUser, getAccessUsers } from './shared/mock/users.js'
 import { getAnalyticsSessions } from './shared/mock/analytics.js'
 import { seedCltvExam } from './shared/mock/cltvExam.js'
+import { seedSalesTrainer } from './shared/mock/salesTrainer.js'
 
 seedCltvExam()
+seedSalesTrainer()
 
 // Читаем bootstrap или используем mock-данные
 const bootstrap = window.AI_MENTOR_BOOTSTRAP || {}

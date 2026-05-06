@@ -110,6 +110,21 @@ export const MOCK_UNITS = [
     launchUrl: "./sandbox/?id=cltv-exam-001",
     editUrl: "./builder/?id=cltv-exam-001",
   }),
+  createUnit({
+    id: "sales-trainer-001",
+    title: "Тренажёр по продажам кредитных продуктов в чате",
+    type: "Обучающая",
+    category: "Продажи",
+    factory: "Сервис",
+    authorId: "u-101",
+    authorName: "Роман Плишкин",
+    createdAt: "2026-05-06T09:00:00Z",
+    updatedAt: "2026-05-06T09:00:00Z",
+    durationLabel: "~45 мин",
+    publicationStatus: "published",
+    launchUrl: "./sandbox/?id=sales-trainer-001",
+    editUrl: "./builder/?id=sales-trainer-001",
+  }),
 ];
 
 /**
