@@ -15,8 +15,8 @@ export default function TheoryEditor({ node }) {
   const isLocked    = loading || isResponded || isApproved
   const allFilled   = queries.every(q => (q.text || '').trim().length > 0)
 
-  // Show lock overlay if no rubric selected
-  const hasRubric = !!node.settings?.abookRubric
+  const noAbook  = !!node.settings?.noAbook
+  const hasRubric = noAbook || !!node.settings?.abookRubric
 
   function save(patch) {
     updateNodeFull(node.id, { ...content, elements, queries, ...patch })
@@ -123,83 +123,94 @@ export default function TheoryEditor({ node }) {
         </div>
       </div>
 
-      {/* Enrich section */}
-      <div className="enrich-section">
-        <div className="enrich-section__title-row">
-          <span className="enrich-section__title">Обогащение из базы знаний</span>
+      {/* Enrich section — A-Book или ручной ввод */}
+      {noAbook ? (
+        <div className="enrich-section">
+          <div className="enrich-section__title-row">
+            <span className="enrich-section__title">Ручное наполнение</span>
+          </div>
+          <p className="enrich-section__desc">
+            Вставьте текст, который AI будет использовать как справочную базу для этого блока теории.
+          </p>
+          <textarea
+            className="cv-textarea"
+            rows={10}
+            value={content.manualContent || ''}
+            onChange={e => save({ manualContent: e.target.value })}
+            placeholder="Вставьте сюда справочный текст, инструкцию или выдержку из материалов, которые AI должен использовать при обучении сотрудника..."
+          />
         </div>
-        <div className={`query-card${isApproved ? ' query-card--approved' : ''}`}>
-          <div className="query-card__header">
-            <span className="query-card__title">Тестовые запросы в A-Book</span>
+      ) : (
+        <div className="enrich-section">
+          <div className="enrich-section__title-row">
+            <span className="enrich-section__title">Обогащение из базы знаний</span>
           </div>
-
-          {/* Промпт — первый элемент внутри query-card */}
-          <div className="query-item query-item--prompt">
-            <div className="query-item__header">
-              <span className="query-item__label">Промпт</span>
+          <div className={`query-card${isApproved ? ' query-card--approved' : ''}`}>
+            <div className="query-card__header">
+              <span className="query-card__title">Тестовые запросы в A-Book</span>
             </div>
-            <textarea
-              className={`query-textarea${isLocked ? ' query-textarea--locked' : ''}`}
-              disabled={isLocked}
-              value={content.prompt || ''}
-              onChange={e => save({ prompt: e.target.value })}
-              placeholder="Например: Оформи полученную информацию из ABook в виде обучающего текста простым языком"
-            />
-          </div>
 
-          <div>
-            {queries.map((q, i) => (
-              <div key={q.id} className="query-item">
-                <div className="query-item__header">
-                  <span className="query-item__label">Запрос {i + 1}</span>
-                  {queries.length > 1 && !isLocked && (
-                    <button className="query-item__del" onClick={() => removeQuery(i)}>×</button>
-                  )}
+            <div className="query-item query-item--prompt">
+              <div className="query-item__header">
+                <span className="query-item__label">Промпт</span>
+              </div>
+              <textarea
+                className={`query-textarea${isLocked ? ' query-textarea--locked' : ''}`}
+                disabled={isLocked}
+                value={content.prompt || ''}
+                onChange={e => save({ prompt: e.target.value })}
+                placeholder="Например: Оформи полученную информацию из ABook в виде обучающего текста простым языком"
+              />
+            </div>
+
+            <div>
+              {queries.map((q, i) => (
+                <div key={q.id} className="query-item">
+                  <div className="query-item__header">
+                    <span className="query-item__label">Запрос {i + 1}</span>
+                    {queries.length > 1 && !isLocked && (
+                      <button className="query-item__del" onClick={() => removeQuery(i)}>×</button>
+                    )}
+                  </div>
+                  <textarea
+                    className={`query-textarea${isLocked ? ' query-textarea--locked' : ''}`}
+                    disabled={isLocked}
+                    value={q.text || ''}
+                    onChange={e => updateQuery(i, e.target.value)}
+                    placeholder="Например: Какая комиссия за услугу уведомлений по дебетовой карте"
+                  />
                 </div>
-                <textarea
-                  className={`query-textarea${isLocked ? ' query-textarea--locked' : ''}`}
-                  disabled={isLocked}
-                  value={q.text || ''}
-                  onChange={e => updateQuery(i, e.target.value)}
-                  placeholder="Например: Какая комиссия за услугу уведомлений по дебетовой карте"
-                />
-              </div>
-            ))}
-          </div>
-          {!isLocked && queries.length < 5 && (
-            <button className="add-dashed add-dashed--sm" style={{ marginTop: 8, width: '100%' }} onClick={addQuery}>
-              + Добавить запрос
-            </button>
-          )}
-          {(isResponded || isApproved) && content.queryResponse && (
-            <div className={`query-response${isApproved ? ' query-response--approved' : ''}`}>
-              <div className="query-response__title">Ответ</div>
-              <div className="query-response__text" style={{ whiteSpace: 'pre-wrap' }}>{content.queryResponse}</div>
+              ))}
             </div>
-          )}
-          <div className="query-footer">
-            {loading && (
-              <div className="query-sending">
-                <span className="query-spinner" />Отправляем запросы...
-              </div>
-            )}
-            {!loading && isApproved && (
-              <div className="query-approved-note">✓ Все запросы утверждены</div>
-            )}
-            {!loading && isResponded && (
-              <div className="query-actions">
-                <button className="query-approve-btn" onClick={approveAll}>✓ Утвердить запросы</button>
-                <button className="query-change-btn" onClick={changeAll}>✎ Изменить запросы</button>
-              </div>
-            )}
-            {!loading && !isApproved && !isResponded && (
-              <button className="query-send-btn" disabled={!allFilled} onClick={sendQueries}>
-                ➤ Отправить
+            {!isLocked && queries.length < 5 && (
+              <button className="add-dashed add-dashed--sm" style={{ marginTop: 8, width: '100%' }} onClick={addQuery}>
+                + Добавить запрос
               </button>
             )}
+            {(isResponded || isApproved) && content.queryResponse && (
+              <div className={`query-response${isApproved ? ' query-response--approved' : ''}`}>
+                <div className="query-response__title">Ответ</div>
+                <div className="query-response__text" style={{ whiteSpace: 'pre-wrap' }}>{content.queryResponse}</div>
+              </div>
+            )}
+            <div className="query-footer">
+              {loading && <div className="query-sending"><span className="query-spinner" />Отправляем запросы...</div>}
+              {!loading && isApproved && <div className="query-approved-note">✓ Все запросы утверждены</div>}
+              {!loading && isResponded && (
+                <div className="query-actions">
+                  <button className="query-approve-btn" onClick={approveAll}>✓ Утвердить запросы</button>
+                  <button className="query-change-btn" onClick={changeAll}>✎ Изменить запросы</button>
+                </div>
+              )}
+              {!loading && !isApproved && !isResponded && (
+                <button className="query-send-btn" disabled={!allFilled} onClick={sendQueries}>
+                  ➤ Отправить
+                </button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Lock overlay when rubric not selected */}
       {!hasRubric && (

@@ -186,10 +186,17 @@ function CaseInspector({ node, updateNode }) {
 
 function QuestionInspector({ node, updateNode }) {
   const s = node.settings || {}
+  const noAbook = !!s.noAbook
   const [restrict, setRestrict] = useState(!!s.abookRestrict)
 
   function bindSelect(key) {
     return e => updateNode(node.id, { settings: { ...s, [key]: e.target.value || undefined } })
+  }
+
+  function toggleNoAbook(e) {
+    const val = e.target.checked
+    updateNode(node.id, { settings: { ...s, noAbook: val || undefined, abookRubric: undefined, abookRestrict: undefined, abookSection: undefined, abookArticles: undefined } })
+    if (val) setRestrict(false)
   }
 
   function toggleRestrict(e) {
@@ -200,37 +207,48 @@ function QuestionInspector({ node, updateNode }) {
 
   return (
     <IGroup icon="📖" label="Информация из A-Book" defaultOpen>
-      <p className="ig-desc">Выберите рубрику, из которой AI будет получать справочную информацию для этого вопроса</p>
-      <IField label="Область поиска">
-        <select value={s.abookRubric || ''} onChange={bindSelect('abookRubric')}>
-          <option value="">Выберите рубрику...</option>
-          <option value="retail">Розничный бизнес</option>
-          <option value="corporate">Корпоративный бизнес</option>
-          <option value="digital">Цифровые продукты</option>
-          <option value="sme">МСБ</option>
-        </select>
-      </IField>
       <div className="igf ig-toggle-row">
         <label className="ig-toggle">
-          <input type="checkbox" checked={restrict} onChange={toggleRestrict} />
+          <input type="checkbox" checked={noAbook} onChange={toggleNoAbook} />
           <span className="ig-toggle__track" />
-          <span className="ig-toggle__label">Ограничить поиск по разделам рубрики</span>
+          <span className="ig-toggle__label">Без поиска по базе знаний</span>
         </label>
       </div>
-      {restrict && (
-        <IField label="Раздел">
-          <select value={s.abookSection || ''} onChange={bindSelect('abookSection')}>
-            <option value="">Выберите раздел...</option>
-            <option value="credits">Кредитование</option>
-            <option value="debit">Дебетовые карты</option>
-            <option value="deposits">Вклады</option>
-            <option value="insurance">Страхование</option>
-          </select>
-          <select style={{ marginTop: 8 }} value={s.abookArticles || ''} onChange={bindSelect('abookArticles')}>
-            <option value="">Статьи раздела</option>
-          </select>
-          <div className="ig-hint">При выборе статей поиск будет осуществляться только по ним</div>
-        </IField>
+      {!noAbook && (
+        <>
+          <p className="ig-desc" style={{ marginTop: 8 }}>Выберите рубрику, из которой AI будет получать справочную информацию для этого вопроса</p>
+          <IField label="Область поиска">
+            <select value={s.abookRubric || ''} onChange={bindSelect('abookRubric')}>
+              <option value="">Выберите рубрику...</option>
+              <option value="retail">Розничный бизнес</option>
+              <option value="corporate">Корпоративный бизнес</option>
+              <option value="digital">Цифровые продукты</option>
+              <option value="sme">МСБ</option>
+            </select>
+          </IField>
+          <div className="igf ig-toggle-row">
+            <label className="ig-toggle">
+              <input type="checkbox" checked={restrict} onChange={toggleRestrict} />
+              <span className="ig-toggle__track" />
+              <span className="ig-toggle__label">Ограничить поиск по разделам рубрики</span>
+            </label>
+          </div>
+          {restrict && (
+            <IField label="Раздел">
+              <select value={s.abookSection || ''} onChange={bindSelect('abookSection')}>
+                <option value="">Выберите раздел...</option>
+                <option value="credits">Кредитование</option>
+                <option value="debit">Дебетовые карты</option>
+                <option value="deposits">Вклады</option>
+                <option value="insurance">Страхование</option>
+              </select>
+              <select style={{ marginTop: 8 }} value={s.abookArticles || ''} onChange={bindSelect('abookArticles')}>
+                <option value="">Статьи раздела</option>
+              </select>
+              <div className="ig-hint">При выборе статей поиск будет осуществляться только по ним</div>
+            </IField>
+          )}
+        </>
       )}
     </IGroup>
   )
@@ -238,10 +256,17 @@ function QuestionInspector({ node, updateNode }) {
 
 function TheoryInspector({ node, updateNode }) {
   const s = node.settings || {}
+  const noAbook = !!s.noAbook
   const [restrict, setRestrict] = useState(!!s.abookRestrict)
 
   function bindSelect(key) {
     return e => updateNode(node.id, { settings: { ...s, [key]: e.target.value || undefined } })
+  }
+
+  function toggleNoAbook(e) {
+    const val = e.target.checked
+    updateNode(node.id, { settings: { ...s, noAbook: val || undefined, abookRubric: undefined, abookRestrict: undefined, abookSection: undefined, abookArticles: undefined } })
+    if (val) setRestrict(false)
   }
 
   function toggleRestrict(e) {
@@ -252,37 +277,48 @@ function TheoryInspector({ node, updateNode }) {
 
   return (
     <IGroup icon="🔗" label="Информация из A-Book" defaultOpen>
-      <p className="ig-desc">Выберите из какой рубрики получать информацию</p>
-      <IField label="Область поиска">
-        <select value={s.abookRubric || ''} onChange={bindSelect('abookRubric')}>
-          <option value="">Выберите рубрику...</option>
-          <option value="retail">Розничный бизнес</option>
-          <option value="corporate">Корпоративный бизнес</option>
-          <option value="digital">Цифровые продукты</option>
-          <option value="sme">МСБ</option>
-        </select>
-      </IField>
       <div className="igf ig-toggle-row">
         <label className="ig-toggle">
-          <input type="checkbox" checked={restrict} onChange={toggleRestrict} />
+          <input type="checkbox" checked={noAbook} onChange={toggleNoAbook} />
           <span className="ig-toggle__track" />
-          <span className="ig-toggle__label">Ограничить поиск по разделам рубрики</span>
+          <span className="ig-toggle__label">Без поиска по базе знаний</span>
         </label>
       </div>
-      {restrict && (
-        <IField label="Раздел">
-          <select value={s.abookSection || ''} onChange={bindSelect('abookSection')}>
-            <option value="">Выберите раздел...</option>
-            <option value="credits">Кредитование</option>
-            <option value="debit">Дебетовые карты</option>
-            <option value="deposits">Вклады</option>
-            <option value="insurance">Страхование</option>
-          </select>
-          <select style={{ marginTop: 8 }} value={s.abookArticles || ''} onChange={bindSelect('abookArticles')}>
-            <option value="">Статьи раздела</option>
-          </select>
-          <div className="ig-hint">При выборе статей поиск будет осуществляться только по ним</div>
-        </IField>
+      {!noAbook && (
+        <>
+          <p className="ig-desc" style={{ marginTop: 8 }}>Выберите из какой рубрики получать информацию</p>
+          <IField label="Область поиска">
+            <select value={s.abookRubric || ''} onChange={bindSelect('abookRubric')}>
+              <option value="">Выберите рубрику...</option>
+              <option value="retail">Розничный бизнес</option>
+              <option value="corporate">Корпоративный бизнес</option>
+              <option value="digital">Цифровые продукты</option>
+              <option value="sme">МСБ</option>
+            </select>
+          </IField>
+          <div className="igf ig-toggle-row">
+            <label className="ig-toggle">
+              <input type="checkbox" checked={restrict} onChange={toggleRestrict} />
+              <span className="ig-toggle__track" />
+              <span className="ig-toggle__label">Ограничить поиск по разделам рубрики</span>
+            </label>
+          </div>
+          {restrict && (
+            <IField label="Раздел">
+              <select value={s.abookSection || ''} onChange={bindSelect('abookSection')}>
+                <option value="">Выберите раздел...</option>
+                <option value="credits">Кредитование</option>
+                <option value="debit">Дебетовые карты</option>
+                <option value="deposits">Вклады</option>
+                <option value="insurance">Страхование</option>
+              </select>
+              <select style={{ marginTop: 8 }} value={s.abookArticles || ''} onChange={bindSelect('abookArticles')}>
+                <option value="">Статьи раздела</option>
+              </select>
+              <div className="ig-hint">При выборе статей поиск будет осуществляться только по ним</div>
+            </IField>
+          )}
+        </>
       )}
     </IGroup>
   )
