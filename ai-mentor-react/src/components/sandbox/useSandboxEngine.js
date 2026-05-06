@@ -74,32 +74,77 @@ export function useSandboxEngine() {
     await botSay(html, 600)
   }
 
+  // Для вопросов с эталонным ответом (3 шага) требуем минимальную длину
+  // И наличие призыва к действию — иначе ответ неполный
+  const CTA_RE = /оформ|закаж|расскаж|помог|отправл|попробу|предлаг/i
+
+  function isAnswerSufficient(text, q) {
+    const t = text.trim()
+    if (q.content?.refAnswer?.trim()) {
+      // Структурированный вопрос (3 шага): нужна длина И призыв к действию
+      return t.length >= 60 && CTA_RE.test(t)
+    }
+    // Обычный вопрос — просто не слишком короткий
+    return t.length >= 15
+  }
+
+  function getQuestionHints(q) {
+    return (q.content?.hints || [])
+      .filter(h => h?.text?.trim() || (typeof h === 'string' && h.trim()))
+      .map(h => (typeof h === 'string' ? h : h.text))
+  }
+
+  function refAnswerBlock(q) {
+    return q.content?.refAnswer?.trim()
+      ? `<div class="sb-msg__ref"><span class="sb-msg__ref-label">Эталонный ответ:</span><span>${q.content.refAnswer}</span></div>`
+      : ''
+  }
+
   async function trainerHandleAnswer(text) {
     const { unit, session } = useSandboxStore.getState()
     const questions = flattenQuestions(unit)
-    const idx = session.questionIndex
-    const q   = questions[idx]
-    const isError = text.trim().length < 10
+    const idx     = session.questionIndex
+    const q       = questions[idx]
+    const isRetry = !!session.retryMode
+    const isGood  = isAnswerSufficient(text, q)
 
-    let evalHtml = ''
+    // Custom per-question feedback bypasses retry logic
     if (q.content?.feedback?.trim()) {
-      evalHtml = `<p>${q.content.feedback}</p>`
-    } else if (isError) {
-      const hintIdx = idx % MOCK_HINTS.length
-      evalHtml = `<p>⚠️ Ответ можно дополнить.</p><p>${MOCK_HINTS[hintIdx]}</p>`
-      const errors = [...(session.errors || []), idx]
-      store.updateSession({ errors })
-    } else {
-      const corrIdx = idx % MOCK_CORRECT.length
-      evalHtml = `<p>${MOCK_CORRECT[corrIdx]}</p>`
-      if (q.content?.refAnswer?.trim()) {
-        evalHtml += `<div class="sb-msg__ref"><span class="sb-msg__ref-label">Эталонный ответ:</span><span>${q.content.refAnswer}</span></div>`
-      }
+      await botSay(`<p>${q.content.feedback}</p>`, 650)
+      store.updateSession({ questionIndex: idx + 1, retryMode: false })
+      await trainerAskQuestion()
+      return
     }
 
-    await botSay(evalHtml, 650)
-    store.updateSession({ questionIndex: session.questionIndex + 1 })
-    await trainerAskQuestion()
+    if (isGood) {
+      // ── Correct ───────────────────────────────────────────────────────
+      const corrIdx = idx % MOCK_CORRECT.length
+      let html = `<p>${MOCK_CORRECT[corrIdx]}</p>${refAnswerBlock(q)}`
+      await botSay(html, 650)
+      store.updateSession({ questionIndex: idx + 1, retryMode: false })
+      await trainerAskQuestion()
+      return
+    }
+
+    // ── Insufficient answer ───────────────────────────────────────────
+    const errors = [...(session.errors || []), idx]
+
+    if (isRetry) {
+      // Second wrong attempt → show ref answer and move on
+      let html = `<p>❌ Ответ по-прежнему не соответствует ожидаемому. Посмотрите, как нужно отвечать:</p>${refAnswerBlock(q)}`
+      await botSay(html, 700)
+      store.updateSession({ questionIndex: idx + 1, retryMode: false, errors })
+      await trainerAskQuestion()
+    } else {
+      // First wrong attempt → give all hints, allow retry
+      const hints = getQuestionHints(q)
+      const hintLines = hints.length
+        ? hints.map(h => `<p>💡 ${h}</p>`).join('')
+        : `<p>💡 ${MOCK_HINTS[idx % MOCK_HINTS.length]}</p>`
+      let html = `<p>⚠️ Ответ не содержит всех необходимых элементов — попробуйте ещё раз!</p>${hintLines}`
+      await botSay(html, 650)
+      store.updateSession({ retryMode: true, errors })
+    }
   }
 
   async function trainerFinish() {
