@@ -70,7 +70,7 @@ export default function OnboardingEditor({ node }) {
 
       <div className="enrich-section" style={{ marginTop: 16 }}>
         <div className="enrich-section__title-row">
-          <span className="enrich-section__title">Кнопка перехода</span>
+          <span className="enrich-section__title">Кнопка перехода <span className="req-star">*</span></span>
           <InfoTip wide>Данную кнопку будет видеть сотрудник, чтобы перейти к следующему этапу обучению</InfoTip>
         </div>
         <div className="field-block">

@@ -6,18 +6,21 @@ import {
   getRecursiveReadiness,
   getStatus,
   getProgress,
+  getIncompleteChildren,
 } from '../../builderServices/readiness.js'
 
 function ReadinessPanel({ node }) {
+  const selectNode = useBuilderStore((s) => s.selectNode)
   if (!node) return null
+
   const own = getNodeReadiness(node)
   const recursive = getRecursiveReadiness(node)
-  const ownStatus = getStatus(own.passed, own.total)
   const recStatus = getStatus(recursive.passed, recursive.total)
   const recProgress = getProgress(recursive.passed, recursive.total)
 
-  const isAggregator = (node.children || []).length > 0 && own.total === 0
   const isUnitRoot = node.type === 'trainer' || node.type === 'exam'
+  const incompleteChildren = getIncompleteChildren(node)
+  const ownAllOk = own.problems.length === 0
 
   return (
     <div className="rd-panel">
@@ -34,18 +37,10 @@ function ReadinessPanel({ node }) {
         />
       </div>
 
-      {own.total === 0 ? (
-        <div className="rd-panel__note">
-          {isAggregator
-            ? 'Состоит из вложенных блоков — заполните их.'
-            : 'В этом блоке нет обязательных полей.'}
-        </div>
-      ) : own.problems.length === 0 ? (
-        <div className="rd-panel__ok">✓ Все поля заполнены</div>
-      ) : (
-        <details className="rd-panel__details" open={ownStatus !== 'ok'}>
+      {!ownAllOk && (
+        <details className="rd-panel__details" open>
           <summary>
-            <span>Не заполнено</span>
+            <span>Заполните в этом блоке</span>
             <span className="rd-panel__count">{own.problems.length}</span>
           </summary>
           <ul className="rd-panel__list">
@@ -54,6 +49,34 @@ function ReadinessPanel({ node }) {
             ))}
           </ul>
         </details>
+      )}
+
+      {incompleteChildren.length > 0 && (
+        <details className="rd-panel__details" open>
+          <summary>
+            <span>Не заполнены вложенные блоки</span>
+            <span className="rd-panel__count">{incompleteChildren.length}</span>
+          </summary>
+          <ul className="rd-panel__list rd-panel__list--linkable">
+            {incompleteChildren.map((c) => (
+              <li key={c.id}>
+                <button
+                  type="button"
+                  className="rd-panel__child-link"
+                  onClick={() => selectNode(c.id)}
+                  title={`Перейти к блоку «${c.title}»`}
+                >
+                  <span className="rd-panel__child-title">{c.title}</span>
+                  <span className="rd-panel__child-pct">{c.progress}%</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+
+      {ownAllOk && incompleteChildren.length === 0 && (
+        <div className="rd-panel__ok">✓ Всё заполнено</div>
       )}
     </div>
   )

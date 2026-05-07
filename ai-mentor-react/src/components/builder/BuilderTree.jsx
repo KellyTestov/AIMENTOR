@@ -132,7 +132,6 @@ function TreeNode({ node, depth, isRoot }) {
           )
           : <span className="tree-toggle tree-toggle--leaf" />
         }
-        <span className={`tree-status tree-status--${status}`} title={statusTitle} aria-label={statusTitle} />
         <span className="tree-icon">{icon}</span>
         {renaming
           ? <RenameInline node={node} onDone={() => setRenaming(false)} />
@@ -165,6 +164,11 @@ function TreeNode({ node, depth, isRoot }) {
             </>
           )}
         </div>
+        <span
+          className={`tree-status tree-status--${status}`}
+          title={statusTitle}
+          aria-label={statusTitle}
+        />
       </div>
       {hasKids && expanded && (
         <ul className="bld-tree">

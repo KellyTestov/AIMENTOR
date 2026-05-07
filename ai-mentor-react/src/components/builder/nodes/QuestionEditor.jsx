@@ -10,28 +10,12 @@ function initContent(c = {}) {
 
   const criteria = (c.criteria && c.criteria.length > 0)
     ? c.criteria
-    : [
-        { id: genId('crit'), text: '', score: '' },
-        { id: genId('crit'), text: '', score: '' },
-        { id: genId('crit'), text: '', score: '' },
-      ]
-
-  const hints = (c.hints || []).map(h =>
-    typeof h === 'string'
-      ? { id: genId('hint'), text: h, criteriaId: '' }
-      : (h.id ? h : { id: genId('hint'), text: h.text || '', criteriaId: h.criteriaId || '' })
-  )
-
-  // Auto-link orphan hints to first criterion
-  if (criteria.length > 0) {
-    hints.forEach(h => { if (!h.criteriaId) h.criteriaId = criteria[0].id })
-  }
+    : [{ id: genId('crit'), text: '', score: '' }]
 
   return {
     ...c,
     queries,
     criteria,
-    hints,
     queriesApproved: !!c.queriesApproved,
     queryResponse:   c.queryResponse || '',
     text:            c.text || '',
@@ -44,7 +28,7 @@ export default function QuestionEditor({ node }) {
 
   const raw = node.content || {}
   const content = initContent(raw)
-  const { queries, criteria, hints } = content
+  const { queries, criteria } = content
 
   const noAbook     = !!node.settings?.noAbook
   const isApproved  = !!content.queriesApproved
@@ -94,23 +78,7 @@ export default function QuestionEditor({ node }) {
 
   function removeCrit(id) {
     if (criteria.length <= 1) return
-    save({
-      criteria: criteria.filter(c => c.id !== id),
-      hints: hints.filter(h => h.criteriaId !== id),
-    })
-  }
-
-  function addHint(criteriaId) {
-    if (hints.length >= 10) return
-    save({ hints: [...hints, { id: genId('hint'), text: '', criteriaId }] })
-  }
-
-  function updateHint(id, text) {
-    save({ hints: hints.map(h => h.id === id ? { ...h, text } : h) })
-  }
-
-  function removeHint(id) {
-    save({ hints: hints.filter(h => h.id !== id) })
+    save({ criteria: criteria.filter(c => c.id !== id) })
   }
 
   return (
@@ -125,7 +93,7 @@ export default function QuestionEditor({ node }) {
           placeholder="Название вопроса..."
         />
       </div>
-      <p className="cv-subheading">Вопрос к участнику, критерии оценки и подсказки</p>
+      <p className="cv-subheading">Вопрос к участнику и чек-лист оценки ответа</p>
 
       <div className="field-block">
         <label className="field-lbl">Текст вопроса</label>
@@ -221,59 +189,37 @@ export default function QuestionEditor({ node }) {
           Добавьте пункты, которые должны быть в ответе сотрудника. AI проверит каждый пункт отдельно и начислит баллы.
         </p>
         <div className="crit-cards" id="crit-cards">
-          {criteria.map((cr, i) => {
-            const linked = hints.filter(h => h.criteriaId === cr.id)
-            return (
-              <div key={cr.id} className="crit-card">
-                <div className="crit-card__head">
-                  <span className="crit-card__num">{i + 1}</span>
-                  <span className="crit-card__field-lbl">Что проверяем в ответе?</span>
-                </div>
-                <div className="crit-card__row">
-                  <input
-                    type="text"
-                    className="crit-card__text"
-                    value={cr.text}
-                    placeholder="Например: Сотрудник верно указал комиссию по кредитной карте"
-                    onChange={e => updateCritText(cr.id, e.target.value)}
-                  />
-                  <div className="crit-card__score-pill">
-                    <input
-                      type="number"
-                      className="crit-card__score-inp"
-                      value={cr.score}
-                      min="0" max="100"
-                      placeholder="0"
-                      onChange={e => updateCritScore(cr.id, e.target.value)}
-                    />
-                    <span className="crit-card__score-unit">б.</span>
-                  </div>
-                  {criteria.length > 1 && (
-                    <button className="crit-card__del" onClick={() => removeCrit(cr.id)} title="Удалить пункт">×</button>
-                  )}
-                </div>
-                {linked.length > 0 && (
-                  <div className="crit-card__hints">
-                    {linked.map(h => (
-                      <div key={h.id} className="crit-hint">
-                        <span className="crit-hint__icon">💡</span>
-                        <textarea
-                          className="crit-hint__body"
-                          value={h.text}
-                          placeholder="Подсказка для сотрудника..."
-                          onChange={e => updateHint(h.id, e.target.value)}
-                          rows={2}
-                          style={{ resize: 'vertical', flex: 1, border: 'none', background: 'transparent', outline: 'none', fontFamily: 'inherit', fontSize: 13 }}
-                        />
-                        <button className="crit-hint__del" onClick={() => removeHint(h.id)} title="Удалить подсказку">×</button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <button className="crit-card__add-hint" onClick={() => addHint(cr.id)}>+ Подсказка</button>
+          {criteria.map((cr, i) => (
+            <div key={cr.id} className="crit-card">
+              <div className="crit-card__head">
+                <span className="crit-card__num">{i + 1}</span>
+                <span className="crit-card__field-lbl">Что проверяем в ответе?</span>
               </div>
-            )
-          })}
+              <div className="crit-card__row">
+                <input
+                  type="text"
+                  className="crit-card__text"
+                  value={cr.text}
+                  placeholder="Например: Сотрудник верно указал комиссию по кредитной карте"
+                  onChange={e => updateCritText(cr.id, e.target.value)}
+                />
+                <div className="crit-card__score-pill">
+                  <input
+                    type="number"
+                    className="crit-card__score-inp"
+                    value={cr.score}
+                    min="0" max="100"
+                    placeholder="0"
+                    onChange={e => updateCritScore(cr.id, e.target.value)}
+                  />
+                  <span className="crit-card__score-unit">б.</span>
+                </div>
+                {criteria.length > 1 && (
+                  <button className="crit-card__del" onClick={() => removeCrit(cr.id)} title="Удалить пункт">×</button>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
         <button
           className="add-dashed add-dashed--sm"

@@ -102,36 +102,6 @@ export default function TheoryEditor({ node }) {
         </div>
       ))}
 
-      {/* "Переход к следующему блоку" section */}
-      <div className="enrich-section">
-        <div className="enrich-section__title-row">
-          <span className="enrich-section__title">Переход к следующему блоку</span>
-          <InfoTip wide>Данную кнопку будет видеть сотрудник, чтобы перейти к следующему этапу обучению</InfoTip>
-        </div>
-        <p className="enrich-section__desc">
-          После прочтения теории сотруднику отображается кнопка для перехода к следующему шагу обучения. Здесь вы можете настроить её текст — он будет виден пользователю в чате.
-        </p>
-        <div className="field-block">
-          <label className="field-lbl">Текст кнопки</label>
-          <input
-            className="cv-inp"
-            value={content.nextBtnText || ''}
-            onChange={e => save({ nextBtnText: e.target.value })}
-            placeholder="Ознакомился, далее"
-          />
-          <div className="next-btn-preview" style={{ marginTop: 8 }}>
-            <span className="next-btn-preview__lbl">Предпросмотр</span>
-            <button className="next-btn-demo" type="button" disabled>
-              <span>{content.nextBtnText || 'Ознакомился, далее'}</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* Enrich section — A-Book или ручной ввод */}
       {noAbook ? (
         <div className="enrich-section">
@@ -223,6 +193,36 @@ export default function TheoryEditor({ node }) {
           </div>
         </div>
       )}
+
+      {/* "Переход к следующему блоку" — внизу */}
+      <div className="enrich-section">
+        <div className="enrich-section__title-row">
+          <span className="enrich-section__title">Переход к следующему блоку <span className="req-star">*</span></span>
+          <InfoTip wide>Данную кнопку будет видеть сотрудник, чтобы перейти к следующему этапу обучению</InfoTip>
+        </div>
+        <p className="enrich-section__desc">
+          После прочтения теории сотруднику отображается кнопка для перехода к следующему шагу обучения. Здесь вы можете настроить её текст — он будет виден пользователю в чате.
+        </p>
+        <div className="field-block">
+          <label className="field-lbl">Текст кнопки</label>
+          <input
+            className="cv-inp"
+            value={content.nextBtnText || ''}
+            onChange={e => save({ nextBtnText: e.target.value })}
+            placeholder="Ознакомился, далее"
+          />
+          <div className="next-btn-preview" style={{ marginTop: 8 }}>
+            <span className="next-btn-preview__lbl">Предпросмотр</span>
+            <button className="next-btn-demo" type="button" disabled>
+              <span>{content.nextBtnText || 'Ознакомился, далее'}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Lock overlay when rubric not selected */}
       {!hasRubric && (

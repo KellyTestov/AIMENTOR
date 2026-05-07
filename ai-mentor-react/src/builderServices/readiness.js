@@ -10,15 +10,6 @@ function txt(v) {
   return typeof v === 'string' ? v.trim() : ''
 }
 
-function hasContentElement(elements) {
-  return Array.isArray(elements) && elements.some((e) => txt(e?.heading) || txt(e?.text))
-}
-
-function hasRubric(node) {
-  const s = node.settings || {}
-  return !!s.noAbook || !!s.abookRubric
-}
-
 /**
  * Собственные проверки узла (без учёта детей).
  * Возвращает массив { ok: boolean, label: string }.
@@ -30,8 +21,15 @@ export function getOwnChecks(node) {
     case 'exam':
       return [{ ok: !!txt(node.title), label: 'Название обучения' }]
 
-    case 'onboarding':
-      return [{ ok: hasContentElement(node.content?.elements), label: 'Текст онбординга' }]
+    case 'onboarding': {
+      const els = node.content?.elements || []
+      const firstHeading = els[0]?.heading || ''
+      const btn = node.content?.startBtnText || ''
+      return [
+        { ok: !!txt(firstHeading), label: 'Заголовок' },
+        { ok: !!txt(btn), label: 'Текст кнопки перехода' },
+      ]
+    }
 
     case 'theory_block':
       return [{
@@ -39,11 +37,28 @@ export function getOwnChecks(node) {
         label: 'Минимум одна теория',
       }]
 
-    case 'theory':
-      return [
-        { ok: hasContentElement(node.content?.elements), label: 'Содержание теории' },
-        { ok: hasRubric(node), label: 'Рубрика A-Book' },
+    case 'theory': {
+      const c = node.content || {}
+      const settings = node.settings || {}
+      const els = c.elements || []
+      const firstHeading = els[0]?.heading || ''
+      const btn = c.nextBtnText || ''
+      const checks = [
+        { ok: !!txt(firstHeading), label: 'Заголовок описания' },
+        { ok: !!txt(btn), label: 'Текст кнопки перехода' },
       ]
+      if (settings.noAbook) {
+        checks.push({ ok: !!txt(c.manualContent), label: 'Содержание (ручной ввод)' })
+      } else {
+        checks.push({ ok: !!txt(c.prompt), label: 'Промпт A-Book' })
+        const queries = c.queries || []
+        checks.push({
+          ok: queries.length > 0 && queries.every((q) => !!txt(q.text)),
+          label: 'Запросы в A-Book заполнены',
+        })
+      }
+      return checks
+    }
 
     case 'practice':
       return [{
@@ -68,15 +83,31 @@ export function getOwnChecks(node) {
 
     case 'question': {
       const c = node.content || {}
-      return [
+      const settings = node.settings || {}
+      const criteria = Array.isArray(c.criteria) ? c.criteria : []
+      const checks = [
         { ok: !!txt(c.text), label: 'Текст вопроса' },
-        { ok: Array.isArray(c.criteria) && c.criteria.length > 0, label: 'Хотя бы один критерий оценки' },
-        { ok: hasRubric(node), label: 'Рубрика A-Book' },
+        { ok: criteria.length > 0, label: 'Минимум один пункт чек-листа' },
+        {
+          ok: criteria.length > 0 && criteria.every((cr) => !!txt(cr.text)),
+          label: 'Все пункты чек-листа заполнены',
+        },
       ]
+      if (settings.noAbook) {
+        checks.push({ ok: !!txt(c.manualAnswer), label: 'Эталонный ответ' })
+      } else {
+        const queries = Array.isArray(c.queries) ? c.queries : []
+        checks.push({
+          ok: queries.length > 0 && queries.some((q) => !!txt(q.text)),
+          label: 'Минимум один запрос в A-Book',
+        })
+        checks.push({ ok: !!c.queriesApproved, label: 'Запросы в A-Book утверждены' })
+      }
+      return checks
     }
 
     case 'completion':
-      return [] // блок завершения не обязателен
+      return []
 
     default:
       return []
@@ -107,7 +138,6 @@ export function getRecursiveReadiness(node) {
   return { passed, total }
 }
 
-/** Возвращает 'ok' | 'partial' | 'empty' */
 export function getStatus(passed, total) {
   if (total === 0) return 'ok'
   if (passed === total) return 'ok'
@@ -115,8 +145,22 @@ export function getStatus(passed, total) {
   return 'partial'
 }
 
-/** Целое число процентов 0..100 */
 export function getProgress(passed, total) {
   if (total === 0) return 100
   return Math.round((passed / total) * 100)
+}
+
+/**
+ * Дочерние узлы первого уровня, у которых рекурсивная готовность < 100%.
+ * Используется для inspector-сообщения при агрегаторах.
+ */
+export function getIncompleteChildren(node) {
+  if (!node || !node.children) return []
+  return node.children
+    .map((child) => {
+      const r = getRecursiveReadiness(child)
+      const progress = getProgress(r.passed, r.total)
+      return { id: child.id, title: child.title, type: child.type, progress }
+    })
+    .filter((c) => c.progress < 100)
 }
