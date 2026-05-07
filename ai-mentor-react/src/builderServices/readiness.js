@@ -151,6 +151,22 @@ export function getProgress(passed, total) {
 }
 
 /**
+ * Был ли в поддереве (включая сам узел) хотя бы один visited-узел
+ * с незавершённой рекурсивной готовностью.
+ */
+export function hasVisitedProblem(node, visitedSet) {
+  if (!node || !visitedSet) return false
+  if (visitedSet.has(node.id)) {
+    const r = getRecursiveReadiness(node)
+    if (r.passed < r.total) return true
+  }
+  for (const child of node.children || []) {
+    if (hasVisitedProblem(child, visitedSet)) return true
+  }
+  return false
+}
+
+/**
  * Дочерние узлы первого уровня, у которых рекурсивная готовность < 100%.
  * Используется для inspector-сообщения при агрегаторах.
  */

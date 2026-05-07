@@ -92,11 +92,27 @@ function buildScaffold(meta) {
 
 export { ICONS, CHILD_TYPES, makeNode, genId }
 
+function visitedKey(unitId) {
+  return `bld-visited-${unitId}`
+}
+function loadVisited(unitId) {
+  try {
+    const raw = sessionStorage.getItem(visitedKey(unitId))
+    return raw ? new Set(JSON.parse(raw)) : new Set()
+  } catch { return new Set() }
+}
+function persistVisited(unitId, visitedSet) {
+  try {
+    sessionStorage.setItem(visitedKey(unitId), JSON.stringify([...visitedSet]))
+  } catch {}
+}
+
 export const useBuilderStore = create((set, get) => ({
   unit: null,
   selectedId: null,
   isDirty: false,
   error: null,
+  visitedIds: new Set(),
 
   load(unitId) {
     try {
@@ -117,14 +133,23 @@ export const useBuilderStore = create((set, get) => ({
           silenceThreshold: 10, hintPolicy: 'on_request', defaultFeedback: 'text',
         }
       }
-      set({ unit: stored, selectedId: stored.id, isDirty: false, error: null })
+      const visitedIds = loadVisited(stored.id)
+      set({ unit: stored, selectedId: stored.id, isDirty: false, error: null, visitedIds })
     } catch {
       set({ error: 'Ошибка загрузки обучения.' })
     }
   },
 
   selectNode(id) {
-    set({ selectedId: id })
+    const { unit, visitedIds } = get()
+    if (unit && id && !visitedIds.has(id)) {
+      const next = new Set(visitedIds)
+      next.add(id)
+      persistVisited(unit.id, next)
+      set({ selectedId: id, visitedIds: next })
+    } else {
+      set({ selectedId: id })
+    }
   },
 
   updateUnit(patch) {

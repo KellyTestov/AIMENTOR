@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useBuilderStore, ICONS, CHILD_TYPES } from '../../stores/builderStore.js'
-import { getRecursiveReadiness, getStatus } from '../../builderServices/readiness.js'
+import { getRecursiveReadiness, getStatus, hasVisitedProblem } from '../../builderServices/readiness.js'
 
 const PROTECTED = new Set(['onboarding', 'completion'])
 const CAN_ADD   = new Set(['unit', 'theory_block', 'practice', 'section', 'case'])
@@ -63,7 +63,7 @@ function RenameInline({ node, onDone }) {
 }
 
 function TreeNode({ node, depth, isRoot }) {
-  const { selectedId, selectNode, addChild, deleteNode, duplicateNode } = useBuilderStore()
+  const { selectedId, selectNode, addChild, deleteNode, duplicateNode, visitedIds } = useBuilderStore()
   const [expanded, setExpanded] = useState(true)
   const [renaming, setRenaming] = useState(false)
 
@@ -77,11 +77,10 @@ function TreeNode({ node, depth, isRoot }) {
 
   const r = getRecursiveReadiness(node)
   const status = getStatus(r.passed, r.total)
-  const statusTitle = r.total === 0
-    ? 'Без обязательных полей'
-    : status === 'ok'    ? 'Полностью заполнен'
-    : status === 'empty' ? 'Не заполнен'
-    : `Заполнено ${r.passed} из ${r.total}`
+  const showStatus = status !== 'ok' && hasVisitedProblem(node, visitedIds)
+  const statusTitle = status === 'empty'
+    ? 'Этот блок открыт, но не заполнен. Откройте его, чтобы заполнить обязательные поля.'
+    : `Этот блок открыт, но заполнен не до конца (${r.passed} из ${r.total}). Откройте, чтобы доделать.`
 
   function handleSelect(e) {
     if (e.target.closest('[data-action]')) return
@@ -164,11 +163,13 @@ function TreeNode({ node, depth, isRoot }) {
             </>
           )}
         </div>
-        <span
-          className={`tree-status tree-status--${status}`}
-          title={statusTitle}
-          aria-label={statusTitle}
-        />
+        {showStatus && (
+          <span
+            className={`tree-status tree-status--${status}`}
+            title={statusTitle}
+            aria-label={statusTitle}
+          />
+        )}
       </div>
       {hasKids && expanded && (
         <ul className="bld-tree">
