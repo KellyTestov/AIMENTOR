@@ -251,7 +251,7 @@ html, body {
   border-bottom: 1px solid #d1d5db;
 }
 .sb-msg__client-hdr--row {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  display: flex; align-items: center; gap: 10px;
 }
 .sb-msg__case {
   font-size: 13px; color: var(--muted); margin-bottom: 8px;
