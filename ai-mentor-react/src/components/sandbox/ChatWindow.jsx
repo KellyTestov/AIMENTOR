@@ -22,21 +22,20 @@ function Message({ msg, unitType }) {
 }
 
 export default function ChatWindow() {
-  const messages = useSandboxStore(s => s.messages)
-  const unit     = useSandboxStore(s => s.unit)
-  const chatRef  = useRef(null)
+  const messages   = useSandboxStore(s => s.messages)
+  const unit       = useSandboxStore(s => s.unit)
+  const bottomRef  = useRef(null)
 
   useEffect(() => {
-    if (chatRef.current) {
-      chatRef.current.scrollTop = chatRef.current.scrollHeight
-    }
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [messages])
 
   return (
-    <div className="sb-chat" ref={chatRef}>
+    <div className="sb-chat">
       {messages.map(msg => (
         <Message key={msg.id} msg={msg} unitType={unit?.type} />
       ))}
+      <div ref={bottomRef} style={{ height: 0 }} />
     </div>
   )
 }
