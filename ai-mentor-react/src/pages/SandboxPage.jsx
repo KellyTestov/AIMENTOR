@@ -99,12 +99,7 @@ export default function SandboxPage() {
           <span className="sb-header__title" id="sb-unit-title">{unit.title}</span>
         </div>
         <div className="sb-header__right">
-          {isExam && phase === 'running' && (
-            <>
-              <ElapsedTimer />
-              <QuestionTimer />
-            </>
-          )}
+          {isExam && phase === 'running' && <ElapsedTimer />}
           <span className="sb-header__badge" id="sb-mode-badge">{modeLbl}</span>
         </div>
       </header>
@@ -120,6 +115,7 @@ export default function SandboxPage() {
               <span className="sb-exam-bar__req">{client.request}</span>
             </>
           )}
+          <div className="sb-exam-bar__timer"><QuestionTimer /></div>
         </div>
       )}
 

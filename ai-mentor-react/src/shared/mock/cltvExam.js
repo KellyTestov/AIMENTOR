@@ -385,7 +385,7 @@ CLTV_EXAM_UNIT.children
   .find(c => c.type === 'practice')
   .children
   .find(s => s.id === 'cltv-section-2')
-  .children.push(CASE_Q3, CASE_Q4)
+  .children.push(CASE_Q3)
 
 /**
  * Seed the CLTV exam into localStorage if not already present.
@@ -395,10 +395,8 @@ export function seedCltvExam() {
   const KEY = 'ai-mentor-builder-data-v1'
   try {
     const stored = JSON.parse(localStorage.getItem(KEY) || '{}')
-    if (!stored[CLTV_EXAM_ID]) {
-      stored[CLTV_EXAM_ID] = CLTV_EXAM_UNIT
-      localStorage.setItem(KEY, JSON.stringify(stored))
-    }
+    stored[CLTV_EXAM_ID] = CLTV_EXAM_UNIT
+    localStorage.setItem(KEY, JSON.stringify(stored))
   } catch (e) {
     console.warn('seedCltvExam:', e)
   }

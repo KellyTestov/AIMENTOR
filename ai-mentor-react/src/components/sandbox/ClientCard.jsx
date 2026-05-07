@@ -75,27 +75,47 @@ function CardContent({ c }) {
   )
 }
 
+const PERSONAL_KEY = '__personal__'
+
 function SidebarAccordion({ c }) {
-  const [open, setOpen] = useState({})
+  // одна секция открыта за раз; по умолчанию — личные данные
+  const [openKey, setOpenKey] = useState(PERSONAL_KEY)
 
   function toggle(key) {
-    setOpen(prev => ({ ...prev, [key]: !prev[key] }))
+    setOpenKey(prev => prev === key ? null : key)
   }
+
+  const chevron = (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
 
   return (
     <div className="sb-client-card">
-      {/* Личные данные — всегда открыты */}
+
+      {/* Личные данные — тоже кнопка-переключатель */}
       <div className="sb-cc-section">
-        <div className="sb-cc-section__title">Личные данные клиента</div>
-        <PersonalRows c={c} />
+        <button
+          className={`sb-acc-toggle${openKey === PERSONAL_KEY ? ' is-open' : ''}`}
+          onClick={() => toggle(PERSONAL_KEY)}
+        >
+          <span>Личные данные клиента</span>
+          {chevron}
+        </button>
+        {openKey === PERSONAL_KEY && (
+          <div className="sb-acc-body">
+            <PersonalRows c={c} />
+          </div>
+        )}
       </div>
 
-      {/* Остальные секции — аккордеон */}
+      {/* Остальные секции */}
       {CLIENT_CARD_SECTIONS.map(sec => {
         const secData = c[sec.key] || {}
         const hasAny = sec.fields.some(f => secData[f.key] && String(secData[f.key]).trim())
         if (!hasAny) return null
-        const isOpen = !!open[sec.key]
+        const isOpen = openKey === sec.key
         return (
           <div key={sec.key} className="sb-cc-section">
             <button
@@ -103,9 +123,7 @@ function SidebarAccordion({ c }) {
               onClick={() => toggle(sec.key)}
             >
               <span>{sec.title}</span>
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              {chevron}
             </button>
             {isOpen && (
               <div className="sb-acc-body">

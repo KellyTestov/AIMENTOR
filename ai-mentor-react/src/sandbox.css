@@ -119,15 +119,15 @@ html, body {
 .sb-exam-bar__name  { font-weight: 700; color: var(--text); }
 .sb-exam-bar__sep   { color: var(--border); }
 .sb-exam-bar__req   { color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-exam-bar__timer { margin-left: auto; flex-shrink: 0; }
 
 /* ── Body / Chat ────────────────────────────────── */
-.sb-shell { display: flex; flex-direction: column; min-height: 100vh; }
-.sb-body { flex: 1; display: flex; align-items: stretch; min-height: 0; }
-.sb-body--with-sidebar { overflow: hidden; }
+.sb-shell { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.sb-body { flex: 1; display: flex; align-items: stretch; min-height: 0; overflow: hidden; }
 
 .sb-chat-wrap {
   display: flex; flex-direction: column; flex: 1;
-  max-width: 740px; margin: 0 auto; width: 100%; padding: 0 16px; min-height: 0;
+  max-width: 740px; margin: 0 auto; width: 100%; padding: 0 16px; min-height: 0; overflow: hidden;
 }
 .sb-body--with-sidebar .sb-chat-wrap {
   max-width: none; margin: 0;
