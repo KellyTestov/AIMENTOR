@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useSandboxStore } from '../../stores/sandboxStore.js'
 import { CLIENT_CARD_SECTIONS } from '../../core/constants.js'
 
@@ -10,12 +11,41 @@ const PERSONAL_FIELDS = [
   { key: 'request',  label: 'Запрос' },
 ]
 
+function PersonalRows({ c }) {
+  function displayValue(val) {
+    if (Array.isArray(val)) return val.length ? val.join(', ') : null
+    return val || null
+  }
+  return PERSONAL_FIELDS.map(f => {
+    const val = displayValue(c[f.key])
+    return (
+      <div key={f.key} className={`sb-client-row${f.key === 'request' ? ' sb-client-row--highlight' : ''}`}>
+        <span className="sb-client-label">{f.label}</span>
+        <span className={val ? '' : 'sb-client-empty'}>{val || '—'}</span>
+      </div>
+    )
+  })
+}
+
+function SectionRows({ sec, c }) {
+  const secData = c[sec.key] || {}
+  return sec.fields.map(f => {
+    const val = secData[f.key] ? String(secData[f.key]).trim() : null
+    if (!val) return null
+    return (
+      <div key={f.key} className="sb-client-row">
+        <span className="sb-client-label">{f.label}</span>
+        <span>{val}</span>
+      </div>
+    )
+  })
+}
+
 function CardContent({ c }) {
   function displayValue(val) {
     if (Array.isArray(val)) return val.length ? val.join(', ') : null
     return val || null
   }
-
   return (
     <div className="sb-client-card" id="sb-client-card">
       <div className="sb-cc-section">
@@ -30,7 +60,6 @@ function CardContent({ c }) {
           )
         })}
       </div>
-
       {CLIENT_CARD_SECTIONS.map(sec => {
         const secData = c[sec.key] || {}
         const hasAny = sec.fields.some(f => secData[f.key] && String(secData[f.key]).trim())
@@ -38,16 +67,51 @@ function CardContent({ c }) {
         return (
           <div key={sec.key} className="sb-cc-section">
             <div className="sb-cc-section__title">{sec.title}</div>
-            {sec.fields.map(f => {
-              const val = secData[f.key] ? String(secData[f.key]).trim() : null
-              if (!val) return null
-              return (
-                <div key={f.key} className="sb-client-row">
-                  <span className="sb-client-label">{f.label}</span>
-                  <span>{val}</span>
-                </div>
-              )
-            })}
+            <SectionRows sec={sec} c={c} />
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function SidebarAccordion({ c }) {
+  const [open, setOpen] = useState({})
+
+  function toggle(key) {
+    setOpen(prev => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  return (
+    <div className="sb-client-card">
+      {/* Личные данные — всегда открыты */}
+      <div className="sb-cc-section">
+        <div className="sb-cc-section__title">Личные данные клиента</div>
+        <PersonalRows c={c} />
+      </div>
+
+      {/* Остальные секции — аккордеон */}
+      {CLIENT_CARD_SECTIONS.map(sec => {
+        const secData = c[sec.key] || {}
+        const hasAny = sec.fields.some(f => secData[f.key] && String(secData[f.key]).trim())
+        if (!hasAny) return null
+        const isOpen = !!open[sec.key]
+        return (
+          <div key={sec.key} className="sb-cc-section">
+            <button
+              className={`sb-acc-toggle${isOpen ? ' is-open' : ''}`}
+              onClick={() => toggle(sec.key)}
+            >
+              <span>{sec.title}</span>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            {isOpen && (
+              <div className="sb-acc-body">
+                <SectionRows sec={sec} c={c} />
+              </div>
+            )}
           </div>
         )
       })}
@@ -69,7 +133,7 @@ export default function ClientCard({ onClose, sidebar }) {
           </div>
         </div>
         <div className="sb-sidebar__section-title">О клиенте</div>
-        <CardContent c={c} />
+        <SidebarAccordion c={c} />
       </div>
     )
   }
