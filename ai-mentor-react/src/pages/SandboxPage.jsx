@@ -4,7 +4,7 @@ import { useSandboxStore } from '../stores/sandboxStore.js'
 import { useSandboxEngine } from '../components/sandbox/useSandboxEngine.js'
 import ChatWindow from '../components/sandbox/ChatWindow.jsx'
 import AnswerInput from '../components/sandbox/AnswerInput.jsx'
-import { ElapsedTimer, QuestionTimer } from '../components/sandbox/ExamTimer.jsx'
+import { ElapsedTimer } from '../components/sandbox/ExamTimer.jsx'
 import ClientCard from '../components/sandbox/ClientCard.jsx'
 import ExamRulesModal from '../components/sandbox/ExamRulesModal.jsx'
 import ResumeModal from '../components/sandbox/ResumeModal.jsx'
@@ -115,7 +115,6 @@ export default function SandboxPage() {
               <span className="sb-exam-bar__req">{client.request}</span>
             </>
           )}
-          <div className="sb-exam-bar__timer"><QuestionTimer /></div>
         </div>
       )}
 

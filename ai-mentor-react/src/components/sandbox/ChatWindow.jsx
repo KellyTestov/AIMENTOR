@@ -1,7 +1,11 @@
 import { useEffect, useRef } from 'react'
 import { useSandboxStore } from '../../stores/sandboxStore.js'
+import { QuestionTimer } from './ExamTimer.jsx'
 
-function Message({ msg, unitType }) {
+const HDR_OPEN  = '<div class="sb-msg__client-hdr">'
+const HDR_CLOSE = '</div>'
+
+function Message({ msg, unitType, showTimer }) {
   if (msg.role === 'typing') {
     const cssRole = unitType === 'exam' ? 'client' : 'bot'
     return (
@@ -11,8 +15,27 @@ function Message({ msg, unitType }) {
     )
   }
 
-  const cssRole = (unitType === 'exam' && msg.role === 'bot') ? 'client' : msg.role
+  const cssRole   = (unitType === 'exam' && msg.role === 'bot') ? 'client' : msg.role
   const typeClass = msg.msgType ? ` sb-msg-type--${msg.msgType}` : ''
+
+  // For the last active client message in exam mode, split out the client-hdr
+  // so we can inject the QuestionTimer React component inline on the same row.
+  if (showTimer && msg.html.startsWith(HDR_OPEN)) {
+    const closeAt = msg.html.indexOf(HDR_CLOSE)
+    const hdrText = msg.html.slice(HDR_OPEN.length, closeAt)      // e.g. "👤 Петрова Анна"
+    const rest    = msg.html.slice(closeAt + HDR_CLOSE.length)
+
+    return (
+      <div className={`sb-msg sb-msg--${cssRole}${typeClass}`}>
+        <div className="sb-msg__client-hdr sb-msg__client-hdr--row">
+          <span>{hdrText}</span>
+          <QuestionTimer />
+        </div>
+        <div dangerouslySetInnerHTML={{ __html: rest }} />
+      </div>
+    )
+  }
+
   return (
     <div
       className={`sb-msg sb-msg--${cssRole}${typeClass}`}
@@ -22,18 +45,36 @@ function Message({ msg, unitType }) {
 }
 
 export default function ChatWindow() {
-  const messages   = useSandboxStore(s => s.messages)
-  const unit       = useSandboxStore(s => s.unit)
-  const bottomRef  = useRef(null)
+  const messages = useSandboxStore(s => s.messages)
+  const unit     = useSandboxStore(s => s.unit)
+  const phase    = useSandboxStore(s => s.phase)
+  const bottomRef = useRef(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [messages])
 
+  // Find last non-user, non-typing message to show timer on
+  const isExamRunning = unit?.type === 'exam' && phase === 'running'
+  let lastBotIdx = -1
+  if (isExamRunning) {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role !== 'user' && messages[i].role !== 'typing') {
+        lastBotIdx = i
+        break
+      }
+    }
+  }
+
   return (
     <div className="sb-chat">
-      {messages.map(msg => (
-        <Message key={msg.id} msg={msg} unitType={unit?.type} />
+      {messages.map((msg, idx) => (
+        <Message
+          key={msg.id}
+          msg={msg}
+          unitType={unit?.type}
+          showTimer={idx === lastBotIdx}
+        />
       ))}
       <div ref={bottomRef} style={{ height: 0 }} />
     </div>
