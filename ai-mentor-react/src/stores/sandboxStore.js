@@ -136,6 +136,7 @@ export const useSandboxStore = create((set, get) => ({
   client:            MOCK_CLIENT,
   cases:             [],        // [{ id, clientName }] — tabs for exam
   activeCaseId:      null,
+  closedCaseIds:     [],        // ids of cases navigated away from (disabled tabs)
 
   loadUnit(id) {
     try {
@@ -190,17 +191,37 @@ export const useSandboxStore = create((set, get) => ({
 
   registerCase(caseId, clientName) {
     set(s => {
+      const prevId = s.activeCaseId
+      let closedCaseIds = s.closedCaseIds
+
+      // Close previous tab and schedule its removal after 60s
+      if (prevId && prevId !== caseId && !closedCaseIds.includes(prevId)) {
+        closedCaseIds = [...closedCaseIds, prevId]
+        setTimeout(() => useSandboxStore.getState().hideCaseTab(prevId), 60000)
+      }
+
       if (s.cases.find(c => c.id === caseId)) {
-        return { activeCaseId: caseId }
+        return { activeCaseId: caseId, closedCaseIds }
       }
       const cases = [...s.cases, { id: caseId, clientName }]
       const session = s.session ? { ...s.session, cases, activeCaseId: caseId } : s.session
       if (session) saveSession(session)
-      return { cases, activeCaseId: caseId, session }
+      return { cases, activeCaseId: caseId, closedCaseIds, session }
     })
   },
 
-  setActiveCaseId(id) { set({ activeCaseId: id }) },
+  hideCaseTab(caseId) {
+    set(s => ({
+      cases:         s.cases.filter(c => c.id !== caseId),
+      closedCaseIds: s.closedCaseIds.filter(id => id !== caseId),
+    }))
+  },
+
+  setActiveCaseId(id) {
+    const { closedCaseIds } = useSandboxStore.getState()
+    if (closedCaseIds.includes(id)) return
+    set({ activeCaseId: id })
+  },
 
   setBusy(isBusy) { set({ isBusy }) },
 
@@ -229,7 +250,7 @@ export const useSandboxStore = create((set, get) => ({
 
   clearSession() {
     clearSession()
-    set({ session: null, messages: [], elapsed: 0, questionElapsed: 0, phase: 'idle', cases: [], activeCaseId: null })
+    set({ session: null, messages: [], elapsed: 0, questionElapsed: 0, phase: 'idle', cases: [], activeCaseId: null, closedCaseIds: [] })
   },
 
   publishUnit() {

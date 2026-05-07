@@ -139,6 +139,16 @@ html, body {
 .sb-tab:hover { background: #eef1f7; color: var(--text); border-color: var(--muted-lt); }
 .sb-tab.is-active {
   background: #eff6ff; color: #1e3a8a; border-color: #93c5fd; font-weight: 700;
+  gap: 8px;
+}
+.sb-tab.is-closed {
+  opacity: 0.45; cursor: not-allowed; pointer-events: none;
+}
+.sb-tab.is-closed:hover { background: var(--bg); color: var(--muted); border-color: var(--border); }
+
+/* Timer inside active tab */
+.sb-tab .sb-timer {
+  font-size: 11px; padding: 3px 7px; border-width: 1px;
 }
 
 /* ── Body / Chat ────────────────────────────────── */
@@ -159,6 +169,13 @@ html, body {
   border: 1px solid var(--border); border-radius: var(--radius-lg);
   background: var(--surface); box-shadow: var(--shadow-sm);
   margin: 0 auto; padding: 0 16px;
+  overflow: hidden;
+}
+.mode-trainer .sb-input-area {
+  background: var(--surface);
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
+  position: relative;
 }
 
 /* ── Right sidebar ───────────────────────────────── */

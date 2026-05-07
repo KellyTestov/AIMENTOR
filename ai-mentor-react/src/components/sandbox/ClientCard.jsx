@@ -78,11 +78,14 @@ function CardContent({ c }) {
 const PERSONAL_KEY = '__personal__'
 
 function SidebarAccordion({ c }) {
-  // одна секция открыта за раз; по умолчанию — личные данные
-  const [openKey, setOpenKey] = useState(PERSONAL_KEY)
+  const [openKeys, setOpenKeys] = useState(new Set([PERSONAL_KEY]))
 
   function toggle(key) {
-    setOpenKey(prev => prev === key ? null : key)
+    setOpenKeys(prev => {
+      const next = new Set(prev)
+      next.has(key) ? next.delete(key) : next.add(key)
+      return next
+    })
   }
 
   const chevron = (
@@ -97,13 +100,13 @@ function SidebarAccordion({ c }) {
       {/* Личные данные — тоже кнопка-переключатель */}
       <div className="sb-cc-section">
         <button
-          className={`sb-acc-toggle${openKey === PERSONAL_KEY ? ' is-open' : ''}`}
+          className={`sb-acc-toggle${openKeys.has(PERSONAL_KEY) ? ' is-open' : ''}`}
           onClick={() => toggle(PERSONAL_KEY)}
         >
           <span>Личные данные клиента</span>
           {chevron}
         </button>
-        {openKey === PERSONAL_KEY && (
+        {openKeys.has(PERSONAL_KEY) && (
           <div className="sb-acc-body">
             <PersonalRows c={c} />
           </div>
@@ -115,7 +118,7 @@ function SidebarAccordion({ c }) {
         const secData = c[sec.key] || {}
         const hasAny = sec.fields.some(f => secData[f.key] && String(secData[f.key]).trim())
         if (!hasAny) return null
-        const isOpen = openKey === sec.key
+        const isOpen = openKeys.has(sec.key)
         return (
           <div key={sec.key} className="sb-cc-section">
             <button

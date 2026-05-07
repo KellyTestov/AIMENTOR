@@ -4,7 +4,7 @@ import { useSandboxStore } from '../stores/sandboxStore.js'
 import { useSandboxEngine } from '../components/sandbox/useSandboxEngine.js'
 import ChatWindow from '../components/sandbox/ChatWindow.jsx'
 import AnswerInput from '../components/sandbox/AnswerInput.jsx'
-import { ElapsedTimer } from '../components/sandbox/ExamTimer.jsx'
+import { ElapsedTimer, QuestionTimer } from '../components/sandbox/ExamTimer.jsx'
 import ClientCard from '../components/sandbox/ClientCard.jsx'
 import ExamRulesModal from '../components/sandbox/ExamRulesModal.jsx'
 import ResumeModal from '../components/sandbox/ResumeModal.jsx'
@@ -17,7 +17,7 @@ export default function SandboxPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
-  const { unit, phase, error, client, session, isBusy, clearSession, publishUnit, loadUnit, cases, activeCaseId, setActiveCaseId } = useSandboxStore()
+  const { unit, phase, error, client, session, isBusy, clearSession, publishUnit, loadUnit, cases, activeCaseId, setActiveCaseId, closedCaseIds } = useSandboxStore()
   const { handleInput, handleStartButton, handleNextButton, startTrainer, startExam, resumeExam } = useSandboxEngine()
 
   const [publishing, setPublishing] = useState(false)
@@ -119,15 +119,21 @@ export default function SandboxPage() {
       {/* Client tabs (exam) */}
       {isExam && cases.length > 0 && (
         <div className="sb-tabs">
-          {cases.map(c => (
-            <button
-              key={c.id}
-              className={`sb-tab${c.id === activeCaseId ? ' is-active' : ''}`}
-              onClick={() => setActiveCaseId(c.id)}
-            >
-              👤 {c.clientName}
-            </button>
-          ))}
+          {cases.map(c => {
+            const isActive = c.id === activeCaseId
+            const isClosed = closedCaseIds.includes(c.id)
+            return (
+              <button
+                key={c.id}
+                className={`sb-tab${isActive ? ' is-active' : ''}${isClosed ? ' is-closed' : ''}`}
+                onClick={() => setActiveCaseId(c.id)}
+                disabled={isClosed}
+              >
+                <span>👤 {c.clientName}</span>
+                {isActive && <QuestionTimer />}
+              </button>
+            )
+          })}
         </div>
       )}
 
