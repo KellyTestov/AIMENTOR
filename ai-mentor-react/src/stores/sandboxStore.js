@@ -134,6 +134,8 @@ export const useSandboxStore = create((set, get) => ({
   phase:             'idle',   // idle | rules | resume | running | done | error
   error:             null,
   client:            MOCK_CLIENT,
+  cases:             [],        // [{ id, clientName }] — tabs for exam
+  activeCaseId:      null,
 
   loadUnit(id) {
     try {
@@ -149,7 +151,7 @@ export const useSandboxStore = create((set, get) => ({
       // Check saved session
       const saved = loadSavedSession()
       if (saved && saved.unitId === id) {
-        set({ unit, client, session: saved, messages: saved.messages || [], elapsed: saved.elapsedSeconds || 0 })
+        set({ unit, client, session: saved, messages: saved.messages || [], elapsed: saved.elapsedSeconds || 0, cases: saved.cases || [], activeCaseId: saved.activeCaseId || null })
         if (saved.phase === 'done') {
           set({ phase: 'done' })
         } else if (unit.type !== 'trainer' && saved.phase === 'running') {
@@ -176,7 +178,7 @@ export const useSandboxStore = create((set, get) => ({
   },
 
   addMessage(role, html, msgType = null) {
-    const msg = { id: nextId(), role, html, msgType }
+    const msg = { id: nextId(), role, html, msgType, caseId: get().activeCaseId }
     set(s => {
       const messages = [...s.messages, msg]
       const session  = s.session ? { ...s.session, messages } : s.session
@@ -185,6 +187,20 @@ export const useSandboxStore = create((set, get) => ({
     })
     return msg
   },
+
+  registerCase(caseId, clientName) {
+    set(s => {
+      if (s.cases.find(c => c.id === caseId)) {
+        return { activeCaseId: caseId }
+      }
+      const cases = [...s.cases, { id: caseId, clientName }]
+      const session = s.session ? { ...s.session, cases, activeCaseId: caseId } : s.session
+      if (session) saveSession(session)
+      return { cases, activeCaseId: caseId, session }
+    })
+  },
+
+  setActiveCaseId(id) { set({ activeCaseId: id }) },
 
   setBusy(isBusy) { set({ isBusy }) },
 
@@ -213,7 +229,7 @@ export const useSandboxStore = create((set, get) => ({
 
   clearSession() {
     clearSession()
-    set({ session: null, messages: [], elapsed: 0, questionElapsed: 0, phase: 'idle' })
+    set({ session: null, messages: [], elapsed: 0, questionElapsed: 0, phase: 'idle', cases: [], activeCaseId: null })
   },
 
   publishUnit() {

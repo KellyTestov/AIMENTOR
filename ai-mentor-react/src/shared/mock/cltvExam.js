@@ -381,11 +381,7 @@ CLTV_EXAM_UNIT.children
   .find(s => s.id === 'cltv-section-1')
   .children.push(CASE_Q1, CASE_Q2)
 
-CLTV_EXAM_UNIT.children
-  .find(c => c.type === 'practice')
-  .children
-  .find(s => s.id === 'cltv-section-2')
-  .children.push(CASE_Q3)
+// CASE_Q3 removed — exam uses only 2 clients (Петрова, Соколов)
 
 /**
  * Seed the CLTV exam into localStorage if not already present.

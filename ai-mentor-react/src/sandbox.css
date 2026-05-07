@@ -40,7 +40,7 @@ html, body {
   display: flex; flex-direction: column; align-items: center; gap: 1px;
   overflow: hidden;
 }
-.sb-header__right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.sb-header__right { display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end; }
 .sb-header__unit-label {
   font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
   color: var(--muted-lt); white-space: nowrap;
@@ -120,6 +120,27 @@ html, body {
 .sb-exam-bar__req   { color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sb-exam-bar__timer { margin-left: auto; flex-shrink: 0; }
 
+/* ── Client tabs (exam) ──────────────────────────── */
+.sb-tabs {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px; background: var(--surface);
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+  overflow-x: auto;
+}
+.sb-tabs::-webkit-scrollbar { height: 0; }
+.sb-tab {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 14px; border-radius: var(--radius-sm);
+  font: 600 12px/1 Manrope, sans-serif; color: var(--muted);
+  background: var(--bg); border: 1px solid var(--border);
+  cursor: pointer; white-space: nowrap;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.sb-tab:hover { background: #eef1f7; color: var(--text); border-color: var(--muted-lt); }
+.sb-tab.is-active {
+  background: #eff6ff; color: #1e3a8a; border-color: #93c5fd; font-weight: 700;
+}
+
 /* ── Body / Chat ────────────────────────────────── */
 .sb-shell { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 .sb-body { flex: 1; display: flex; align-items: stretch; min-height: 0; overflow: hidden; }
@@ -130,6 +151,14 @@ html, body {
 }
 .sb-body--with-sidebar .sb-chat-wrap {
   max-width: none; margin: 0;
+}
+
+/* Trainer: bordered chat window */
+.mode-trainer .sb-body { padding: 16px; }
+.mode-trainer .sb-chat-wrap {
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+  background: var(--surface); box-shadow: var(--shadow-sm);
+  margin: 0 auto; padding: 0 16px;
 }
 
 /* ── Right sidebar ───────────────────────────────── */

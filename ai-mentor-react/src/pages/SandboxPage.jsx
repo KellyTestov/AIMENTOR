@@ -17,7 +17,7 @@ export default function SandboxPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
-  const { unit, phase, error, client, session, isBusy, clearSession, publishUnit, loadUnit } = useSandboxStore()
+  const { unit, phase, error, client, session, isBusy, clearSession, publishUnit, loadUnit, cases, activeCaseId, setActiveCaseId } = useSandboxStore()
   const { handleInput, handleStartButton, handleNextButton, startTrainer, startExam, resumeExam } = useSandboxEngine()
 
   const [publishing, setPublishing] = useState(false)
@@ -80,8 +80,7 @@ export default function SandboxPage() {
     return <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>Загрузка...</div>
   }
 
-  const isExam   = unit.type !== 'trainer'
-  const modeLbl  = isExam ? 'Тестовая среда · Экзамен' : 'Тестовая среда · Тренажёр'
+  const isExam      = unit.type !== 'trainer'
   const showSidebar = isExam && phase === 'running'
 
   return (
@@ -100,7 +99,6 @@ export default function SandboxPage() {
         </div>
         <div className="sb-header__right">
           {isExam && phase === 'running' && <ElapsedTimer />}
-          <span className="sb-header__badge" id="sb-mode-badge">{modeLbl}</span>
         </div>
       </header>
 
@@ -115,6 +113,21 @@ export default function SandboxPage() {
               <span className="sb-exam-bar__req">{client.request}</span>
             </>
           )}
+        </div>
+      )}
+
+      {/* Client tabs (exam) */}
+      {isExam && cases.length > 0 && (
+        <div className="sb-tabs">
+          {cases.map(c => (
+            <button
+              key={c.id}
+              className={`sb-tab${c.id === activeCaseId ? ' is-active' : ''}`}
+              onClick={() => setActiveCaseId(c.id)}
+            >
+              👤 {c.clientName}
+            </button>
+          ))}
         </div>
       )}
 
@@ -157,7 +170,7 @@ export default function SandboxPage() {
         <ResumeModal onContinue={resumeExam} onBack={handleBack} />
       )}
       {phase === 'done' && !isExam && (
-        <TrainerReportModal onBack={handleBack} onPublish={handlePublish} />
+        <TrainerReportModal onBack={handleBack} />
       )}
       {phase === 'done' && isExam && (
         <ExamCompletionModal onBack={handleBack} onPublish={handlePublish} />

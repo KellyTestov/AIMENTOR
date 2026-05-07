@@ -161,6 +161,7 @@ export function useSandboxEngine() {
       const clientInfo = extractClientFromCase(parent)
       store.setClient(clientInfo)
       clientName = clientInfo.name
+      useSandboxStore.getState().registerCase(parent.id, clientName)
     }
 
     let html = `<div class="sb-msg__client-hdr">👤 ${clientName}</div>`

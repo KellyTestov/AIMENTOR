@@ -45,21 +45,29 @@ function Message({ msg, unitType, showTimer }) {
 }
 
 export default function ChatWindow() {
-  const messages = useSandboxStore(s => s.messages)
-  const unit     = useSandboxStore(s => s.unit)
-  const phase    = useSandboxStore(s => s.phase)
-  const bottomRef = useRef(null)
+  const messages     = useSandboxStore(s => s.messages)
+  const unit         = useSandboxStore(s => s.unit)
+  const phase        = useSandboxStore(s => s.phase)
+  const cases        = useSandboxStore(s => s.cases)
+  const activeCaseId = useSandboxStore(s => s.activeCaseId)
+  const bottomRef    = useRef(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
-  }, [messages])
+  }, [messages, activeCaseId])
 
-  // Find last non-user, non-typing message to show timer on
+  // In exam mode with tabs, show only messages for the active case
+  const isExamTabs = unit?.type === 'exam' && cases.length > 0
+  const visibleMessages = isExamTabs
+    ? messages.filter(m => m.caseId === activeCaseId)
+    : messages
+
+  // Find last non-user, non-typing message in visible set to show timer on
   const isExamRunning = unit?.type === 'exam' && phase === 'running'
   let lastBotIdx = -1
   if (isExamRunning) {
-    for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].role !== 'user' && messages[i].role !== 'typing') {
+    for (let i = visibleMessages.length - 1; i >= 0; i--) {
+      if (visibleMessages[i].role !== 'user' && visibleMessages[i].role !== 'typing') {
         lastBotIdx = i
         break
       }
@@ -68,7 +76,7 @@ export default function ChatWindow() {
 
   return (
     <div className="sb-chat">
-      {messages.map((msg, idx) => (
+      {visibleMessages.map((msg, idx) => (
         <Message
           key={msg.id}
           msg={msg}
