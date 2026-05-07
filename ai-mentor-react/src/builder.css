@@ -313,18 +313,28 @@ html, body {
   text-align: center;
 }
 
-/* Status indicator per node (recursive readiness) — vertical bar pinned right */
+/* Status indicator per node (recursive readiness) — pinned right */
 .tree-status {
   flex-shrink: 0;
-  width: 3px;
-  height: 16px;
-  border-radius: 2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
   margin-left: 6px;
-  background: var(--border);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, .25);
 }
-.tree-status--ok      { background: #22c55e; }
-.tree-status--partial { background: #f59e0b; }
-.tree-status--empty   { background: #ef4444; }
+.tree-status--ok {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, .28);
+}
+.tree-status--partial {
+  background: #f59e0b;
+  box-shadow: none;
+}
+.tree-status--empty {
+  background: #ef4444;
+  box-shadow: none;
+}
 
 .tree-label {
   flex: 1;
