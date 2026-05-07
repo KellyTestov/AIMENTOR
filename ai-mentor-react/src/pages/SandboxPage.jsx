@@ -18,7 +18,7 @@ export default function SandboxPage() {
   const navigate = useNavigate()
 
   const { unit, phase, error, client, session, isBusy, clearSession, publishUnit, loadUnit, cases, activeCaseId, setActiveCaseId, closedCaseIds } = useSandboxStore()
-  const { handleInput, handleStartButton, handleNextButton, startTrainer, startExam, resumeExam } = useSandboxEngine()
+  const { handleInput, handleStartButton, handleNextButton, startTrainer, startExam, resumeExam, handleFinish } = useSandboxEngine()
 
   const [publishing, setPublishing] = useState(false)
   const [published,  setPublished]  = useState(false)
@@ -153,6 +153,12 @@ export default function SandboxPage() {
             <div className="sb-theory-actions">
               <button className="sb-theory-btn" onClick={handleNextButton} disabled={isBusy}>
                 Дальше →
+              </button>
+            </div>
+          ) : phase === 'finished' ? (
+            <div className="sb-theory-actions">
+              <button className="sb-theory-btn" onClick={handleFinish}>
+                Завершить тренировку
               </button>
             </div>
           ) : (

@@ -137,13 +137,13 @@ export function useSandboxEngine() {
   }
 
   async function trainerFinish() {
-    store.updateSession({ phase: 'done' })
     const { unit } = useSandboxStore.getState()
     const compHtml = getNodeHtml(unit, 'completion')
     let html = '<p>🏁 <strong>Тренировка завершена!</strong></p>'
     if (compHtml) html += `<div class="sb-msg__block">${compHtml}</div>`
     await botSay(html, 600, 'practice')
-    setTimeout(() => store.setPhase('done'), 800)
+    // Show "Завершить тренировку" button — modal appears only on click
+    store.setPhase('finished')
   }
 
   // ── EXAM ─────────────────────────────────────────
@@ -262,5 +262,9 @@ export function useSandboxEngine() {
     await examAskQuestion()
   }, [])
 
-  return { handleInput, handleStartButton, handleNextButton, startTrainer, startExam, resumeExam }
+  const handleFinish = useCallback(() => {
+    store.setPhase('done')
+  }, [])
+
+  return { handleInput, handleStartButton, handleNextButton, startTrainer, startExam, resumeExam, handleFinish }
 }
