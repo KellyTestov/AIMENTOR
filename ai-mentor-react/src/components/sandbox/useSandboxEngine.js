@@ -139,8 +139,9 @@ export function useSandboxEngine() {
   async function trainerFinish() {
     const { unit } = useSandboxStore.getState()
     const compHtml = getNodeHtml(unit, 'completion')
-    let html = '<p>🏁 <strong>Тренировка завершена!</strong></p>'
-    if (compHtml) html += `<div class="sb-msg__block">${compHtml}</div>`
+    const html = compHtml
+      ? `<div class="sb-msg__block">${compHtml}</div>`
+      : '<p>🏁 <strong>Тренировка завершена!</strong></p>'
     await botSay(html, 600, 'practice')
     // Show "Завершить тренировку" button — modal appears only on click
     store.setPhase('finished')
