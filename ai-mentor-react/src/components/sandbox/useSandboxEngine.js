@@ -156,11 +156,14 @@ export function useSandboxEngine() {
     const q      = questions[idx]
     const parent = findParentCase(unit, q)
 
+    let clientName = useSandboxStore.getState().client.name
     if (parent?.type === 'case') {
-      store.setClient(extractClientFromCase(parent))
+      const clientInfo = extractClientFromCase(parent)
+      store.setClient(clientInfo)
+      clientName = clientInfo.name
     }
 
-    let html = ''
+    let html = `<div class="sb-msg__client-hdr">👤 ${clientName}</div>`
     if (parent?.type === 'case' && parent.content?.description?.trim()) {
       html += `<div class="sb-msg__case">${parent.content.description}</div>`
     }

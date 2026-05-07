@@ -10,12 +10,68 @@ const PERSONAL_FIELDS = [
   { key: 'request',  label: 'Запрос' },
 ]
 
-export default function ClientCard({ onClose }) {
-  const c = useSandboxStore(s => s.client)
-
+function CardContent({ c }) {
   function displayValue(val) {
     if (Array.isArray(val)) return val.length ? val.join(', ') : null
     return val || null
+  }
+
+  return (
+    <div className="sb-client-card" id="sb-client-card">
+      <div className="sb-cc-section">
+        <div className="sb-cc-section__title">Личные данные клиента</div>
+        {PERSONAL_FIELDS.map(f => {
+          const val = displayValue(c[f.key])
+          return (
+            <div key={f.key} className={`sb-client-row${f.key === 'request' ? ' sb-client-row--highlight' : ''}`}>
+              <span className="sb-client-label">{f.label}</span>
+              <span className={val ? '' : 'sb-client-empty'}>{val || '—'}</span>
+            </div>
+          )
+        })}
+      </div>
+
+      {CLIENT_CARD_SECTIONS.map(sec => {
+        const secData = c[sec.key] || {}
+        const hasAny = sec.fields.some(f => secData[f.key] && String(secData[f.key]).trim())
+        if (!hasAny) return null
+        return (
+          <div key={sec.key} className="sb-cc-section">
+            <div className="sb-cc-section__title">{sec.title}</div>
+            {sec.fields.map(f => {
+              const val = secData[f.key] ? String(secData[f.key]).trim() : null
+              if (!val) return null
+              return (
+                <div key={f.key} className="sb-client-row">
+                  <span className="sb-client-label">{f.label}</span>
+                  <span>{val}</span>
+                </div>
+              )
+            })}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+export default function ClientCard({ onClose, sidebar }) {
+  const c = useSandboxStore(s => s.client)
+
+  if (sidebar) {
+    return (
+      <div className="sb-sidebar__inner">
+        <div className="sb-sidebar__head">
+          <span className="sb-sidebar__icon">👤</span>
+          <div>
+            <div className="sb-sidebar__name">{c.name}</div>
+            <div className="sb-sidebar__status">{c.status}</div>
+          </div>
+        </div>
+        <div className="sb-sidebar__section-title">О клиенте</div>
+        <CardContent c={c} />
+      </div>
+    )
   }
 
   return (
@@ -28,46 +84,7 @@ export default function ClientCard({ onClose }) {
         </button>
         <div className="sb-modal__icon" aria-hidden="true">👤</div>
         <h2 className="sb-modal__title">Данные клиента</h2>
-
-        <div className="sb-client-card" id="sb-client-card">
-
-          {/* Личные данные */}
-          <div className="sb-cc-section">
-            <div className="sb-cc-section__title">Личные данные клиента</div>
-            {PERSONAL_FIELDS.map(f => {
-              const val = displayValue(c[f.key])
-              return (
-                <div key={f.key} className={`sb-client-row${f.key === 'request' ? ' sb-client-row--highlight' : ''}`}>
-                  <span className="sb-client-label">{f.label}</span>
-                  <span className={val ? '' : 'sb-client-empty'}>{val || '—'}</span>
-                </div>
-              )
-            })}
-          </div>
-
-          {/* Все разделы из карточки клиента */}
-          {CLIENT_CARD_SECTIONS.map(sec => {
-            const secData = c[sec.key] || {}
-            const hasAny = sec.fields.some(f => secData[f.key] && String(secData[f.key]).trim())
-            if (!hasAny) return null
-            return (
-              <div key={sec.key} className="sb-cc-section">
-                <div className="sb-cc-section__title">{sec.title}</div>
-                {sec.fields.map(f => {
-                  const val = secData[f.key] ? String(secData[f.key]).trim() : null
-                  if (!val) return null
-                  return (
-                    <div key={f.key} className="sb-client-row">
-                      <span className="sb-client-label">{f.label}</span>
-                      <span>{val}</span>
-                    </div>
-                  )
-                })}
-              </div>
-            )
-          })}
-
-        </div>
+        <CardContent c={c} />
       </div>
     </div>
   )

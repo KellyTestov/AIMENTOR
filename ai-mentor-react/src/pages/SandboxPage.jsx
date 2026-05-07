@@ -17,15 +17,13 @@ export default function SandboxPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
-  const { unit, phase, error, client, session, isBusy, clearSession, publishUnit, loadUnit, setPhase } = useSandboxStore()
+  const { unit, phase, error, client, session, isBusy, clearSession, publishUnit, loadUnit } = useSandboxStore()
   const { handleInput, handleStartButton, handleNextButton, startTrainer, startExam, resumeExam } = useSandboxEngine()
 
-  const [showClient,  setShowClient]  = useState(false)
-  const [publishing,  setPublishing]  = useState(false)
-  const [published,   setPublished]   = useState(false)
-  const [origin,      setOrigin]      = useState('catalog')  // 'catalog' | 'builder'
+  const [publishing, setPublishing] = useState(false)
+  const [published,  setPublished]  = useState(false)
+  const [origin,     setOrigin]     = useState('catalog')
 
-  // Load unit
   useEffect(() => {
     const id = searchParams.get('id') || sessionStorage.getItem('sb-pending-id') || ''
     if (id) {
@@ -37,29 +35,19 @@ export default function SandboxPage() {
     setOrigin(src)
   }, [searchParams, loadUnit])
 
-  // Auto-start trainer greeting once unit loaded
   useEffect(() => {
     if (unit && unit.type === 'trainer' && phase === 'idle') {
       startTrainer()
     }
   }, [unit, phase, startTrainer])
 
-  // Navigation helpers
   function goToBuilder() {
-    if (unit) {
-      navigate(`/builder?id=${unit.id}`)
-    } else {
-      navigate('/')
-    }
+    navigate(unit ? `/builder?id=${unit.id}` : '/')
   }
 
   function handleBack() {
     clearSession()
-    if (origin === 'builder') {
-      goToBuilder()
-    } else {
-      navigate('/')
-    }
+    origin === 'builder' ? goToBuilder() : navigate('/')
   }
 
   function handlePublish() {
@@ -72,7 +60,6 @@ export default function SandboxPage() {
     }, 1500)
   }
 
-  // ── Error state ────────────────────────────────
   if (error || phase === 'error') {
     return (
       <div style={{
@@ -93,11 +80,12 @@ export default function SandboxPage() {
     return <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>Загрузка...</div>
   }
 
-  const isExam    = unit.type !== 'trainer'
-  const modeLbl   = isExam ? 'Тестовая среда · Экзамен' : 'Тестовая среда · Тренажёр'
+  const isExam   = unit.type !== 'trainer'
+  const modeLbl  = isExam ? 'Тестовая среда · Экзамен' : 'Тестовая среда · Тренажёр'
+  const showSidebar = isExam && phase === 'running'
 
   return (
-    <div className={`sb-shell${isExam ? ' mode-exam' : ' mode-trainer'}`} style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div className={`sb-shell${isExam ? ' mode-exam' : ' mode-trainer'}`}>
 
       {/* Header */}
       <header className="sb-header">
@@ -115,27 +103,31 @@ export default function SandboxPage() {
             <>
               <ElapsedTimer />
               <QuestionTimer />
-              <button className="sb-client-btn" onClick={() => setShowClient(true)} id="btn-show-client">
-                👤 Данные клиента
-              </button>
             </>
           )}
           <span className="sb-header__badge" id="sb-mode-badge">{modeLbl}</span>
         </div>
       </header>
 
-      {/* Body */}
-      <div className="sb-body">
-        <div className="sb-chat-wrap">
-          {isExam && phase === 'running' && (
-            <div className="sb-role-bar" id="sb-role-bar">
-              <span className="sb-role-bar__client" id="sb-role-client-label">
-                💬 {client.name}
-              </span>
-              <span className="sb-role-bar__sep">·</span>
-              <span>Сотрудник</span>
-            </div>
+      {/* Exam subheader — client name + request */}
+      {showSidebar && (
+        <div className="sb-exam-bar">
+          <span className="sb-exam-bar__label">Чат с клиентом</span>
+          <span className="sb-exam-bar__name">{client.name}</span>
+          {client.request && (
+            <>
+              <span className="sb-exam-bar__sep">·</span>
+              <span className="sb-exam-bar__req">{client.request}</span>
+            </>
           )}
+        </div>
+      )}
+
+      {/* Body */}
+      <div className={`sb-body${showSidebar ? ' sb-body--with-sidebar' : ''}`}>
+
+        {/* Chat area */}
+        <div className="sb-chat-wrap">
           <ChatWindow />
           {session?.phase === 'greeting' ? (
             <div className="sb-theory-actions">
@@ -153,66 +145,38 @@ export default function SandboxPage() {
             <AnswerInput onSend={handleInput} />
           )}
         </div>
+
+        {/* Right sidebar — client card (exam only) */}
+        {showSidebar && (
+          <aside className="sb-sidebar">
+            <ClientCard sidebar />
+          </aside>
+        )}
       </div>
 
       {/* Modals */}
-
-      {/* Exam rules — shown before exam starts */}
       {phase === 'rules' && (
-        <ExamRulesModal
-          unitTitle={unit.title}
-          onStart={startExam}
-          onBack={handleBack}
-        />
+        <ExamRulesModal unitTitle={unit.title} onStart={startExam} onBack={handleBack} />
       )}
-
-      {/* Resume after crash */}
       {phase === 'resume' && (
-        <ResumeModal
-          onContinue={resumeExam}
-          onBack={handleBack}
-        />
+        <ResumeModal onContinue={resumeExam} onBack={handleBack} />
       )}
-
-      {/* Trainer report — shown when done */}
       {phase === 'done' && !isExam && (
-        <TrainerReportModal
-          onBack={handleBack}
-          onPublish={handlePublish}
-        />
+        <TrainerReportModal onBack={handleBack} onPublish={handlePublish} />
       )}
-
-      {/* Exam completion */}
       {phase === 'done' && isExam && (
-        <ExamCompletionModal
-          onBack={handleBack}
-          onPublish={handlePublish}
-        />
+        <ExamCompletionModal onBack={handleBack} onPublish={handlePublish} />
       )}
-
-      {/* Publishing spinner */}
       {publishing && (
         <div className="sb-modal-backdrop" id="loading-modal">
           <div className="sb-modal sb-modal--compact">
-            <div className="sb-loader">
-              <div className="sb-loader__ring" />
-            </div>
+            <div className="sb-loader"><div className="sb-loader__ring" /></div>
             <p className="sb-modal__desc">Публикуем обучение...</p>
           </div>
         </div>
       )}
-
-      {/* Published success */}
       {published && (
-        <PublishSuccessModal
-          onBackToBuilder={goToBuilder}
-          onCatalog={() => navigate('/')}
-        />
-      )}
-
-      {/* Client data modal */}
-      {showClient && (
-        <ClientCard onClose={() => setShowClient(false)} />
+        <PublishSuccessModal onBackToBuilder={goToBuilder} onCatalog={() => navigate('/')} />
       )}
     </div>
   )
