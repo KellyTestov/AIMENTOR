@@ -164,9 +164,6 @@ export function useSandboxEngine() {
     }
 
     let html = `<div class="sb-msg__client-hdr">👤 ${clientName}</div>`
-    if (parent?.type === 'case' && parent.content?.description?.trim()) {
-      html += `<div class="sb-msg__case">${parent.content.description}</div>`
-    }
     html += `<p>${q.content?.text || '(вопрос не заполнен)'}</p>`
 
     await botSay(html, 600)
