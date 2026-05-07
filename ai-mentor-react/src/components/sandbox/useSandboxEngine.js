@@ -1,6 +1,6 @@
 /**
  * useSandboxEngine — hook that drives the trainer/exam conversation logic.
- * Returns { handleInput } to be called when user sends a message.
+ * Returns { handleInput, handleStartButton, handleNextButton } for use in UI.
  */
 import { useCallback } from 'react'
 import {
@@ -17,13 +17,12 @@ export function useSandboxEngine() {
   const store = useSandboxStore()
 
   // botSay: add typing indicator → wait → add bot message → unblock
-  async function botSay(html, delay = 750) {
+  async function botSay(html, delay = 750, msgType = null) {
     store.setBusy(true)
-    store.addMessage('typing', '')  // typing placeholder handled in ChatWindow
+    store.addMessage('typing', '')
     await new Promise(r => setTimeout(r, delay))
-    // Remove last typing msg
     useSandboxStore.setState(s => ({ messages: s.messages.filter(m => m.role !== 'typing') }))
-    store.addMessage(store.unit?.type === 'exam' ? 'client' : 'bot', html)
+    store.addMessage(store.unit?.type === 'exam' ? 'client' : 'bot', html, msgType)
     store.setBusy(false)
   }
 
@@ -34,14 +33,13 @@ export function useSandboxEngine() {
     let html = `<p>Добро пожаловать в тестовую среду тренажёра!</p>
 <p>Вы проверяете тренажёр <strong>«${unit.title}»</strong>.</p>`
     if (obHtml) html += `<div class="sb-msg__block">${obHtml}</div>`
-    html += `<p>Для начала тренировки введите <strong>«Старт»</strong>.</p>`
-    await botSay(html, 400)
+    await botSay(html, 400, 'theory')
     store.updateSession({ phase: 'greeting' })
   }
 
   async function trainerStart() {
     store.updateSession({ phase: 'running', questionIndex: 0, errors: [] })
-    await botSay('<p>Начинаем тренировку! Отвечайте на вопросы в формате диалога с клиентом.</p>', 500)
+    await botSay('<p>Начинаем тренировку! Отвечайте на вопросы в формате диалога с клиентом.</p>', 500, 'practice')
     await trainerAskQuestion()
   }
 
@@ -71,20 +69,16 @@ export function useSandboxEngine() {
       html += `<div class="sb-msg__hint">💡 ${hintText}</div>`
     }
 
-    await botSay(html, 600)
+    await botSay(html, 600, 'practice')
   }
 
-  // Для вопросов с эталонным ответом (3 шага) требуем минимальную длину
-  // И наличие призыва к действию — иначе ответ неполный
   const CTA_RE = /оформ|закаж|расскаж|помог|отправл|попробу|предлаг/i
 
   function isAnswerSufficient(text, q) {
     const t = text.trim()
     if (q.content?.refAnswer?.trim()) {
-      // Структурированный вопрос (3 шага): нужна длина И призыв к действию
       return t.length >= 60 && CTA_RE.test(t)
     }
-    // Обычный вопрос — просто не слишком короткий
     return t.length >= 15
   }
 
@@ -108,41 +102,36 @@ export function useSandboxEngine() {
     const isRetry = !!session.retryMode
     const isGood  = isAnswerSufficient(text, q)
 
-    // Custom per-question feedback bypasses retry logic
     if (q.content?.feedback?.trim()) {
-      await botSay(`<p>${q.content.feedback}</p>`, 650)
+      await botSay(`<p>${q.content.feedback}</p>`, 650, 'practice')
       store.updateSession({ questionIndex: idx + 1, retryMode: false })
       await trainerAskQuestion()
       return
     }
 
     if (isGood) {
-      // ── Correct ───────────────────────────────────────────────────────
       const corrIdx = idx % MOCK_CORRECT.length
       let html = `<p>${MOCK_CORRECT[corrIdx]}</p>${refAnswerBlock(q)}`
-      await botSay(html, 650)
+      await botSay(html, 650, 'practice')
       store.updateSession({ questionIndex: idx + 1, retryMode: false })
       await trainerAskQuestion()
       return
     }
 
-    // ── Insufficient answer ───────────────────────────────────────────
     const errors = [...(session.errors || []), idx]
 
     if (isRetry) {
-      // Second wrong attempt → show ref answer and move on
       let html = `<p>❌ Ответ по-прежнему не соответствует ожидаемому. Посмотрите, как нужно отвечать:</p>${refAnswerBlock(q)}`
-      await botSay(html, 700)
+      await botSay(html, 700, 'practice')
       store.updateSession({ questionIndex: idx + 1, retryMode: false, errors })
       await trainerAskQuestion()
     } else {
-      // First wrong attempt → give all hints, allow retry
       const hints = getQuestionHints(q)
       const hintLines = hints.length
         ? hints.map(h => `<p>💡 ${h}</p>`).join('')
         : `<p>💡 ${MOCK_HINTS[idx % MOCK_HINTS.length]}</p>`
       let html = `<p>⚠️ Ответ не содержит всех необходимых элементов — попробуйте ещё раз!</p>${hintLines}`
-      await botSay(html, 650)
+      await botSay(html, 650, 'practice')
       store.updateSession({ retryMode: true, errors })
     }
   }
@@ -153,7 +142,7 @@ export function useSandboxEngine() {
     const compHtml = getNodeHtml(unit, 'completion')
     let html = '<p>🏁 <strong>Тренировка завершена!</strong></p>'
     if (compHtml) html += `<div class="sb-msg__block">${compHtml}</div>`
-    await botSay(html, 600)
+    await botSay(html, 600, 'practice')
     setTimeout(() => store.setPhase('done'), 800)
   }
 
@@ -197,7 +186,7 @@ export function useSandboxEngine() {
     setTimeout(() => store.setPhase('done'), 800)
   }
 
-  // ── THEORY STEPS (optional, trainer only) ────────────────────────────────
+  // ── THEORY STEPS ────────────────────────────────────────────────────────────
   async function trainerTheoryStep(idx) {
     const { unit } = useSandboxStore.getState()
     const onboarding = unit.children?.find(c => c.type === 'onboarding')
@@ -205,18 +194,16 @@ export function useSandboxEngine() {
 
     if (idx >= steps.length) {
       store.updateSession({ phase: 'running', questionIndex: 0, errors: [] })
-      await botSay('<p>Отлично! Начинаем тренировку. Отвечайте на возражения клиентов, используя правило трёх шагов.</p>', 400)
+      await botSay('<p>Отлично! Начинаем тренировку. Отвечайте на возражения клиентов, используя правило трёх шагов.</p>', 400, 'practice')
       await trainerAskQuestion()
       return
     }
 
     const step = steps[idx]
-    const isLast = idx === steps.length - 1
     let html = step.heading ? `<p><strong>${step.heading}</strong></p>` : ''
     html += `<p>${(step.text || '').replace(/\n/g, '<br/>')}</p>`
-    html += `<p><em>Напишите <strong>«Дальше»</strong>, чтобы ${isLast ? 'начать тренировку' : 'продолжить'}.</em></p>`
 
-    await botSay(html, 600)
+    await botSay(html, 600, 'theory')
     store.updateSession({ phase: 'theory', theoryIndex: idx })
   }
 
@@ -228,25 +215,7 @@ export function useSandboxEngine() {
     store.addMessage('user', `<p>${text}</p>`)
 
     if (unit.type === 'trainer') {
-      if (session.phase === 'greeting') {
-        if (/^старт$/i.test(text.trim())) {
-          const onboarding = unit.children?.find(c => c.type === 'onboarding')
-          const theorySteps = onboarding?.content?.theorySteps || []
-          if (theorySteps.length > 0) {
-            await trainerTheoryStep(0)
-          } else {
-            await trainerStart()
-          }
-        } else {
-          await botSay('<p>Введите <strong>«Старт»</strong>, чтобы начать тренировку.</p>', 350)
-        }
-      } else if (session.phase === 'theory') {
-        if (/^дальше$/i.test(text.trim())) {
-          await trainerTheoryStep((session.theoryIndex ?? 0) + 1)
-        } else {
-          await botSay('<p>Напишите <strong>«Дальше»</strong>, чтобы перейти к следующему блоку.</p>', 350)
-        }
-      } else if (session.phase === 'running') {
+      if (session.phase === 'running') {
         await trainerHandleAnswer(text)
       }
     } else {
@@ -254,6 +223,24 @@ export function useSandboxEngine() {
         await examHandleAnswer()
       }
     }
+  }, [])
+
+  const handleStartButton = useCallback(async () => {
+    const { unit, isBusy } = useSandboxStore.getState()
+    if (isBusy) return
+    const onboarding = unit.children?.find(c => c.type === 'onboarding')
+    const theorySteps = onboarding?.content?.theorySteps || []
+    if (theorySteps.length > 0) {
+      await trainerTheoryStep(0)
+    } else {
+      await trainerStart()
+    }
+  }, [])
+
+  const handleNextButton = useCallback(async () => {
+    const { session, isBusy } = useSandboxStore.getState()
+    if (isBusy) return
+    await trainerTheoryStep((session.theoryIndex ?? 0) + 1)
   }, [])
 
   const startTrainer = useCallback(async () => {
@@ -274,5 +261,5 @@ export function useSandboxEngine() {
     await examAskQuestion()
   }, [])
 
-  return { handleInput, startTrainer, startExam, resumeExam }
+  return { handleInput, handleStartButton, handleNextButton, startTrainer, startExam, resumeExam }
 }

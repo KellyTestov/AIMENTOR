@@ -155,11 +155,16 @@ html, body {
   border: 1px solid #bfdbfe; box-shadow: var(--shadow-sm);
   border-bottom-left-radius: 4px;
 }
-.sb-msg--client::before {
-  content: var(--client-bubble-label, "Клиент");
-  display: block; font-size: 10px; font-weight: 700;
-  letter-spacing: .05em; text-transform: uppercase;
-  color: #3b82f6; margin-bottom: 4px;
+/* Theory messages — gray background */
+.sb-msg-type--theory {
+  background: #f0f0f0;
+  border-color: #d4d4d4;
+}
+
+/* Practice messages — pastel green */
+.sb-msg-type--practice {
+  background: #e8f5e9;
+  border-color: #a5d6a7;
 }
 
 /* Пользователь (сотрудник) */
@@ -236,6 +241,20 @@ html, body {
 }
 .sb-send-btn:hover  { background: linear-gradient(145deg, #bf1a1a 0%, #7a0b0b 100%); }
 .sb-send-btn:disabled { background: var(--border); cursor: not-allowed; }
+
+/* ── Theory action buttons (Старт / Дальше) ──────── */
+.sb-theory-actions {
+  display: flex; justify-content: flex-end;
+  padding: 10px 0 14px; border-top: 1px solid var(--border);
+}
+.sb-theory-btn {
+  padding: 10px 28px; border-radius: var(--radius-md);
+  background: linear-gradient(145deg, #d62020 0%, #900e0e 100%);
+  color: #fff; font-size: 15px; font-weight: 600;
+  border: none; cursor: pointer; transition: background .15s, opacity .15s;
+}
+.sb-theory-btn:hover { background: linear-gradient(145deg, #bf1a1a 0%, #7a0b0b 100%); }
+.sb-theory-btn:disabled { opacity: .5; cursor: not-allowed; }
 
 /* ── Модальные окна ──────────────────────────────── */
 .sb-modal-backdrop {

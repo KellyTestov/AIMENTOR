@@ -17,8 +17,8 @@ export default function SandboxPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
-  const { unit, phase, error, client, clearSession, publishUnit, loadUnit, setPhase } = useSandboxStore()
-  const { handleInput, startTrainer, startExam, resumeExam } = useSandboxEngine()
+  const { unit, phase, error, client, session, isBusy, clearSession, publishUnit, loadUnit, setPhase } = useSandboxStore()
+  const { handleInput, handleStartButton, handleNextButton, startTrainer, startExam, resumeExam } = useSandboxEngine()
 
   const [showClient,  setShowClient]  = useState(false)
   const [publishing,  setPublishing]  = useState(false)
@@ -137,7 +137,21 @@ export default function SandboxPage() {
             </div>
           )}
           <ChatWindow />
-          <AnswerInput onSend={handleInput} />
+          {session?.phase === 'greeting' ? (
+            <div className="sb-theory-actions">
+              <button className="sb-theory-btn" onClick={handleStartButton} disabled={isBusy}>
+                Старт
+              </button>
+            </div>
+          ) : session?.phase === 'theory' ? (
+            <div className="sb-theory-actions">
+              <button className="sb-theory-btn" onClick={handleNextButton} disabled={isBusy}>
+                Дальше →
+              </button>
+            </div>
+          ) : (
+            <AnswerInput onSend={handleInput} />
+          )}
         </div>
       </div>
 

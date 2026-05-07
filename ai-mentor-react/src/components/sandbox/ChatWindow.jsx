@@ -12,9 +12,10 @@ function Message({ msg, unitType }) {
   }
 
   const cssRole = (unitType === 'exam' && msg.role === 'bot') ? 'client' : msg.role
+  const typeClass = msg.msgType ? ` sb-msg-type--${msg.msgType}` : ''
   return (
     <div
-      className={`sb-msg sb-msg--${cssRole}`}
+      className={`sb-msg sb-msg--${cssRole}${typeClass}`}
       dangerouslySetInnerHTML={{ __html: msg.html }}
     />
   )

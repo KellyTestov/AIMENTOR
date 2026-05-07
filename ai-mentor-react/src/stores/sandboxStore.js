@@ -175,8 +175,8 @@ export const useSandboxStore = create((set, get) => ({
     }
   },
 
-  addMessage(role, html) {
-    const msg = { id: nextId(), role, html }
+  addMessage(role, html, msgType = null) {
+    const msg = { id: nextId(), role, html, msgType }
     set(s => {
       const messages = [...s.messages, msg]
       const session  = s.session ? { ...s.session, messages } : s.session
