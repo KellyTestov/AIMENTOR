@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useBuilderStore, ICONS, CHILD_TYPES } from '../../stores/builderStore.js'
+import { getRecursiveReadiness, getStatus } from '../../builderServices/readiness.js'
 
 const PROTECTED = new Set(['onboarding', 'completion'])
 const CAN_ADD   = new Set(['unit', 'theory_block', 'practice', 'section', 'case'])
@@ -74,6 +75,14 @@ function TreeNode({ node, depth, isRoot }) {
   const canRename  = node.type === 'theory'
   const indent     = depth * 16 + 8
 
+  const r = getRecursiveReadiness(node)
+  const status = getStatus(r.passed, r.total)
+  const statusTitle = r.total === 0
+    ? 'Без обязательных полей'
+    : status === 'ok'    ? 'Полностью заполнен'
+    : status === 'empty' ? 'Не заполнен'
+    : `Заполнено ${r.passed} из ${r.total}`
+
   function handleSelect(e) {
     if (e.target.closest('[data-action]')) return
     selectNode(node.id)
@@ -123,6 +132,7 @@ function TreeNode({ node, depth, isRoot }) {
           )
           : <span className="tree-toggle tree-toggle--leaf" />
         }
+        <span className={`tree-status tree-status--${status}`} title={statusTitle} aria-label={statusTitle} />
         <span className="tree-icon">{icon}</span>
         {renaming
           ? <RenameInline node={node} onDone={() => setRenaming(false)} />

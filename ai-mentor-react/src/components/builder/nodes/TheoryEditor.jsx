@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useBuilderStore, genId } from '../../../stores/builderStore.js'
+import InfoTip from '../../shared/InfoTip.jsx'
 
 const MOCK_ABOOK_RESP = `✅ Комиссия за услугу уведомлений по дебетовым картам составляет — 99 рублей.\n\n🚨 По кредитным комиссия составляет — 159 рублей.\n\n❌ Если клиент хочет оспорить списание — направь его на составление обращения «Комиссии»`
 
@@ -74,7 +75,12 @@ export default function TheoryEditor({ node }) {
 
       <p className="cv-subheading">Обучение сотрудника. Вы можете настроить теорию, которая будет отображена сотруднику</p>
 
-      <div className="cv-section-lbl">Описание</div>
+      <div className="enrich-section" style={{ marginTop: 0 }}>
+        <div className="enrich-section__title">Описание</div>
+        <p className="enrich-section__desc">
+          Указанный вами текст будет отображен сотруднику над теоретической информацией
+        </p>
+      </div>
 
       {elements.map((el, idx) => (
         <div key={el.id} className="field-block">
@@ -98,7 +104,10 @@ export default function TheoryEditor({ node }) {
 
       {/* "Переход к следующему блоку" section */}
       <div className="enrich-section">
-        <div className="enrich-section__title">Переход к следующему блоку</div>
+        <div className="enrich-section__title-row">
+          <span className="enrich-section__title">Переход к следующему блоку</span>
+          <InfoTip wide>Данную кнопку будет видеть сотрудник, чтобы перейти к следующему этапу обучению</InfoTip>
+        </div>
         <p className="enrich-section__desc">
           После прочтения теории сотруднику отображается кнопка для перехода к следующему шагу обучения. Здесь вы можете настроить её текст — он будет виден пользователю в чате.
         </p>
@@ -145,6 +154,9 @@ export default function TheoryEditor({ node }) {
           <div className="enrich-section__title-row">
             <span className="enrich-section__title">Обогащение из базы знаний</span>
           </div>
+          <p className="enrich-section__desc">
+            Вам необходимо указать запросы к базе знаний и получить из нее необходимую вам теоретическую информацию, при прохождении обучения данные запросы будут автоматически направлены в A-Book и сотрудник увидит полученные ответы.
+          </p>
           <div className={`query-card${isApproved ? ' query-card--approved' : ''}`}>
             <div className="query-card__header">
               <span className="query-card__title">Тестовые запросы в A-Book</span>

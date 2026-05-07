@@ -1,6 +1,63 @@
 import { useState } from 'react'
 import { useBuilderStore, ICONS } from '../../stores/builderStore.js'
 import { builderService } from '../../builderServices/builderService.js'
+import {
+  getNodeReadiness,
+  getRecursiveReadiness,
+  getStatus,
+  getProgress,
+} from '../../builderServices/readiness.js'
+
+function ReadinessPanel({ node }) {
+  if (!node) return null
+  const own = getNodeReadiness(node)
+  const recursive = getRecursiveReadiness(node)
+  const ownStatus = getStatus(own.passed, own.total)
+  const recStatus = getStatus(recursive.passed, recursive.total)
+  const recProgress = getProgress(recursive.passed, recursive.total)
+
+  const isAggregator = (node.children || []).length > 0 && own.total === 0
+  const isUnitRoot = node.type === 'trainer' || node.type === 'exam'
+
+  return (
+    <div className="rd-panel">
+      <div className="rd-panel__head">
+        <span className="rd-panel__label">
+          {isUnitRoot ? 'Готовность обучения' : 'Готовность блока'}
+        </span>
+        <span className={`rd-panel__pct rd-panel__pct--${recStatus}`}>{recProgress}%</span>
+      </div>
+      <div className="rd-panel__bar">
+        <div
+          className={`rd-panel__bar-fill rd-panel__bar-fill--${recStatus}`}
+          style={{ width: `${recProgress}%` }}
+        />
+      </div>
+
+      {own.total === 0 ? (
+        <div className="rd-panel__note">
+          {isAggregator
+            ? 'Состоит из вложенных блоков — заполните их.'
+            : 'В этом блоке нет обязательных полей.'}
+        </div>
+      ) : own.problems.length === 0 ? (
+        <div className="rd-panel__ok">✓ Все поля заполнены</div>
+      ) : (
+        <details className="rd-panel__details" open={ownStatus !== 'ok'}>
+          <summary>
+            <span>Не заполнено</span>
+            <span className="rd-panel__count">{own.problems.length}</span>
+          </summary>
+          <ul className="rd-panel__list">
+            {own.problems.map((p, i) => (
+              <li key={i}>{p}</li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </div>
+  )
+}
 
 function failLbl(v) {
   return v === 'retry' ? 'Повторная попытка' : v === 'end' ? 'Завершить' : v === 'skip' ? 'Пропустить' : 'По умолчанию'
@@ -343,7 +400,8 @@ export default function Inspector() {
   if (!unit) return null
 
   let title = 'Инспектор'
-  let body  = (
+  let activeNode = null
+  let body = (
     <div className="insp-empty">
       <div className="insp-empty__icon">🎛️</div>
       <div className="insp-empty__text">Выберите элемент в структуре, чтобы увидеть его настройки</div>
@@ -352,10 +410,12 @@ export default function Inspector() {
 
   if (selectedId === unit.id || !selectedId) {
     title = 'Единица обучения'
+    activeNode = unit
     body  = <UnitInspector unit={unit} updateUnit={updateUnit} />
   } else {
     const node = builderService.findNode(unit, selectedId)
     if (node) {
+      activeNode = node
       switch (node.type) {
         case 'question':
           title = 'Вопрос'
@@ -386,6 +446,7 @@ export default function Inspector() {
         <span className="bld-right__title" id="inspector-title">{title}</span>
       </div>
       <div className="bld-right__body" id="inspector-body">
+        {activeNode && <ReadinessPanel node={activeNode} />}
         {body}
       </div>
     </aside>

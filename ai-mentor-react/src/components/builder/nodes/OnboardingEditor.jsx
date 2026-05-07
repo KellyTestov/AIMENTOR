@@ -1,4 +1,5 @@
 import { useBuilderStore, genId } from '../../../stores/builderStore.js'
+import InfoTip from '../../shared/InfoTip.jsx'
 
 export default function OnboardingEditor({ node }) {
   const updateNodeFull = useBuilderStore(s => s.updateNodeFull)
@@ -68,7 +69,10 @@ export default function OnboardingEditor({ node }) {
       )}
 
       <div className="enrich-section" style={{ marginTop: 16 }}>
-        <div className="enrich-section__title">Кнопка перехода</div>
+        <div className="enrich-section__title-row">
+          <span className="enrich-section__title">Кнопка перехода</span>
+          <InfoTip wide>Данную кнопку будет видеть сотрудник, чтобы перейти к следующему этапу обучению</InfoTip>
+        </div>
         <div className="field-block">
           <label className="field-lbl">Текст кнопки</label>
           <input

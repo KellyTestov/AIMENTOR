@@ -95,15 +95,18 @@ export default function CaseEditor({ node }) {
       </div>
       <p className="cv-subheading">Сценарий кейса и список вопросов</p>
 
-      <div className="field-block">
-        <label className="field-lbl" htmlFor="case-desc">Описание кейса</label>
+      <div className="enrich-section" style={{ marginTop: 0 }}>
+        <div className="enrich-section__title">Описание кейса</div>
+        <p className="enrich-section__desc">
+          Опишите, с какой темой связан данный кейс, сотрудник не увидит эту информацию
+        </p>
         <textarea
           className="cv-textarea"
           id="case-desc"
           rows={3}
           value={content.description || ''}
           onChange={e => save({ description: e.target.value })}
-          placeholder="Опишите контекст или сценарий для этого кейса..."
+          placeholder="Проработка льготного периода по кредитной карте"
         />
       </div>
 

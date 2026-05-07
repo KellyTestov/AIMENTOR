@@ -88,7 +88,7 @@ export default function QuestionEditor({ node }) {
   }
 
   function addCrit() {
-    if (criteria.length >= 3) return
+    if (criteria.length >= 10) return
     save({ criteria: [...criteria, { id: genId('crit'), text: '', score: '' }] })
   }
 
@@ -160,6 +160,9 @@ export default function QuestionEditor({ node }) {
           <div className="enrich-section__title-row">
             <span className="enrich-section__title">Обогащение из базы знаний</span>
           </div>
+          <p className="enrich-section__desc">
+            Вам необходимо указать запросы к базе знаний и получить из нее необходимую вам информацию, при прохождении обучения данные запросы будут автоматически направлены в A-Book и будут использованы для оценки ответа сотрудника
+          </p>
           <div className={`query-card${isApproved ? ' query-card--approved' : ''}`}>
             <div className="query-card__header">
               <span className="query-card__title">Тестовые запросы в A-Book</span>
@@ -212,20 +215,26 @@ export default function QuestionEditor({ node }) {
       {/* Criteria */}
       <div className="field-block">
         <div className="crit-section-hd">
-          <span className="field-lbl" style={{ margin: 0 }}>Критерии оценки</span>
+          <span className="field-lbl" style={{ margin: 0 }}>Чек-лист оценки ответа</span>
         </div>
+        <p className="crit-section-desc">
+          Добавьте пункты, которые должны быть в ответе сотрудника. AI проверит каждый пункт отдельно и начислит баллы.
+        </p>
         <div className="crit-cards" id="crit-cards">
           {criteria.map((cr, i) => {
             const linked = hints.filter(h => h.criteriaId === cr.id)
             return (
               <div key={cr.id} className="crit-card">
-                <div className="crit-card__row">
+                <div className="crit-card__head">
                   <span className="crit-card__num">{i + 1}</span>
+                  <span className="crit-card__field-lbl">Что проверяем в ответе?</span>
+                </div>
+                <div className="crit-card__row">
                   <input
                     type="text"
                     className="crit-card__text"
                     value={cr.text}
-                    placeholder="Опишите критерий оценки..."
+                    placeholder="Например: Сотрудник верно указал комиссию по кредитной карте"
                     onChange={e => updateCritText(cr.id, e.target.value)}
                   />
                   <div className="crit-card__score-pill">
@@ -240,7 +249,7 @@ export default function QuestionEditor({ node }) {
                     <span className="crit-card__score-unit">б.</span>
                   </div>
                   {criteria.length > 1 && (
-                    <button className="crit-card__del" onClick={() => removeCrit(cr.id)} title="Удалить критерий">×</button>
+                    <button className="crit-card__del" onClick={() => removeCrit(cr.id)} title="Удалить пункт">×</button>
                   )}
                 </div>
                 {linked.length > 0 && (
@@ -266,11 +275,15 @@ export default function QuestionEditor({ node }) {
             )
           })}
         </div>
-        {criteria.length < 3 && (
-          <button className="add-dashed add-dashed--sm" style={{ marginTop: 8 }} onClick={addCrit}>
-            + Добавить критерий
-          </button>
-        )}
+        <button
+          className="add-dashed add-dashed--sm"
+          style={{ marginTop: 8 }}
+          onClick={addCrit}
+          disabled={criteria.length >= 10}
+          title={criteria.length >= 10 ? 'Максимум 10 пунктов' : ''}
+        >
+          + Добавить пункт оценки
+        </button>
       </div>
     </div>
   )

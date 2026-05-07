@@ -70,7 +70,15 @@
       "WebFetch(domain:core-ds.github.io)",
       "Bash(grep -n \"\\\\$\" \"f:/ownerpagementor/ai-mentor-react/node_modules/@alfalab/core-components-vars/mixins.css\")",
       "Bash(grep -v \"^$\")",
-      "Bash(xargs grep:*)"
+      "Bash(xargs grep:*)",
+      "Bash(xargs ls:*)",
+      "Bash(xargs cat:*)",
+      "Bash(npx vite:*)",
+      "Bash(python -c \"import json; p=json.load\\(open\\('f:/ownerpagementor/ai-mentor-react/node_modules/@alfalab/core-components/package.json'\\)\\); print\\(list\\(p.keys\\(\\)\\)\\)\")",
+      "Bash(netstat -ano)",
+      "Bash(git -C f:/ownerpagementor log --all --oneline -30 --graph)",
+      "Bash(git -C f:/ownerpagementor branch -a)",
+      "Bash(git -C f:/ownerpagementor show --stat 07dc48f)"
     ]
   }
 }
