@@ -11,6 +11,16 @@ import { getAnalyticsSessions } from './shared/mock/analytics.js'
 import { seedCltvExam } from './shared/mock/cltvExam.js'
 import { seedSalesTrainer } from './shared/mock/salesTrainer.js'
 
+// Bump this version whenever the mock data schema changes.
+// All users' localStorage will be cleared on the next load.
+const DATA_VERSION = '2'
+const VER_KEY = 'ai-mentor-data-version'
+
+if (localStorage.getItem(VER_KEY) !== DATA_VERSION) {
+  ;['ai-mentor-builder-data-v1', 'ai-mentor-sandbox-session-v1', 'ai-mentor-catalog-state-v1'].forEach(k => localStorage.removeItem(k))
+  localStorage.setItem(VER_KEY, DATA_VERSION)
+}
+
 seedCltvExam()
 seedSalesTrainer()
 
