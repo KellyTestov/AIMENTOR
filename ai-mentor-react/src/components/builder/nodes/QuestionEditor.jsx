@@ -126,13 +126,15 @@ export default function QuestionEditor({ node }) {
           <p className="enrich-section__desc">
             Введите правильный ответ на вопрос выше — AI будет использовать его для оценки ответа сотрудника.
           </p>
-          <textarea
-            className="cv-textarea"
-            rows={6}
-            value={content.manualAnswer || ''}
-            onChange={e => save({ manualAnswer: e.target.value })}
-            placeholder="Опишите эталонный ответ на вопрос: что именно должен сказать сотрудник, чтобы ответ был засчитан как верный..."
-          />
+          <div className="field-block">
+            <textarea
+              className="cv-textarea"
+              rows={6}
+              value={content.manualAnswer || ''}
+              onChange={e => save({ manualAnswer: e.target.value })}
+              placeholder="Опишите эталонный ответ на вопрос: что именно должен сказать сотрудник, чтобы ответ был засчитан как верный..."
+            />
+          </div>
         </div>
       ) : (
         <div className="enrich-section">

@@ -111,13 +111,15 @@ export default function TheoryEditor({ node }) {
           <p className="enrich-section__desc">
             Вставьте текст, который AI будет использовать как справочную базу для этого блока теории.
           </p>
-          <textarea
-            className="cv-textarea"
-            rows={10}
-            value={content.manualContent || ''}
-            onChange={e => save({ manualContent: e.target.value })}
-            placeholder="Вставьте сюда справочный текст, инструкцию или выдержку из материалов, которые AI должен использовать при обучении сотрудника..."
-          />
+          <div className="field-block">
+            <textarea
+              className="cv-textarea"
+              rows={10}
+              value={content.manualContent || ''}
+              onChange={e => save({ manualContent: e.target.value })}
+              placeholder="Вставьте сюда справочный текст, инструкцию или выдержку из материалов, которые AI должен использовать при обучении сотрудника..."
+            />
+          </div>
         </div>
       ) : (
         <div className="enrich-section">
