@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 const PADDING = 12
 
@@ -19,14 +20,12 @@ export default function InfoTip({ children, wide = false }) {
     const tipW = tipRect.width
     const tipH = tipRect.height
 
-    // Horizontal: try to center on trigger, clamp to viewport
     let left = rect.left + rect.width / 2 - tipW / 2
     if (left + tipW > window.innerWidth - PADDING) {
       left = window.innerWidth - tipW - PADDING
     }
     if (left < PADDING) left = PADDING
 
-    // Vertical: above by default; if not enough room above — below
     let top = rect.top - tipH - 8
     if (top < PADDING) top = rect.bottom + 8
 
@@ -54,14 +53,15 @@ export default function InfoTip({ children, wide = false }) {
         <line x1="12" y1="16" x2="12" y2="12" />
         <line x1="12" y1="8" x2="12.01" y2="8" />
       </svg>
-      {open && (
+      {open && createPortal(
         <span
           ref={tipRef}
           className={`info-tip-pop${wide ? ' info-tip-pop--wide' : ''}`}
           style={pos ? { top: pos.top, left: pos.left, visibility: 'visible' } : { visibility: 'hidden' }}
         >
           {children}
-        </span>
+        </span>,
+        document.body
       )}
     </span>
   )
