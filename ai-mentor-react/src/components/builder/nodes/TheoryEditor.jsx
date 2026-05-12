@@ -75,32 +75,31 @@ export default function TheoryEditor({ node }) {
 
       <p className="cv-subheading">Обучение сотрудника. Вы можете настроить теорию, которая будет отображена сотруднику</p>
 
-      <div className="enrich-section" style={{ marginTop: 0 }}>
+      <div className="field-block">
         <div className="enrich-section__title">Описание</div>
         <p className="enrich-section__desc">
           Указанный вами текст будет отображен сотруднику над теоретической информацией
         </p>
+        {elements.map((el, idx) => (
+          <div key={el.id} style={idx > 0 ? { marginTop: 16 } : null}>
+            <label className="field-lbl">Заголовок</label>
+            <input
+              className="cv-inp"
+              value={el.heading || ''}
+              onChange={e => updateEl(idx, { heading: e.target.value })}
+              placeholder="Введите заголовок..."
+            />
+            <label className="field-lbl" style={{ marginTop: 8 }}>Текст</label>
+            <textarea
+              className="cv-textarea"
+              rows={6}
+              value={el.text || ''}
+              onChange={e => updateEl(idx, { text: e.target.value })}
+              placeholder="Введите описание к теоретическому материалу..."
+            />
+          </div>
+        ))}
       </div>
-
-      {elements.map((el, idx) => (
-        <div key={el.id} className="field-block">
-          <label className="field-lbl">Заголовок</label>
-          <input
-            className="cv-inp"
-            value={el.heading || ''}
-            onChange={e => updateEl(idx, { heading: e.target.value })}
-            placeholder="Введите заголовок..."
-          />
-          <label className="field-lbl" style={{ marginTop: 8 }}>Текст</label>
-          <textarea
-            className="cv-textarea"
-            rows={6}
-            value={el.text || ''}
-            onChange={e => updateEl(idx, { text: e.target.value })}
-            placeholder="Введите описание к теоретическому материалу..."
-          />
-        </div>
-      ))}
 
       {/* Enrich section — A-Book или ручной ввод */}
       {noAbook ? (
