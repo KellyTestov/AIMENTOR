@@ -1,5 +1,12 @@
 import { useRef } from 'react'
 import { useBuilderStore } from '../../../stores/builderStore.js'
+import { PROMPT_COVERS } from '../../../shared/mock/units.js'
+
+function getPlaceholderCover(id) {
+  if (!PROMPT_COVERS || PROMPT_COVERS.length === 0) return null
+  const idx = id ? id.charCodeAt(id.length - 1) % PROMPT_COVERS.length : 0
+  return PROMPT_COVERS[idx]
+}
 
 const DIRECTION_MAP = {
   'Доставка':       ['Малый и микро бизнес', 'Розничный бизнес'],
@@ -49,6 +56,8 @@ export default function UnitEditor({ unit }) {
   const curFactory = unit.factory || ''
   const dirOptions = DIRECTION_MAP[curFactory] || []
 
+  const coverSrc = unit.coverDataUrl || unit.coverUrl || getPlaceholderCover(unit.id)
+
   function handleCoverFile(e) {
     const file = e.target.files[0]
     if (!file) return
@@ -74,14 +83,14 @@ export default function UnitEditor({ unit }) {
         title="Нажмите для изменения обложки"
         style={{ cursor: 'pointer' }}
       >
-        {unit.coverDataUrl
-          ? <img src={unit.coverDataUrl} alt="Обложка" />
+        {coverSrc
+          ? <img src={coverSrc} alt="Обложка" />
           : <div className="cu-cover-ph">🖼️</div>
         }
         <div className="cu-cover-overlay">
           <span className="cu-cover-overlay__icon">📷</span>
           <span className="cu-cover-overlay__text">
-            {unit.coverDataUrl ? 'Изменить обложку' : 'Загрузить обложку'}
+            {coverSrc ? 'Изменить обложку' : 'Загрузить обложку'}
           </span>
         </div>
         <input
