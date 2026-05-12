@@ -127,6 +127,7 @@ export default function QuestionEditor({ node }) {
             Введите правильный ответ на вопрос выше — AI будет использовать его для оценки ответа сотрудника.
           </p>
           <div className="field-block">
+            <label className="field-lbl">Текст</label>
             <textarea
               className="cv-textarea"
               rows={6}

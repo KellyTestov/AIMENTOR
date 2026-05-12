@@ -112,6 +112,7 @@ export default function TheoryEditor({ node }) {
             Вставьте текст, который AI будет использовать как справочную базу для этого блока теории.
           </p>
           <div className="field-block">
+            <label className="field-lbl">Текст</label>
             <textarea
               className="cv-textarea"
               rows={10}

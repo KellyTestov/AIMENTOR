@@ -155,16 +155,19 @@ export default function BuilderPage() {
 
         <div className="bld-header__right">
           <button
-            id="btn-check"
+            id="btn-save"
             className="bld-btn bld-btn--ghost"
-            onClick={handleCheck}
-            title="Проверить заполнение"
+            onClick={handleSave}
+            disabled={!isDirty}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4 }} aria-hidden="true">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-            Проверить
+            Сохранить
+          </button>
+          <button
+            id="btn-publish"
+            className={`bld-btn${isPublished ? ' bld-btn--ghost' : ' bld-btn--primary'}`}
+            onClick={handlePublishClick}
+          >
+            {isPublished ? 'Снять с публикации' : 'Опубликовать'}
           </button>
 
           <div className="bld-more-wrap" ref={moreRef}>
@@ -186,22 +189,6 @@ export default function BuilderPage() {
               </div>
             )}
           </div>
-
-          <button
-            id="btn-save"
-            className="bld-btn bld-btn--ghost"
-            onClick={handleSave}
-            disabled={!isDirty}
-          >
-            Сохранить
-          </button>
-          <button
-            id="btn-publish"
-            className={`bld-btn${isPublished ? ' bld-btn--ghost' : ' bld-btn--primary'}`}
-            onClick={handlePublishClick}
-          >
-            {isPublished ? 'Снять с публикации' : 'Опубликовать'}
-          </button>
         </div>
       </header>
 
