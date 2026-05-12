@@ -1,13 +1,68 @@
+import { useState, useRef, useEffect } from 'react'
+
+const PADDING = 12
+
 export default function InfoTip({ children, wide = false }) {
+  const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState(null)
+  const triggerRef = useRef(null)
+  const tipRef = useRef(null)
+
+  useEffect(() => {
+    if (!open) return
+    const trigger = triggerRef.current
+    const tip = tipRef.current
+    if (!trigger || !tip) return
+
+    const rect = trigger.getBoundingClientRect()
+    const tipRect = tip.getBoundingClientRect()
+    const tipW = tipRect.width
+    const tipH = tipRect.height
+
+    // Horizontal: try to center on trigger, clamp to viewport
+    let left = rect.left + rect.width / 2 - tipW / 2
+    if (left + tipW > window.innerWidth - PADDING) {
+      left = window.innerWidth - tipW - PADDING
+    }
+    if (left < PADDING) left = PADDING
+
+    // Vertical: above by default; if not enough room above — below
+    let top = rect.top - tipH - 8
+    if (top < PADDING) top = rect.bottom + 8
+
+    setPos({ top, left })
+  }, [open])
+
+  function show() { setOpen(true) }
+  function hide() { setOpen(false); setPos(null) }
+
   return (
-    <span className="info-icon" tabIndex={0} role="img" aria-label="Подсказка">
+    <span
+      ref={triggerRef}
+      className="info-icon"
+      tabIndex={0}
+      role="img"
+      aria-label="Подсказка"
+      onMouseEnter={show}
+      onMouseLeave={hide}
+      onFocus={show}
+      onBlur={hide}
+    >
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
         strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <circle cx="12" cy="12" r="10" />
         <line x1="12" y1="16" x2="12" y2="12" />
         <line x1="12" y1="8" x2="12.01" y2="8" />
       </svg>
-      <span className={`info-tip${wide ? ' info-tip--wide' : ''}`}>{children}</span>
+      {open && (
+        <span
+          ref={tipRef}
+          className={`info-tip-pop${wide ? ' info-tip-pop--wide' : ''}`}
+          style={pos ? { top: pos.top, left: pos.left, visibility: 'visible' } : { visibility: 'hidden' }}
+        >
+          {children}
+        </span>
+      )}
     </span>
   )
 }

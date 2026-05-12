@@ -1024,6 +1024,26 @@ html, body {
 .info-icon:hover .info-tip,
 .info-icon:focus .info-tip { display: block; }
 
+/* JS-positioned tooltip (fixed; relative to viewport) */
+.info-tip-pop {
+  position: fixed;
+  background: #1a1d26;
+  color: #fff;
+  font: 500 12px/1.5 Manrope, sans-serif;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  width: 230px;
+  max-width: calc(100vw - 24px);
+  text-align: left;
+  z-index: 9999;
+  box-shadow: var(--shadow-lg);
+  pointer-events: none;
+  white-space: normal;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.info-tip-pop--wide { width: 320px; }
+
 /* Required asterisk */
 .req-star { color: var(--accent); }
 

@@ -239,7 +239,7 @@ export default function QuestionEditor({ node }) {
                     type="text"
                     className="crit-card__text"
                     value={cr.hint || ''}
-                    placeholder="Например: Уточните условия льготного периода по кредитной карте"
+                    placeholder="Например: Обратите внимание на условия начисления процентов в случае просрочки"
                     onChange={e => updateCritHint(cr.id, e.target.value)}
                   />
                 </div>
