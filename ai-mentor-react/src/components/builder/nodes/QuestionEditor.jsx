@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useBuilderStore, genId } from '../../../stores/builderStore.js'
+import { builderService } from '../../../builderServices/builderService.js'
+import InfoTip from '../../shared/InfoTip.jsx'
 
 const MOCK_ABOOK_RESP = `✅ Комиссия за услугу уведомлений по дебетовым картам составляет — 99 рублей.\n\n🚨 По кредитным комиссия составляет — 159 рублей.\n\n❌ Если клиент хочет оспорить списание — направь его на составление обращения «Комиссии»`
 
@@ -23,12 +25,17 @@ function initContent(c = {}) {
 }
 
 export default function QuestionEditor({ node }) {
-  const { updateNodeFull, updateNode } = useBuilderStore()
+  const { unit, updateNodeFull, updateNode } = useBuilderStore()
   const [loading, setLoading] = useState(false)
 
   const raw = node.content || {}
   const content = initContent(raw)
   const { queries, criteria } = content
+
+  const parentCase = unit ? builderService.findParent(unit, node.id) : null
+  const effectiveHintsMode =
+    node.settings?.hintsMode || parentCase?.settings?.hintsMode || 'auto'
+  const showHints = effectiveHintsMode === 'manual'
 
   const noAbook     = !!node.settings?.noAbook
   const isApproved  = !!content.queriesApproved
@@ -69,6 +76,10 @@ export default function QuestionEditor({ node }) {
 
   function updateCritScore(id, score) {
     save({ criteria: criteria.map(c => c.id === id ? { ...c, score } : c) })
+  }
+
+  function updateCritHint(id, hint) {
+    save({ criteria: criteria.map(c => c.id === id ? { ...c, hint } : c) })
   }
 
   function addCrit() {
@@ -218,6 +229,21 @@ export default function QuestionEditor({ node }) {
                   <button className="crit-card__del" onClick={() => removeCrit(cr.id)} title="Удалить пункт">×</button>
                 )}
               </div>
+              {showHints && (
+                <div className="crit-card__hint">
+                  <div className="crit-card__hint-lbl">
+                    Подсказка <span className="req-star">*</span>
+                    <InfoTip wide>Укажите подсказку, которую увидит сотрудник в случае если данный пункт чек-листа не будет выполнен при ответе на вопрос</InfoTip>
+                  </div>
+                  <input
+                    type="text"
+                    className="crit-card__text"
+                    value={cr.hint || ''}
+                    placeholder="Например: Уточните условия льготного периода по кредитной карте"
+                    onChange={e => updateCritHint(cr.id, e.target.value)}
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>

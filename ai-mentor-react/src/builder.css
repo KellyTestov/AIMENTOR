@@ -2196,6 +2196,21 @@ select.cu-edit-input { appearance: auto; cursor: pointer; }
   letter-spacing: .01em;
 }
 
+.crit-card__hint {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-sub);
+}
+.crit-card__hint-lbl {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
 .crit-cards {
   display: flex;
   flex-direction: column;

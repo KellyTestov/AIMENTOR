@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useBuilderStore, ICONS } from '../../stores/builderStore.js'
 import { builderService } from '../../builderServices/builderService.js'
+import InfoTip from '../shared/InfoTip.jsx'
 import {
   getNodeReadiness,
   getRecursiveReadiness,
@@ -9,12 +10,12 @@ import {
   getIncompleteChildren,
 } from '../../builderServices/readiness.js'
 
-function ReadinessPanel({ node }) {
+function ReadinessPanel({ node, parent }) {
   const selectNode = useBuilderStore((s) => s.selectNode)
   if (!node) return null
 
-  const own = getNodeReadiness(node)
-  const recursive = getRecursiveReadiness(node)
+  const own = getNodeReadiness(node, parent)
+  const recursive = getRecursiveReadiness(node, parent)
   const recStatus = getStatus(recursive.passed, recursive.total)
   const recProgress = getProgress(recursive.passed, recursive.total)
 
@@ -88,14 +89,32 @@ function failLbl(v) {
 function hintLbl(v) {
   return v === 'on_request' ? 'По запросу' : v === 'always' ? 'Всегда' : v === 'disabled' ? 'Отключено' : 'По умолчанию'
 }
+function hintsModeLbl(v) {
+  return v === 'manual' ? 'Указываются вручную' : 'Генерируются автоматически'
+}
 
-function IGroup({ icon, label, children, defaultOpen = false }) {
+const HINTS_MODE_INFO = (
+  <>
+    Задайте параметр поведения системы при неверном ответе на вопросы:
+    <br /><br />
+    <strong>Генерируются автоматически</strong> — система самостоятельно на основе критериев сформирует подсказки.
+    <br /><br />
+    <strong>Указываются вручную</strong> — вы сможете задать подсказки в каждом вопросе вручную.
+  </>
+)
+
+function IGroup({ icon, label, info, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
     <div className={`ig${open ? ' is-open' : ''}`}>
       <button className="ig__head" type="button" onClick={() => setOpen(v => !v)}>
         <span className="ig__icon">{icon}</span>
         <span className="ig__label">{label}</span>
+        {info && (
+          <span onClick={e => e.stopPropagation()} style={{ display: 'inline-flex', marginLeft: 4 }}>
+            <InfoTip wide>{info}</InfoTip>
+          </span>
+        )}
         <svg className="ig__chev" width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
           <path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
@@ -236,6 +255,10 @@ function CaseInspector({ node, updateNode }) {
     }
   }
 
+  function bindHintsMode(e) {
+    updateNode(node.id, { settings: { ...s, hintsMode: e.target.value } })
+  }
+
   const minuteOpts = Array.from({ length: 15 }, (_, i) => {
     const m = i + 1
     const lbl = m === 1 ? '1 минута' : m < 5 ? `${m} минуты` : `${m} минут`
@@ -243,34 +266,52 @@ function CaseInspector({ node, updateNode }) {
   })
 
   return (
-    <IGroup icon="🔇" label="Параметр молчания" defaultOpen>
-      <IField label="Время молчания" inherited>
-        <select value={s.silenceMinutes || ''} onChange={bindSelect('silenceMinutes')}>
-          <option value="">Из единицы обучения</option>
-          {minuteOpts.map(({ value, label }) => (
-            <option key={value} value={value}>{label}</option>
-          ))}
-        </select>
-      </IField>
-      <IField label="Действие после молчания">
-        <select value={s.silenceAction || ''} onChange={bindSelect('silenceAction')}>
-          <option value="">Не задано</option>
-          <option value="loyal">Лояльное сообщение оператору</option>
-          <option value="negative">Негативное сообщение оператору</option>
-          <option value="negative_multi">Несколько негативных сообщений оператору</option>
-        </select>
-      </IField>
-    </IGroup>
+    <>
+      <IGroup icon="🔇" label="Параметр молчания" defaultOpen>
+        <IField label="Время молчания" inherited>
+          <select value={s.silenceMinutes || ''} onChange={bindSelect('silenceMinutes')}>
+            <option value="">Из единицы обучения</option>
+            {minuteOpts.map(({ value, label }) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
+        </IField>
+        <IField label="Действие после молчания">
+          <select value={s.silenceAction || ''} onChange={bindSelect('silenceAction')}>
+            <option value="">Не задано</option>
+            <option value="loyal">Лояльное сообщение оператору</option>
+            <option value="negative">Негативное сообщение оператору</option>
+            <option value="negative_multi">Несколько негативных сообщений оператору</option>
+          </select>
+        </IField>
+      </IGroup>
+      <IGroup icon="💡" label="Подсказки" info={HINTS_MODE_INFO} defaultOpen>
+        <IField label="Режим подсказок">
+          <select value={s.hintsMode || 'auto'} onChange={bindHintsMode}>
+            <option value="auto">Генерируются автоматически</option>
+            <option value="manual">Указываются вручную</option>
+          </select>
+        </IField>
+      </IGroup>
+    </>
   )
 }
 
-function QuestionInspector({ node, updateNode }) {
+function QuestionInspector({ node, parentCase, updateNode }) {
   const s = node.settings || {}
   const noAbook = !!s.noAbook
   const [restrict, setRestrict] = useState(!!s.abookRestrict)
 
+  const inheritedHintsMode = parentCase?.settings?.hintsMode || 'auto'
+  const ownHintsMode = s.hintsMode // 'auto' | 'manual' | undefined
+
   function bindSelect(key) {
     return e => updateNode(node.id, { settings: { ...s, [key]: e.target.value || undefined } })
+  }
+
+  function bindHintsMode(e) {
+    const val = e.target.value === 'inherit' ? undefined : e.target.value
+    updateNode(node.id, { settings: { ...s, hintsMode: val } })
   }
 
   function toggleNoAbook(e) {
@@ -286,7 +327,8 @@ function QuestionInspector({ node, updateNode }) {
   }
 
   return (
-    <IGroup icon="📖" label="Информация из A-Book" defaultOpen>
+    <>
+      <IGroup icon="📖" label="Информация из A-Book" defaultOpen>
       <div className="igf ig-toggle-row">
         <label className="ig-toggle">
           <input type="checkbox" checked={noAbook} onChange={toggleNoAbook} />
@@ -330,7 +372,17 @@ function QuestionInspector({ node, updateNode }) {
           )}
         </>
       )}
-    </IGroup>
+      </IGroup>
+      <IGroup icon="💡" label="Подсказки" info={HINTS_MODE_INFO} defaultOpen>
+        <IField label="Режим подсказок" inherited={!ownHintsMode}>
+          <select value={ownHintsMode || 'inherit'} onChange={bindHintsMode}>
+            <option value="inherit">По умолчанию ({hintsModeLbl(inheritedHintsMode)})</option>
+            <option value="auto">Генерируются автоматически</option>
+            <option value="manual">Указываются вручную</option>
+          </select>
+        </IField>
+      </IGroup>
+    </>
   )
 }
 
@@ -424,6 +476,7 @@ export default function Inspector() {
 
   let title = 'Инспектор'
   let activeNode = null
+  let activeParent = null
   let body = (
     <div className="insp-empty">
       <div className="insp-empty__icon">🎛️</div>
@@ -439,10 +492,11 @@ export default function Inspector() {
     const node = builderService.findNode(unit, selectedId)
     if (node) {
       activeNode = node
+      activeParent = builderService.findParent(unit, node.id)
       switch (node.type) {
         case 'question':
           title = 'Вопрос'
-          body  = <QuestionInspector node={node} updateNode={updateNode} />
+          body  = <QuestionInspector node={node} parentCase={activeParent} updateNode={updateNode} />
           break
         case 'case':
           title = 'Кейс'
@@ -469,7 +523,7 @@ export default function Inspector() {
         <span className="bld-right__title" id="inspector-title">{title}</span>
       </div>
       <div className="bld-right__body" id="inspector-body">
-        {activeNode && <ReadinessPanel node={activeNode} />}
+        {activeNode && <ReadinessPanel node={activeNode} parent={activeParent} />}
         {body}
       </div>
     </aside>

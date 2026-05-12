@@ -62,7 +62,7 @@ function RenameInline({ node, onDone }) {
   )
 }
 
-function TreeNode({ node, depth, isRoot }) {
+function TreeNode({ node, parent, depth, isRoot }) {
   const { selectedId, selectNode, addChild, deleteNode, duplicateNode, visitedIds } = useBuilderStore()
   const [expanded, setExpanded] = useState(true)
   const [renaming, setRenaming] = useState(false)
@@ -75,9 +75,9 @@ function TreeNode({ node, depth, isRoot }) {
   const canRename  = node.type === 'theory'
   const indent     = depth * 16 + 8
 
-  const r = getRecursiveReadiness(node)
+  const r = getRecursiveReadiness(node, parent)
   const status = getStatus(r.passed, r.total)
-  const showStatus = status !== 'ok' && hasVisitedProblem(node, visitedIds)
+  const showStatus = status !== 'ok' && hasVisitedProblem(node, visitedIds, parent)
   const statusTitle = status === 'empty'
     ? 'Этот блок открыт, но не заполнен. Откройте его, чтобы заполнить обязательные поля.'
     : `Этот блок открыт, но заполнен не до конца (${r.passed} из ${r.total}). Откройте, чтобы доделать.`
@@ -174,7 +174,7 @@ function TreeNode({ node, depth, isRoot }) {
       {hasKids && expanded && (
         <ul className="bld-tree">
           {node.children.map(child => (
-            <TreeNode key={child.id} node={child} depth={depth + 1} isRoot={false} />
+            <TreeNode key={child.id} node={child} parent={node} depth={depth + 1} isRoot={false} />
           ))}
         </ul>
       )}
