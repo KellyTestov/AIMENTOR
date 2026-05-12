@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useLayoutEffect } from 'react'
 import { createPortal } from 'react-dom'
 
 const PADDING = 12
@@ -9,28 +9,29 @@ export default function InfoTip({ children, wide = false }) {
   const triggerRef = useRef(null)
   const tipRef = useRef(null)
 
-  useEffect(() => {
+  const tipWidth = wide ? 320 : 230
+
+  useLayoutEffect(() => {
     if (!open) return
     const trigger = triggerRef.current
     const tip = tipRef.current
     if (!trigger || !tip) return
 
     const rect = trigger.getBoundingClientRect()
-    const tipRect = tip.getBoundingClientRect()
-    const tipW = tipRect.width
-    const tipH = tipRect.height
+    const tipH = tip.offsetHeight || 80
+    const vw = window.innerWidth
+    const vh = window.innerHeight
 
-    let left = rect.left + rect.width / 2 - tipW / 2
-    if (left + tipW > window.innerWidth - PADDING) {
-      left = window.innerWidth - tipW - PADDING
-    }
+    let left = rect.left + rect.width / 2 - tipWidth / 2
+    const maxLeft = vw - tipWidth - PADDING
+    if (left > maxLeft) left = maxLeft
     if (left < PADDING) left = PADDING
 
     let top = rect.top - tipH - 8
-    if (top < PADDING) top = rect.bottom + 8
+    if (top < PADDING) top = Math.min(rect.bottom + 8, vh - tipH - PADDING)
 
     setPos({ top, left })
-  }, [open])
+  }, [open, tipWidth])
 
   function show() { setOpen(true) }
   function hide() { setOpen(false); setPos(null) }
@@ -57,7 +58,10 @@ export default function InfoTip({ children, wide = false }) {
         <span
           ref={tipRef}
           className={`info-tip-pop${wide ? ' info-tip-pop--wide' : ''}`}
-          style={pos ? { top: pos.top, left: pos.left, visibility: 'visible' } : { visibility: 'hidden' }}
+          style={pos
+            ? { top: pos.top, left: pos.left, visibility: 'visible' }
+            : { top: -9999, left: -9999, visibility: 'hidden' }
+          }
         >
           {children}
         </span>,
