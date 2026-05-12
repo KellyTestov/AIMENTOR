@@ -145,25 +145,22 @@ export default function BuilderPage() {
             onChange={handleTitleChange}
             placeholder="Название обучения..."
           />
-          {!isDirty && !saveFlash && (
-            <span
-              id="unit-status"
-              className={`bld-status${isPublished ? ' is-published' : ' is-private'}`}
-            >
-              {isPublished ? 'Опубликовано' : 'Черновик'}
-            </span>
-          )}
         </div>
 
         <div className="bld-header__right">
-          {(isDirty || saveFlash) && (
-            <span
-              id="unit-status-save"
-              className={`bld-status${saveFlash ? ' is-published' : ' is-private'}`}
-            >
-              {saveFlash ? '✓ Сохранено' : 'Есть изменения'}
-            </span>
-          )}
+          <span
+            id="unit-status"
+            className={`bld-status${(isPublished || saveFlash) ? ' is-published' : ' is-private'}`}
+          >
+            {saveFlash
+              ? '✓ Сохранено'
+              : isDirty
+                ? 'Есть изменения'
+                : isPublished
+                  ? 'Опубликовано'
+                  : 'Черновик'
+            }
+          </span>
           <button
             id="btn-save"
             className="bld-btn bld-btn--ghost"
