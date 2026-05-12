@@ -141,10 +141,8 @@ export default function QuestionEditor({ node }) {
         <div className="enrich-section">
           <div className="enrich-section__title-row">
             <span className="enrich-section__title">Обогащение из базы знаний</span>
+            <InfoTip wide>Вам необходимо указать запросы к базе знаний и получить из нее необходимую вам информацию, при прохождении обучения данные запросы будут автоматически направлены в A-Book и будут использованы для оценки ответа сотрудника</InfoTip>
           </div>
-          <p className="enrich-section__desc">
-            Вам необходимо указать запросы к базе знаний и получить из нее необходимую вам информацию, при прохождении обучения данные запросы будут автоматически направлены в A-Book и будут использованы для оценки ответа сотрудника
-          </p>
           <div className={`query-card${isApproved ? ' query-card--approved' : ''}`}>
             <div className="query-card__header">
               <span className="query-card__title">Тестовые запросы в A-Book</span>

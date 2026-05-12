@@ -115,6 +115,13 @@ export default function BuilderPage() {
     }
   }
 
+  function handleTest() {
+    save()
+    localStorage.removeItem('ai-mentor-sandbox-session-v1')
+    sessionStorage.setItem('sb-origin', 'builder')
+    navigate(`/sandbox?id=${unit.id}`)
+  }
+
   function handleTitleChange(e) {
     updateUnit({ title: e.target.value })
   }
@@ -138,22 +145,25 @@ export default function BuilderPage() {
             onChange={handleTitleChange}
             placeholder="Название обучения..."
           />
-          <span
-            id="unit-status"
-            className={`bld-status${isPublished ? ' is-published' : ' is-private'}`}
-          >
-            {saveFlash
-              ? '✓ Сохранено'
-              : isDirty
-                ? 'Изменения'
-                : isPublished
-                  ? 'Опубликовано'
-                  : 'Черновик'
-            }
-          </span>
+          {!isDirty && !saveFlash && (
+            <span
+              id="unit-status"
+              className={`bld-status${isPublished ? ' is-published' : ' is-private'}`}
+            >
+              {isPublished ? 'Опубликовано' : 'Черновик'}
+            </span>
+          )}
         </div>
 
         <div className="bld-header__right">
+          {(isDirty || saveFlash) && (
+            <span
+              id="unit-status-save"
+              className={`bld-status${saveFlash ? ' is-published' : ' is-private'}`}
+            >
+              {saveFlash ? '✓ Сохранено' : 'Есть изменения'}
+            </span>
+          )}
           <button
             id="btn-save"
             className="bld-btn bld-btn--ghost"
@@ -161,6 +171,14 @@ export default function BuilderPage() {
             disabled={!isDirty}
           >
             Сохранить
+          </button>
+          <button
+            id="btn-test"
+            className="bld-btn bld-btn--ghost"
+            onClick={handleTest}
+            title="Открыть песочницу для тестирования"
+          >
+            Тестировать
           </button>
           <button
             id="btn-publish"
