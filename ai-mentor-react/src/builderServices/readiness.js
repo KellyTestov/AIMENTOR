@@ -187,3 +187,30 @@ export function getIncompleteChildren(node) {
     })
     .filter((c) => c.progress < 100)
 }
+
+/**
+ * Все незавершённые «контентные» блоки в поддереве (значимые для пользователя).
+ * Пропускает агрегаторы (theory_block, practice, section), которые сами по себе
+ * не несут контента — рекурсивно идёт глубже до значимых узлов.
+ */
+const CONTENT_TYPES = new Set(['onboarding', 'theory', 'case', 'question', 'completion'])
+
+export function getIncompleteContentBlocks(node, parent = null) {
+  const results = []
+  if (!node) return results
+
+  function walk(n, p) {
+    if (!n) return
+    if (n !== node && CONTENT_TYPES.has(n.type)) {
+      const r = getRecursiveReadiness(n, p)
+      const progress = getProgress(r.passed, r.total)
+      if (progress < 100) {
+        results.push({ id: n.id, title: n.title, type: n.type, progress })
+      }
+    }
+    for (const c of n.children || []) walk(c, n)
+  }
+
+  walk(node, parent)
+  return results
+}

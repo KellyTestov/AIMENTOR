@@ -8,6 +8,7 @@ import {
   getStatus,
   getProgress,
   getIncompleteChildren,
+  getIncompleteContentBlocks,
 } from '../../builderServices/readiness.js'
 
 function ReadinessPanel({ node, parent }) {
@@ -20,7 +21,9 @@ function ReadinessPanel({ node, parent }) {
   const recProgress = getProgress(recursive.passed, recursive.total)
 
   const isUnitRoot = node.type === 'trainer' || node.type === 'exam'
-  const incompleteChildren = getIncompleteChildren(node)
+  const incompleteChildren = isUnitRoot
+    ? getIncompleteContentBlocks(node, parent)
+    : getIncompleteChildren(node)
   const ownAllOk = own.problems.length === 0
 
   return (
@@ -136,113 +139,12 @@ function IField({ label, children, inherited }) {
   )
 }
 
-function UnitInspector({ unit, updateUnit }) {
-  const s = unit.settings || {}
-
-  function bind(key, parse) {
-    return e => {
-      const val = parse ? parseInt(e.target.value) : e.target.value
-      updateUnit({ settings: { ...s, [key]: val } })
-    }
-  }
-
-  return (
-    <>
-      <IGroup icon="📊" label="Продуктовая оценка" defaultOpen>
-        <IField label="Политика при провале" inherited>
-          <select value={s.failPolicy || 'retry'} onChange={bind('failPolicy')}>
-            <option value="retry">Повторная попытка</option>
-            <option value="end">Завершить сессию</option>
-            <option value="skip">Перейти к следующему</option>
-          </select>
-        </IField>
-      </IGroup>
-      <IGroup icon="🗣️" label="TOV — тональность" defaultOpen>
-        <IField label="Стиль общения">
-          <select value={s.tov || 'neutral'} onChange={bind('tov')}>
-            <option value="neutral">Нейтральный</option>
-            <option value="formal">Официальный</option>
-            <option value="friendly">Дружелюбный</option>
-          </select>
-        </IField>
-      </IGroup>
-      <IGroup icon="⏱️" label="AHT — время ответа">
-        <IField label="Таргет (сек)">
-          <input type="number" value={s.ahtTarget || 120} min="10" max="600" onChange={bind('ahtTarget', true)} />
-        </IField>
-      </IGroup>
-      <IGroup icon="🔇" label="Молчание">
-        <IField label="Порог тишины (сек)">
-          <input type="number" value={s.silenceThreshold || 10} min="5" max="120" onChange={bind('silenceThreshold', true)} />
-        </IField>
-      </IGroup>
-      <IGroup icon="💡" label="Подсказки">
-        <IField label="Политика подсказок">
-          <select value={s.hintPolicy || 'on_request'} onChange={bind('hintPolicy')}>
-            <option value="on_request">По запросу</option>
-            <option value="always">Всегда показывать</option>
-            <option value="disabled">Отключено</option>
-          </select>
-        </IField>
-      </IGroup>
-      <IGroup icon="💬" label="Обратная связь">
-        <IField label="Тип по умолчанию">
-          <select value={s.defaultFeedback || 'text'} onChange={bind('defaultFeedback')}>
-            <option value="text">Текстовая</option>
-            <option value="score">Оценка (баллы)</option>
-            <option value="none">Без обратной связи</option>
-          </select>
-        </IField>
-      </IGroup>
-    </>
-  )
+function UnitInspector() {
+  return null
 }
 
-function SectionInspector({ node, unitSettings, updateNode }) {
-  const us = unitSettings || {}
-  const s  = node.settings || {}
-
-  function bind(key) {
-    return e => {
-      const val = e.target.value === 'inherit' ? undefined : e.target.value
-      updateNode(node.id, { settings: { ...s, [key]: val } })
-    }
-  }
-
-  return (
-    <>
-      <IGroup icon="📊" label="Оценка" defaultOpen>
-        <IField label="Политика при провале" inherited>
-          <select value={s.failPolicy || 'inherit'} onChange={bind('failPolicy')}>
-            <option value="inherit">По умолчанию ({failLbl(us.failPolicy)})</option>
-            <option value="retry">Повторная попытка</option>
-            <option value="end">Завершить сессию</option>
-            <option value="skip">Перейти к следующему</option>
-          </select>
-        </IField>
-      </IGroup>
-      <IGroup icon="💡" label="Подсказки">
-        <IField label="Политика" inherited>
-          <select value={s.hintPolicy || 'inherit'} onChange={bind('hintPolicy')}>
-            <option value="inherit">По умолчанию ({hintLbl(us.hintPolicy)})</option>
-            <option value="on_request">По запросу</option>
-            <option value="always">Всегда</option>
-            <option value="disabled">Отключено</option>
-          </select>
-        </IField>
-      </IGroup>
-      <IGroup icon="💬" label="Обратная связь">
-        <IField label="Тип" inherited>
-          <select value={s.defaultFeedback || 'inherit'} onChange={bind('defaultFeedback')}>
-            <option value="inherit">По умолчанию</option>
-            <option value="text">Текстовая</option>
-            <option value="score">Баллы</option>
-            <option value="none">Без обратной связи</option>
-          </select>
-        </IField>
-      </IGroup>
-    </>
-  )
+function SectionInspector({ node }) {
+  return <PassthroughInspector node={node} />
 }
 
 function CaseInspector({ node, updateNode }) {
@@ -459,11 +361,9 @@ function TheoryInspector({ node, updateNode }) {
 function PassthroughInspector({ node }) {
   return (
     <div className="insp-empty">
-      <div className="insp-empty__icon">{ICONS[node.type] || '•'}</div>
+      <div className="insp-empty__icon">{(node && ICONS[node.type]) || '⚙️'}</div>
       <div className="insp-empty__text">
-        Настройки этого элемента управляются на уровне родительских сущностей.
-        <br /><br />
-        Выберите <strong>Вопрос</strong>, <strong>Кейс</strong> или <strong>Раздел</strong>, чтобы настроить параметры.
+        Для данного блока настройки конфигурации отсутствуют
       </div>
     </div>
   )
