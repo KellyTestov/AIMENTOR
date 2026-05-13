@@ -1,5 +1,6 @@
 import { useBuilderStore, makeNode } from '../../../stores/builderStore.js'
 import ClientCard from '../ClientCard.jsx'
+import InfoTip from '../../shared/InfoTip.jsx'
 
 export default function CaseEditor({ node }) {
   const { updateNodeFull, updateNode, addChild, selectNode } = useBuilderStore()
@@ -53,7 +54,10 @@ export default function CaseEditor({ node }) {
       </div>
 
       <div className="field-block">
-        <div className="field-lbl" style={{ marginBottom: 10 }}>Карточка клиента</div>
+        <div className="field-lbl" style={{ marginBottom: 10, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+          Карточка клиента
+          <InfoTip wide>Настройте карточку клиента, сотрудник проходящий обучения будет видеть ее когда получит сообщение от клиента</InfoTip>
+        </div>
         <ClientCard clientCard={content.clientCard} onChange={updateClientCard} />
       </div>
 
