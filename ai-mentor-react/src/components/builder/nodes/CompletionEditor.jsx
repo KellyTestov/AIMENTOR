@@ -43,6 +43,21 @@ const ON_FAIL_OPTIONS = [
   { value: 'mentor', label: 'Направить к куратору' },
 ]
 
+function ComplSection({ num, title, info, children, accent = false }) {
+  return (
+    <section className={`compl-section${accent ? ' compl-section--accent' : ''}`}>
+      <div className="compl-section__head">
+        <span className="compl-section__num">{num}</span>
+        <span className="compl-section__title">{title}</span>
+        {info && <InfoTip wide>{info}</InfoTip>}
+      </div>
+      <div className="compl-section__body">
+        {children}
+      </div>
+    </section>
+  )
+}
+
 export default function CompletionEditor({ node }) {
   const { unit, updateNodeFull } = useBuilderStore()
 
@@ -54,9 +69,9 @@ export default function CompletionEditor({ node }) {
   const ai       = { ...DEFAULT_AI, ...(content.aiFeedback || {}) }
   const passingScore = content.passingScore ?? 80
   const onFail   = content.onFail || 'retry'
-  const finishBtnText = content.finishBtnText || ''
 
   const isExam = unit?.type === 'exam'
+  const totalSections = isExam ? 4 : 3
 
   function save(patch) {
     updateNodeFull(node.id, { ...content, elements, ...patch })
@@ -85,25 +100,25 @@ export default function CompletionEditor({ node }) {
         <span className="cv-heading-icon">🏁</span>Завершение
       </h2>
       <p className="cv-subheading">
-        Финал обучения — поздравление, сводка результатов и обратная связь от AI на основе пройденной сессии
+        Финал обучения — поздравление, сводка результатов и обратная связь от AI на основе пройденной сессии. Шаги {totalSections > 0 ? `1–${totalSections}` : ''} выполняются по порядку.
       </p>
 
       {/* 1. Финальный экран */}
-      <div className="enrich-section" style={{ marginTop: 0 }}>
-        <div className="enrich-section__title-row">
-          <span className="enrich-section__title">Финальный экран <span className="req-star">*</span></span>
-          <InfoTip wide>То, что сотрудник увидит в конце обучения. Заголовок и текст кнопки обязательны, текст под заголовком опционален.</InfoTip>
-        </div>
+      <ComplSection
+        num="1"
+        title="Финальный экран"
+        info="Информация, которую увидит сотрудник по завершению прохождения обучения"
+      >
         {elements.map((el, idx) => (
-          <div key={el.id} className="field-block">
-            <label className="field-lbl">Заголовок</label>
+          <div key={el.id}>
+            <label className="field-lbl">Заголовок <span className="req-star">*</span></label>
             <input
               className="cv-inp"
               value={el.heading || ''}
               onChange={e => updateEl(idx, { heading: e.target.value })}
               placeholder="Например: Поздравляем! Обучение завершено"
             />
-            <label className="field-lbl" style={{ marginTop: 8 }}>Текст</label>
+            <label className="field-lbl" style={{ marginTop: 12 }}>Текст</label>
             <textarea
               className="cv-textarea"
               rows={3}
@@ -113,36 +128,17 @@ export default function CompletionEditor({ node }) {
             />
           </div>
         ))}
-        <div className="field-block">
-          <label className="field-lbl">Текст кнопки</label>
-          <input
-            className="cv-inp"
-            value={finishBtnText}
-            onChange={e => save({ finishBtnText: e.target.value })}
-            placeholder="Например: Вернуться в каталог"
-          />
-          <div className="next-btn-preview" style={{ marginTop: 8 }}>
-            <span className="next-btn-preview__lbl">Предпросмотр</span>
-            <button className="next-btn-demo" type="button" disabled>
-              <span>{finishBtnText || 'Вернуться в каталог'}</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
+      </ComplSection>
 
-      {/* 2. Сводка по прохождению */}
-      <div className="enrich-section">
-        <div className="enrich-section__title-row">
-          <span className="enrich-section__title">Сводка по прохождению</span>
-          <InfoTip wide>Метрики, которые автоматически рассчитываются по сессии и показываются сотруднику в конце.</InfoTip>
-        </div>
-        <div className="field-block">
+      {/* 2. Сводка */}
+      <ComplSection
+        num="2"
+        title="Сводка по прохождению"
+        info="Метрики, которые автоматически рассчитываются по сессии и показываются сотруднику в конце."
+      >
+        <div className="compl-toggles">
           {Object.entries(METRIC_LABELS).map(([key, label]) => (
-            <label key={key} className="ig-toggle" style={{ padding: '6px 0' }}>
+            <label key={key} className="ig-toggle compl-toggle-row">
               <input
                 type="checkbox"
                 checked={!!metrics[key]}
@@ -153,87 +149,84 @@ export default function CompletionEditor({ node }) {
             </label>
           ))}
         </div>
-      </div>
+      </ComplSection>
 
-      {/* 3. AI-обратная связь */}
-      <div className="enrich-section">
-        <div className="enrich-section__title-row">
-          <span className="enrich-section__title">AI-обратная связь</span>
-          <InfoTip wide>AI получит данные о прохождении и сгенерирует персональный комментарий для сотрудника. Вы задаёте промпт и контекст, который подаётся в модель.</InfoTip>
-        </div>
-        <div className="field-block">
-          <label className="ig-toggle" style={{ padding: '4px 0 12px' }}>
-            <input
-              type="checkbox"
-              checked={!!ai.enabled}
-              onChange={() => toggleAi('enabled')}
-            />
-            <span className="ig-toggle__track" />
-            <span className="ig-toggle__label" style={{ fontWeight: 600 }}>
-              Включить AI-обратную связь
-            </span>
-          </label>
+      {/* 3. AI feedback */}
+      <ComplSection
+        num="3"
+        title="AI-обратная связь"
+        info="AI получит данные о прохождении и сгенерирует персональный комментарий для сотрудника. Вы задаёте промпт и контекст, который подаётся в модель."
+        accent
+      >
+        <label className="ig-toggle compl-ai-master">
+          <input
+            type="checkbox"
+            checked={!!ai.enabled}
+            onChange={() => toggleAi('enabled')}
+          />
+          <span className="ig-toggle__track" />
+          <span className="ig-toggle__label" style={{ fontWeight: 600 }}>
+            Включить AI-обратную связь
+          </span>
+        </label>
 
-          {ai.enabled && (
-            <>
-              <label className="field-lbl" style={{ marginTop: 4 }}>Промпт для модели</label>
-              <textarea
-                className="cv-textarea"
-                rows={4}
-                value={ai.prompt}
-                onChange={e => setAi({ prompt: e.target.value })}
-                placeholder={DEFAULT_AI_PROMPT}
-              />
-
-              <label className="field-lbl" style={{ marginTop: 14 }}>Что учитывать в контексте</label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {Object.entries(AI_CONTEXT_LABELS).map(([key, label]) => (
-                  <label key={key} className="ig-toggle" style={{ padding: '6px 0' }}>
-                    <input
-                      type="checkbox"
-                      checked={!!ai[key]}
-                      onChange={() => toggleAi(key)}
-                    />
-                    <span className="ig-toggle__track" />
-                    <span className="ig-toggle__label">{label}</span>
-                  </label>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* 4. Порог прохождения — только для экзамена */}
-      {isExam && (
-        <div className="enrich-section">
-          <div className="enrich-section__title-row">
-            <span className="enrich-section__title">Порог прохождения</span>
-            <InfoTip wide>Минимальный балл, при котором экзамен считается пройденным. Если сотрудник набрал меньше — выполняется заданное действие.</InfoTip>
-          </div>
-          <div className="field-block">
-            <label className="field-lbl">Минимальный балл, %</label>
-            <input
-              type="number"
-              className="cv-inp"
-              min="0"
-              max="100"
-              value={passingScore}
-              onChange={e => save({ passingScore: Math.max(0, Math.min(100, parseInt(e.target.value) || 0)) })}
+        {ai.enabled && (
+          <div className="compl-ai-body">
+            <label className="field-lbl">Промпт для модели <span className="req-star">*</span></label>
+            <textarea
+              className="cv-textarea"
+              rows={4}
+              value={ai.prompt}
+              onChange={e => setAi({ prompt: e.target.value })}
+              placeholder={DEFAULT_AI_PROMPT}
             />
 
-            <label className="field-lbl" style={{ marginTop: 12 }}>При недостаточном балле</label>
-            <select
-              className="cv-inp"
-              value={onFail}
-              onChange={e => save({ onFail: e.target.value })}
-            >
-              {ON_FAIL_OPTIONS.map(o => (
-                <option key={o.value} value={o.value}>{o.label}</option>
+            <label className="field-lbl" style={{ marginTop: 14 }}>Что учитывать в контексте</label>
+            <div className="compl-toggles">
+              {Object.entries(AI_CONTEXT_LABELS).map(([key, label]) => (
+                <label key={key} className="ig-toggle compl-toggle-row">
+                  <input
+                    type="checkbox"
+                    checked={!!ai[key]}
+                    onChange={() => toggleAi(key)}
+                  />
+                  <span className="ig-toggle__track" />
+                  <span className="ig-toggle__label">{label}</span>
+                </label>
               ))}
-            </select>
+            </div>
           </div>
-        </div>
+        )}
+      </ComplSection>
+
+      {/* 4. Exam threshold */}
+      {isExam && (
+        <ComplSection
+          num="4"
+          title="Порог прохождения"
+          info="Минимальный балл, при котором экзамен считается пройденным. Если сотрудник набрал меньше — выполняется заданное действие."
+        >
+          <label className="field-lbl">Минимальный балл, %</label>
+          <input
+            type="number"
+            className="cv-inp"
+            min="0"
+            max="100"
+            value={passingScore}
+            onChange={e => save({ passingScore: Math.max(0, Math.min(100, parseInt(e.target.value) || 0)) })}
+          />
+
+          <label className="field-lbl" style={{ marginTop: 12 }}>При недостаточном балле</label>
+          <select
+            className="cv-inp"
+            value={onFail}
+            onChange={e => save({ onFail: e.target.value })}
+          >
+            {ON_FAIL_OPTIONS.map(o => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+        </ComplSection>
       )}
     </div>
   )
