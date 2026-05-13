@@ -1,76 +1,18 @@
-import { useState } from 'react'
 import { useBuilderStore, makeNode } from '../../../stores/builderStore.js'
-
-const CC_SECTIONS = [
-  { key: 'creditDetails', title: 'Детализация по кредитной карте клиента', fields: [
-    { key: 'nearestPayment',   label: 'Ближайший платёж',                      ph: '2 200 ₽ до 20.12.2024' },
-    { key: 'paymentSkip',      label: 'Пропуск платежа',                        ph: 'Не подключен' },
-    { key: 'totalDebt',        label: 'Общая задолженность на сегодня',          ph: '3 140 ₽' },
-    { key: 'purchases30',      label: 'Покупки в первые 30 дней',               ph: 'Льготный период не начался' },
-    { key: 'purchasesFrom31',  label: 'Покупки с 31 дня и снятие наличных',     ph: 'Льготный период до 28.01.2026' },
-    { key: 'repayOther',       label: 'Погашение КК в другом банке',            ph: 'Льготный период не начался' },
-    { key: 'availableLimit',   label: 'Доступный лимит',                        ph: '7 860 ₽' },
-    { key: 'overdueDebt',      label: 'Просроченная задолженность',             ph: '0 ₽' },
-    { key: 'fines',            label: 'Штрафы и неустойки',                     ph: '0 ₽' },
-  ]},
-  { key: 'contractTerms', title: 'Общие условия договора', fields: [
-    { key: 'totalCredit',   label: 'Общая сумма кредита',                    ph: '11 000 ₽' },
-    { key: 'agreementDate', label: 'Подписание ДС о беспроцентном периоде',  ph: '16 ноября 2023' },
-    { key: 'issueDate',     label: 'Дата выдачи',                            ph: '30 ноября 2023' },
-  ]},
-  { key: 'interestRates', title: 'Текущие процентные ставки', fields: [
-    { key: 'rate30',   label: 'Покупки в первые 30 дней',    ph: '39,99% годовых' },
-    { key: 'rateFrom31', label: 'Покупки с 31 дня',          ph: '39,99% годовых' },
-    { key: 'rateCash', label: 'Снятие наличных',             ph: '49,99% годовых' },
-    { key: 'rateRepay', label: 'Погашение КК в другом банке', ph: '49,99% годовых' },
-  ]},
-  { key: 'cardInfo', title: 'Информация по кредитной карте', fields: [
-    { key: 'balance',     label: 'Баланс',                                           ph: '7 860 ₽' },
-    { key: 'serviceCost', label: 'Стоимость обслуживания',                           ph: '0 ₽' },
-    { key: 'cashLimit',   label: 'Лимит на снятие наличных без комиссии',            ph: 'до 50 000 ₽/мес' },
-    { key: 'commAlfa',    label: 'Комиссия за снятие в банкоматах Альфа-Банка',      ph: '3,9% + 390 ₽' },
-    { key: 'commOther',   label: 'Комиссия за снятие в сторонних банкоматах',        ph: '3,9% + 390 ₽' },
-  ]},
-]
-
-function initClientCard(existing = {}) {
-  const cc = { ...existing }
-  CC_SECTIONS.forEach(sec => {
-    if (!cc[sec.key]) cc[sec.key] = {}
-    sec.fields.forEach(f => {
-      if (cc[sec.key][f.key] === undefined) cc[sec.key][f.key] = ''
-    })
-  })
-  return cc
-}
+import ClientCard from '../ClientCard.jsx'
 
 export default function CaseEditor({ node }) {
   const { updateNodeFull, updateNode, addChild, selectNode } = useBuilderStore()
-  const [openSections, setOpenSections] = useState(new Set([CC_SECTIONS[0].key]))
 
   const content    = node.content || {}
-  const clientCard = initClientCard(content.clientCard)
   const questions  = (node.children || []).filter(c => c.type === 'question')
 
   function save(patch) {
-    updateNodeFull(node.id, { ...content, clientCard, ...patch })
+    updateNodeFull(node.id, { ...content, ...patch })
   }
 
-  function updateCC(secKey, fieldKey, value) {
-    const updated = {
-      ...clientCard,
-      [secKey]: { ...clientCard[secKey], [fieldKey]: value },
-    }
-    updateNodeFull(node.id, { ...content, clientCard: updated })
-  }
-
-  function toggleSection(key) {
-    setOpenSections(prev => {
-      const next = new Set(prev)
-      if (next.has(key)) next.delete(key)
-      else next.add(key)
-      return next
-    })
+  function updateClientCard(nextCC) {
+    updateNodeFull(node.id, { ...content, clientCard: nextCC })
   }
 
   function add5Questions() {
@@ -112,62 +54,7 @@ export default function CaseEditor({ node }) {
 
       <div className="field-block">
         <div className="field-lbl" style={{ marginBottom: 10 }}>Карточка клиента</div>
-        <div className="client-card">
-
-          {/* Личные данные клиента */}
-          <div className="cc-group is-open cc-group--personal">
-            <div className="cc-group__head cc-group__head--static">
-              <span>Личные данные клиента</span>
-            </div>
-            <div className="cc-group__body">
-              {[
-                { key: 'name',     label: 'ФИО клиента',           ph: 'Иванова Мария Петровна' },
-                { key: 'phone',    label: 'Телефон',                ph: '+7 (999) 123-45-67' },
-                { key: 'account',  label: 'Номер счёта',            ph: '40817810000000001234' },
-                { key: 'status',   label: 'Статус',                 ph: 'Активный клиент' },
-                { key: 'products', label: 'Продукты (через запятую)', ph: 'Дебетовая карта, Накопительный счёт' },
-                { key: 'request',  label: 'Запрос клиента',         ph: 'Вопрос по комиссии за уведомления' },
-              ].map(f => (
-                <div key={f.key} className="cc-row">
-                  <span className="cc-row__label">{f.label}</span>
-                  <input
-                    className="cc-row__input"
-                    value={clientCard[f.key] || ''}
-                    placeholder={f.ph}
-                    onChange={e => updateNodeFull(node.id, {
-                      ...content,
-                      clientCard: { ...clientCard, [f.key]: e.target.value },
-                    })}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {CC_SECTIONS.map((sec, si) => (
-            <div key={sec.key} className={`cc-group${openSections.has(sec.key) ? ' is-open' : ''}`}>
-              <button className="cc-group__head" type="button" onClick={() => toggleSection(sec.key)}>
-                <span>{sec.title}</span>
-                <svg className="cc-group__chev" width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-                  <path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-              <div className="cc-group__body">
-                {sec.fields.map(f => (
-                  <div key={f.key} className="cc-row">
-                    <span className="cc-row__label">{f.label}</span>
-                    <input
-                      className="cc-row__input"
-                      value={clientCard[sec.key]?.[f.key] || ''}
-                      placeholder={f.ph}
-                      onChange={e => updateCC(sec.key, f.key, e.target.value)}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+        <ClientCard clientCard={content.clientCard} onChange={updateClientCard} />
       </div>
 
       <div className="field-block">
