@@ -1,4 +1,4 @@
-export default function ExamCompletionModal({ onBack, onPublish }) {
+export default function ExamCompletionModal({ onBack }) {
   return (
     <div className="sb-modal-backdrop" id="completion-modal">
       <div className="sb-modal" id="completion-modal-inner">
@@ -10,18 +10,11 @@ export default function ExamCompletionModal({ onBack, onPublish }) {
         </p>
         <div className="sb-modal__actions">
           <button
-            className="sb-modal__btn sb-modal__btn--secondary"
+            className="sb-modal__btn sb-modal__btn--primary sb-modal__btn--full"
             onClick={onBack}
             id="exam-completion-back-btn"
           >
-            Вернуться в конструктор
-          </button>
-          <button
-            className="sb-modal__btn sb-modal__btn--primary"
-            onClick={onPublish}
-            id="exam-completion-publish-btn"
-          >
-            Опубликовать
+            Завершить экзамен
           </button>
         </div>
       </div>
