@@ -72,16 +72,22 @@ export function getOwnChecks(node, parent = null, unitType = null) {
       ]
       if (cc?.source) {
         const sections = Array.isArray(cc.sections) ? cc.sections : []
-        const hasAnyField = sections.some((s) => Array.isArray(s.fields) && s.fields.length > 0)
-        const allValuesFilled = hasAnyField && sections.every((s) =>
-          (s.fields || []).every((f) => !!txt(f.value))
-        )
-        checks.push({ ok: allValuesFilled, label: 'Все поля карточки клиента заполнены' })
         if (cc.source === 'custom') {
+          const hasAnyField = sections.some((s) => Array.isArray(s.fields) && s.fields.length > 0)
+          const allValuesFilled = hasAnyField && sections.every((s) =>
+            (s.fields || []).every((f) => !!txt(f.value))
+          )
           const allTitlesFilled = sections.every((s) =>
             !!txt(s.title) && (s.fields || []).every((f) => !!txt(f.label))
           )
+          checks.push({ ok: allValuesFilled, label: 'Все поля карточки клиента заполнены' })
           checks.push({ ok: allTitlesFilled, label: 'Все названия разделов и полей карточки заполнены' })
+        } else {
+          // Шаблон: достаточно заполнить хотя бы одно поле
+          const someValueFilled = sections.some((s) =>
+            (s.fields || []).some((f) => !!txt(f.value))
+          )
+          checks.push({ ok: someValueFilled, label: 'Карточка клиента — хотя бы одно поле' })
         }
       }
       return checks
