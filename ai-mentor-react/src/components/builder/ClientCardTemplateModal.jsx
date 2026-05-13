@@ -8,7 +8,7 @@ export default function ClientCardTemplateModal({ open, onClose, onPick }) {
       <ModalDesktop.Header title="Выбор шаблона карточки клиента" hasCloser={false} />
       <ModalDesktop.Content>
         <p style={{ margin: '0 0 16px', fontSize: 13, color: 'var(--muted)', lineHeight: 1.5 }}>
-          Выберите готовую структуру карточки. Названия разделов и полей зафиксированы — вы только подставляете значения.
+          Выберите готовую структуру карточки. Названия разделов и полей зафиксированы, вы только подставляете значения.
         </p>
         <div className="cct-list">
           {CLIENT_CARD_TEMPLATES.map((tpl) => (

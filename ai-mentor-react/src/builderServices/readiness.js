@@ -63,10 +63,29 @@ export function getOwnChecks(node, parent = null, unitType = null) {
     case 'section':
       return []
 
-    case 'case':
-      return [
-        { ok: !!txt(node.content?.description), label: 'Описание кейса' },
+    case 'case': {
+      const c = node.content || {}
+      const cc = c.clientCard
+      const checks = [
+        { ok: !!txt(c.description), label: 'Описание кейса' },
+        { ok: !!cc?.source, label: 'Карточка клиента создана' },
       ]
+      if (cc?.source) {
+        const sections = Array.isArray(cc.sections) ? cc.sections : []
+        const hasAnyField = sections.some((s) => Array.isArray(s.fields) && s.fields.length > 0)
+        const allValuesFilled = hasAnyField && sections.every((s) =>
+          (s.fields || []).every((f) => !!txt(f.value))
+        )
+        checks.push({ ok: allValuesFilled, label: 'Все поля карточки клиента заполнены' })
+        if (cc.source === 'custom') {
+          const allTitlesFilled = sections.every((s) =>
+            !!txt(s.title) && (s.fields || []).every((f) => !!txt(f.label))
+          )
+          checks.push({ ok: allTitlesFilled, label: 'Все названия разделов и полей карточки заполнены' })
+        }
+      }
+      return checks
+    }
 
     case 'question': {
       const c = node.content || {}
