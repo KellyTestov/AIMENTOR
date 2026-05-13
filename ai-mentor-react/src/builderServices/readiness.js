@@ -113,8 +113,13 @@ export function getOwnChecks(node, parent = null) {
       return checks
     }
 
-    case 'completion':
-      return []
+    case 'completion': {
+      const els = node.content?.elements || []
+      const firstHeading = els[0]?.heading || ''
+      return [
+        { ok: !!txt(firstHeading), label: 'Заголовок' },
+      ]
+    }
 
     default:
       return []
