@@ -1378,6 +1378,38 @@ html, body {
 .ig select:focus,
 .ig input[type="number"]:focus { border-color: var(--accent); }
 
+.ig select:disabled,
+.ig input:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  background: var(--bg);
+  color: var(--muted);
+  border-style: dashed;
+}
+
+/* Locked field: select with leading lock icon */
+.ig-locked-field {
+  position: relative;
+}
+.ig-locked-field::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a0a0a0' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><rect x='4' y='11' width='16' height='10' rx='2'/><path d='M8 11V7a4 4 0 0 1 8 0v4'/></svg>");
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+  z-index: 1;
+  opacity: .8;
+}
+.ig-locked-field select {
+  padding-left: 30px !important;
+}
+
 .ig textarea {
   width: 100%;
   border: 1px solid var(--border);

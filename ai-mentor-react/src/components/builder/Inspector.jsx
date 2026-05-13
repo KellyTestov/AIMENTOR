@@ -225,9 +225,11 @@ function CaseInspector({ node, isExam, updateNode }) {
       <IGroup icon="💡" label="Подсказки" info={isExam ? HINTS_MODE_INFO_EXAM : HINTS_MODE_INFO} defaultOpen>
         <IField label="Режим подсказок">
           {isExam ? (
-            <select value="none" disabled>
-              <option value="none">Не выдаются</option>
-            </select>
+            <div className="ig-locked-field">
+              <select value="none" disabled>
+                <option value="none">Не выдаются</option>
+              </select>
+            </div>
           ) : (
             <select value={s.hintsMode || 'auto'} onChange={bindHintsMode}>
               <option value="auto">Генерируются автоматически</option>
@@ -319,9 +321,11 @@ function QuestionInspector({ node, parentCase, isExam, updateNode }) {
       <IGroup icon="💡" label="Подсказки" info={isExam ? HINTS_MODE_INFO_EXAM : HINTS_MODE_INFO} defaultOpen>
         <IField label="Режим подсказок" inherited={!isExam && !ownHintsMode}>
           {isExam ? (
-            <select value="none" disabled>
-              <option value="none">Не выдаются</option>
-            </select>
+            <div className="ig-locked-field">
+              <select value="none" disabled>
+                <option value="none">Не выдаются</option>
+              </select>
+            </div>
           ) : (
             <select value={ownHintsMode || 'inherit'} onChange={bindHintsMode}>
               <option value="inherit">По умолчанию ({hintsModeLbl(inheritedHintsMode)})</option>

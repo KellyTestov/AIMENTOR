@@ -32,10 +32,7 @@ export function getOwnChecks(node, parent = null, unitType = null) {
     }
 
     case 'theory_block':
-      return [{
-        ok: (node.children || []).some((c) => c.type === 'theory'),
-        label: 'Минимум одна теория',
-      }]
+      return []
 
     case 'theory': {
       const c = node.content || {}
@@ -61,24 +58,14 @@ export function getOwnChecks(node, parent = null, unitType = null) {
     }
 
     case 'practice':
-      return [{
-        ok: (node.children || []).some((c) => c.type === 'section'),
-        label: 'Минимум один раздел',
-      }]
+      return []
 
     case 'section':
-      return [{
-        ok: (node.children || []).some((c) => c.type === 'case'),
-        label: 'Минимум один кейс',
-      }]
+      return []
 
     case 'case':
       return [
         { ok: !!txt(node.content?.description), label: 'Описание кейса' },
-        {
-          ok: (node.children || []).some((c) => c.type === 'question'),
-          label: 'Минимум один вопрос',
-        },
       ]
 
     case 'question': {
@@ -91,15 +78,14 @@ export function getOwnChecks(node, parent = null, unitType = null) {
         : (settings.hintsMode || parent?.settings?.hintsMode || 'auto')
       const checks = [
         { ok: !!txt(c.text), label: 'Текст вопроса' },
-        { ok: criteria.length > 0, label: 'Минимум один пункт чек-листа' },
         {
           ok: criteria.length > 0 && criteria.every((cr) => !!txt(cr.text)),
-          label: 'Все пункты чек-листа заполнены',
+          label: 'Чек-лист оценки заполнен',
         },
       ]
-      if (effectiveHintsMode === 'manual' && criteria.length > 0) {
+      if (effectiveHintsMode === 'manual') {
         checks.push({
-          ok: criteria.every((cr) => !!txt(cr.hint)),
+          ok: criteria.length > 0 && criteria.every((cr) => !!txt(cr.hint)),
           label: 'Подсказки во всех пунктах заполнены',
         })
       }
@@ -108,10 +94,9 @@ export function getOwnChecks(node, parent = null, unitType = null) {
       } else {
         const queries = Array.isArray(c.queries) ? c.queries : []
         checks.push({
-          ok: queries.length > 0 && queries.some((q) => !!txt(q.text)),
-          label: 'Минимум один запрос в A-Book',
+          ok: !!c.queriesApproved && queries.some((q) => !!txt(q.text)),
+          label: 'Запрос в A-Book заполнен и утверждён',
         })
-        checks.push({ ok: !!c.queriesApproved, label: 'Запросы в A-Book утверждены' })
       }
       return checks
     }
