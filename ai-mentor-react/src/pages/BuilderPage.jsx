@@ -115,6 +115,13 @@ export default function BuilderPage() {
     }
   }
 
+  function handleTest() {
+    save()
+    localStorage.removeItem('ai-mentor-sandbox-session-v1')
+    sessionStorage.setItem('sb-origin', 'builder')
+    navigate(`/sandbox?id=${unit.id}`)
+  }
+
   function handleTitleChange(e) {
     updateUnit({ title: e.target.value })
   }
@@ -138,33 +145,44 @@ export default function BuilderPage() {
             onChange={handleTitleChange}
             placeholder="Название обучения..."
           />
+        </div>
+
+        <div className="bld-header__right">
           <span
             id="unit-status"
-            className={`bld-status${isPublished ? ' is-published' : ' is-private'}`}
+            className={`bld-status${(isPublished || saveFlash) ? ' is-published' : ' is-private'}`}
           >
             {saveFlash
               ? '✓ Сохранено'
               : isDirty
-                ? 'Изменения'
+                ? 'Есть изменения'
                 : isPublished
                   ? 'Опубликовано'
                   : 'Черновик'
             }
           </span>
-        </div>
-
-        <div className="bld-header__right">
           <button
-            id="btn-check"
+            id="btn-save"
             className="bld-btn bld-btn--ghost"
-            onClick={handleCheck}
-            title="Проверить заполнение"
+            onClick={handleSave}
+            disabled={!isDirty}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4 }} aria-hidden="true">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-            Проверить
+            Сохранить
+          </button>
+          <button
+            id="btn-test"
+            className="bld-btn bld-btn--ghost"
+            onClick={handleTest}
+            title="Открыть песочницу для тестирования"
+          >
+            Тестировать
+          </button>
+          <button
+            id="btn-publish"
+            className={`bld-btn${isPublished ? ' bld-btn--ghost' : ' bld-btn--primary'}`}
+            onClick={handlePublishClick}
+          >
+            {isPublished ? 'Снять с публикации' : 'Опубликовать'}
           </button>
 
           <div className="bld-more-wrap" ref={moreRef}>
@@ -186,22 +204,6 @@ export default function BuilderPage() {
               </div>
             )}
           </div>
-
-          <button
-            id="btn-save"
-            className="bld-btn bld-btn--ghost"
-            onClick={handleSave}
-            disabled={!isDirty}
-          >
-            Сохранить
-          </button>
-          <button
-            id="btn-publish"
-            className={`bld-btn${isPublished ? ' bld-btn--ghost' : ' bld-btn--primary'}`}
-            onClick={handlePublishClick}
-          >
-            {isPublished ? 'Снять с публикации' : 'Опубликовать'}
-          </button>
         </div>
       </header>
 

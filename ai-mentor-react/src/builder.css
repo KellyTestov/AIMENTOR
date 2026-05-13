@@ -1003,14 +1003,16 @@ html, body {
   display: none;
   position: absolute;
   bottom: calc(100% + 7px);
-  left: 50%;
-  transform: translateX(-50%);
+  right: -6px;
+  left: auto;
+  transform: none;
   background: #1a1d26;
   color: #fff;
   font: 500 12px/1.5 Manrope, sans-serif;
   padding: 8px 12px;
   border-radius: var(--radius-sm);
   width: 230px;
+  max-width: calc(100vw - 24px);
   text-align: left;
   z-index: 500;
   box-shadow: var(--shadow-lg);
@@ -1021,6 +1023,27 @@ html, body {
 }
 .info-icon:hover .info-tip,
 .info-icon:focus .info-tip { display: block; }
+
+/* JS-positioned tooltip (fixed; relative to viewport, rendered via Portal) */
+.info-tip-pop {
+  position: fixed;
+  box-sizing: border-box;
+  background: #1a1d26;
+  color: #fff;
+  font: 500 12px/1.5 Manrope, sans-serif;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  width: 230px;
+  max-width: calc(100vw - 24px);
+  text-align: left;
+  z-index: 9999;
+  box-shadow: var(--shadow-lg);
+  pointer-events: none;
+  white-space: normal;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.info-tip-pop--wide { width: 320px; }
 
 /* Required asterisk */
 .req-star { color: var(--accent); }
@@ -2194,6 +2217,26 @@ select.cu-edit-input { appearance: auto; cursor: pointer; }
   font-weight: 600;
   color: var(--muted);
   letter-spacing: .01em;
+}
+
+.crit-card__hint {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-sub);
+}
+.crit-card__hint-lbl {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.crit-card__hint .crit-card__text {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .crit-cards {

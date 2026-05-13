@@ -76,10 +76,10 @@ export default function TheoryEditor({ node }) {
       <p className="cv-subheading">Обучение сотрудника. Вы можете настроить теорию, которая будет отображена сотруднику</p>
 
       <div className="enrich-section" style={{ marginTop: 0 }}>
-        <div className="enrich-section__title">Описание</div>
-        <p className="enrich-section__desc">
-          Указанный вами текст будет отображен сотруднику над теоретической информацией
-        </p>
+        <div className="enrich-section__title-row">
+          <span className="enrich-section__title">Описание</span>
+          <InfoTip wide>Указанный вами текст будет отображен сотруднику над теоретической информацией</InfoTip>
+        </div>
       </div>
 
       {elements.map((el, idx) => (
@@ -111,22 +111,23 @@ export default function TheoryEditor({ node }) {
           <p className="enrich-section__desc">
             Вставьте текст, который AI будет использовать как справочную базу для этого блока теории.
           </p>
-          <textarea
-            className="cv-textarea"
-            rows={10}
-            value={content.manualContent || ''}
-            onChange={e => save({ manualContent: e.target.value })}
-            placeholder="Вставьте сюда справочный текст, инструкцию или выдержку из материалов, которые AI должен использовать при обучении сотрудника..."
-          />
+          <div className="field-block">
+            <label className="field-lbl">Текст</label>
+            <textarea
+              className="cv-textarea"
+              rows={10}
+              value={content.manualContent || ''}
+              onChange={e => save({ manualContent: e.target.value })}
+              placeholder="Вставьте сюда справочный текст, инструкцию или выдержку из материалов, которые AI должен использовать при обучении сотрудника..."
+            />
+          </div>
         </div>
       ) : (
         <div className="enrich-section">
           <div className="enrich-section__title-row">
             <span className="enrich-section__title">Обогащение из базы знаний</span>
+            <InfoTip wide>Вам необходимо указать запросы к базе знаний и получить из нее необходимую вам теоретическую информацию, при прохождении обучения данные запросы будут автоматически направлены в A-Book и сотрудник увидит полученные ответы.</InfoTip>
           </div>
-          <p className="enrich-section__desc">
-            Вам необходимо указать запросы к базе знаний и получить из нее необходимую вам теоретическую информацию, при прохождении обучения данные запросы будут автоматически направлены в A-Book и сотрудник увидит полученные ответы.
-          </p>
           <div className={`query-card${isApproved ? ' query-card--approved' : ''}`}>
             <div className="query-card__header">
               <span className="query-card__title">Тестовые запросы в A-Book</span>
@@ -200,9 +201,6 @@ export default function TheoryEditor({ node }) {
           <span className="enrich-section__title">Переход к следующему блоку <span className="req-star">*</span></span>
           <InfoTip wide>Данную кнопку будет видеть сотрудник, чтобы перейти к следующему этапу обучению</InfoTip>
         </div>
-        <p className="enrich-section__desc">
-          После прочтения теории сотруднику отображается кнопка для перехода к следующему шагу обучения. Здесь вы можете настроить её текст — он будет виден пользователю в чате.
-        </p>
         <div className="field-block">
           <label className="field-lbl">Текст кнопки</label>
           <input
