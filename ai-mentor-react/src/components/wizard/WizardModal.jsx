@@ -463,14 +463,13 @@ export default function WizardModal({ open, onClose }) {
   }
 
   function handleBack() {
-    if (step === 2) { setStep(1) }
-    else if (step === 3) { setStep(unitType === 'trainer' ? 2 : 1) }
+    if (step === 3) { setStep(1) }
     else if (step === 4) { setStep(3) }
   }
 
   function selectType(type) {
     setUnitType(type)
-    setStep(type === 'trainer' ? 2 : 3)
+    setStep(3)
   }
 
   function selectSubtype(subtype) {
@@ -482,10 +481,9 @@ export default function WizardModal({ open, onClose }) {
     if (method === 'new') setStep(4)
   }
 
-  // Progress: trainers have 4 visual steps, exams have 3
-  const totalProgress = unitType === 'trainer' ? 4 : 3
+  // Steps: 1 → 3 → 4 (step 2 removed), progress always 3 segments
+  const totalProgress = 3
   function getVisualStep(s) {
-    if (unitType !== 'exam') return s
     if (s === 1) return 1
     if (s === 3) return 2
     if (s === 4) return 3
@@ -546,7 +544,6 @@ export default function WizardModal({ open, onClose }) {
               )}
               <h2 className="wizard__heading-inline">
                 {step === 1 ? 'Создать обучение'
-                  : step === 2 ? 'Тип тренажёра'
                   : step === 3 ? 'Способ создания'
                   : 'Настройка обучения'}
               </h2>
@@ -562,7 +559,6 @@ export default function WizardModal({ open, onClose }) {
 
             {/* Контент */}
             {step === 1 && <StepType onSelect={selectType} />}
-            {step === 2 && <StepTrainerSubtype onSelect={selectSubtype} />}
             {step === 3 && <StepMethod type={unitType} onSelect={selectMethod} onShowTemplates={() => setShowTemplates(true)} />}
             {step === 4 && (
               <StepForm
