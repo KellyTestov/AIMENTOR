@@ -127,11 +127,18 @@ export function getOwnChecks(node, parent = null, unitType = null) {
     }
 
     case 'completion': {
-      const els = node.content?.elements || []
+      const c = node.content || {}
+      const els = c.elements || []
       const firstHeading = els[0]?.heading || ''
-      return [
-        { ok: !!txt(firstHeading), label: 'Заголовок' },
+      const btn = c.finishBtnText || ''
+      const checks = [
+        { ok: !!txt(firstHeading), label: 'Заголовок финального экрана' },
+        { ok: !!txt(btn), label: 'Текст кнопки' },
       ]
+      if (c.aiFeedback?.enabled) {
+        checks.push({ ok: !!txt(c.aiFeedback?.prompt), label: 'Промпт AI-обратной связи' })
+      }
+      return checks
     }
 
     default:
