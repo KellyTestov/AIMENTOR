@@ -111,8 +111,13 @@ export function migrateLegacyClientCard(legacy) {
   }
   // Уже новый формат
   if (Array.isArray(legacy.sections)) {
+    // Явный null source = пустое состояние (после Сброса)
+    const explicitSource = Object.prototype.hasOwnProperty.call(legacy, 'source')
+    const source = explicitSource
+      ? legacy.source
+      : (legacy.templateId ? 'template' : (legacy.sections.length > 0 ? 'custom' : null))
     return {
-      source: legacy.source || (legacy.templateId ? 'template' : 'custom'),
+      source,
       templateId: legacy.templateId || null,
       sections: legacy.sections,
     }

@@ -44,9 +44,9 @@ export default function ClientCard({ clientCard, onChange }) {
   function startCustom() {
     const sections = [{
       id: genId('cc-sec'),
-      title: '',
+      title: 'Общая информация',
       collapsible: true,
-      fields: [{ id: genId('cc-fld'), label: '', value: '', placeholder: '' }],
+      fields: [{ id: genId('cc-fld'), label: 'ФИО клиента', value: '', placeholder: '' }],
     }]
     onChange({ source: 'custom', templateId: null, sections })
     setOpenSections(new Set([sections[0].id]))
