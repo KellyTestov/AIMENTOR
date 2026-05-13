@@ -2177,25 +2177,25 @@ select.cu-edit-input { appearance: auto; cursor: pointer; }
 .compl-section__head {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  background: var(--bg);
+  gap: 9px;
+  padding: 10px 14px;
+  background: var(--surface);
   border-bottom: 1px solid var(--border-sub);
 }
 .compl-section__num {
   flex-shrink: 0;
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: var(--muted-lt);
+  background: #94a3b8;
   color: #fff;
-  font: 700 11px/1 Manrope, sans-serif;
+  font: 700 10px/1 Manrope, sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .compl-section--accent .compl-section__num {
-  background: linear-gradient(145deg, #d62020 0%, #900e0e 100%);
+  background: #b91c1c;
 }
 .compl-section__title {
   flex: 1;

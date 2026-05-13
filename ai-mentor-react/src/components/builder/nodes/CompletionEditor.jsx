@@ -1,19 +1,18 @@
 import { useBuilderStore, genId } from '../../../stores/builderStore.js'
 import InfoTip from '../../shared/InfoTip.jsx'
 
-const DEFAULT_AI_PROMPT = 'Дай позитивную обратную связь сотруднику в 3-4 предложениях. Выдели сильные стороны его ответов, мягко укажи на пробелы и предложи, на чём ещё можно сосредоточиться.'
+const AI_PROMPT_PLACEHOLDER = 'Например: Дай позитивную обратную связь сотруднику в 3-4 предложениях. Выдели сильные стороны его ответов, мягко укажи на пробелы и предложи, на чём ещё можно сосредоточиться.'
 
 const DEFAULT_METRICS = {
   score: true,
   correct: true,
   time: true,
   hintsUsed: false,
-  bestWorstSection: false,
 }
 
 const DEFAULT_AI = {
   enabled: false,
-  prompt: DEFAULT_AI_PROMPT,
+  prompt: '',
   includeAnswers: true,
   includeScores: true,
   includeMistakes: true,
@@ -22,11 +21,10 @@ const DEFAULT_AI = {
 }
 
 const METRIC_LABELS = {
-  score:             'Общий балл',
-  correct:           'Количество правильных ответов',
-  time:              'Время прохождения',
-  hintsUsed:         'Использовано подсказок',
-  bestWorstSection:  'Лучший / худший раздел',
+  score:     'Общий балл',
+  correct:   'Количество правильных ответов',
+  time:      'Время прохождения',
+  hintsUsed: 'Использовано подсказок',
 }
 
 const AI_CONTEXT_LABELS = {
@@ -178,7 +176,7 @@ export default function CompletionEditor({ node }) {
               rows={4}
               value={ai.prompt}
               onChange={e => setAi({ prompt: e.target.value })}
-              placeholder={DEFAULT_AI_PROMPT}
+              placeholder={AI_PROMPT_PLACEHOLDER}
             />
 
             <label className="field-lbl" style={{ marginTop: 14 }}>Что учитывать в контексте</label>
