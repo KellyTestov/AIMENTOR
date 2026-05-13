@@ -78,7 +78,10 @@
       "Bash(netstat -ano)",
       "Bash(git -C f:/ownerpagementor log --all --oneline -30 --graph)",
       "Bash(git -C f:/ownerpagementor branch -a)",
-      "Bash(git -C f:/ownerpagementor show --stat 07dc48f)"
+      "Bash(git -C f:/ownerpagementor show --stat 07dc48f)",
+      "Bash(git -C f:/ownerpagementor log --all --oneline --graph -20)",
+      "Bash(git -C f:/ownerpagementor status)",
+      "Bash(git -C f:/ownerpagementor diff --check)"
     ]
   }
 }

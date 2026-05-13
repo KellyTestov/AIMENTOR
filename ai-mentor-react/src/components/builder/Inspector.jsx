@@ -8,7 +8,7 @@ import {
   getStatus,
   getProgress,
   getIncompleteChildren,
-  getIncompleteContentBlocks,
+  getIncompleteHierarchy,
 } from '../../builderServices/readiness.js'
 
 function ReadinessPanel({ node, parent }) {
@@ -21,9 +21,11 @@ function ReadinessPanel({ node, parent }) {
   const recProgress = getProgress(recursive.passed, recursive.total)
 
   const isUnitRoot = node.type === 'trainer' || node.type === 'exam'
-  const incompleteChildren = isUnitRoot
-    ? getIncompleteContentBlocks(node, parent)
-    : getIncompleteChildren(node)
+  const hierarchy = isUnitRoot ? getIncompleteHierarchy(node) : []
+  const incompleteChildren = isUnitRoot ? [] : getIncompleteChildren(node)
+  const incompleteCount = isUnitRoot
+    ? hierarchy.length
+    : incompleteChildren.length
   const ownAllOk = own.problems.length === 0
 
   return (
@@ -55,31 +57,62 @@ function ReadinessPanel({ node, parent }) {
         </details>
       )}
 
-      {incompleteChildren.length > 0 && (
+      {incompleteCount > 0 && (
         <details className="rd-panel__details" open>
           <summary>
             <span>Не заполнены вложенные блоки</span>
-            <span className="rd-panel__count">{incompleteChildren.length}</span>
+            <span className="rd-panel__count">{incompleteCount}</span>
           </summary>
           <ul className="rd-panel__list rd-panel__list--linkable">
-            {incompleteChildren.map((c) => (
-              <li key={c.id}>
-                <button
-                  type="button"
-                  className="rd-panel__child-link"
-                  onClick={() => selectNode(c.id)}
-                  title={`Перейти к блоку «${c.title}»`}
-                >
-                  <span className="rd-panel__child-title">{c.title}</span>
-                  <span className="rd-panel__child-pct">{c.progress}%</span>
-                </button>
-              </li>
-            ))}
+            {isUnitRoot
+              ? hierarchy.map((top) => (
+                  <li key={top.id}>
+                    <button
+                      type="button"
+                      className="rd-panel__child-link"
+                      onClick={() => selectNode(top.id)}
+                      title={`Перейти к блоку «${top.title}»`}
+                    >
+                      <span className="rd-panel__child-title">{top.title}</span>
+                      <span className="rd-panel__child-pct">{top.progress}%</span>
+                    </button>
+                    {top.nested.length > 0 && (
+                      <ul className="rd-panel__sublist">
+                        {top.nested.map((sub) => (
+                          <li key={sub.id}>
+                            <button
+                              type="button"
+                              className="rd-panel__child-link rd-panel__child-link--sub"
+                              onClick={() => selectNode(sub.id)}
+                              title={`Перейти к блоку «${sub.title}»`}
+                            >
+                              <span className="rd-panel__child-title">{sub.title}</span>
+                              <span className="rd-panel__child-pct">{sub.progress}%</span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                ))
+              : incompleteChildren.map((c) => (
+                  <li key={c.id}>
+                    <button
+                      type="button"
+                      className="rd-panel__child-link"
+                      onClick={() => selectNode(c.id)}
+                      title={`Перейти к блоку «${c.title}»`}
+                    >
+                      <span className="rd-panel__child-title">{c.title}</span>
+                      <span className="rd-panel__child-pct">{c.progress}%</span>
+                    </button>
+                  </li>
+                ))}
           </ul>
         </details>
       )}
 
-      {ownAllOk && incompleteChildren.length === 0 && (
+      {ownAllOk && incompleteCount === 0 && (
         <div className="rd-panel__ok">✓ Всё заполнено</div>
       )}
     </div>

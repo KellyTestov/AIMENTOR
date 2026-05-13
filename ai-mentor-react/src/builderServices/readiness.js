@@ -214,3 +214,42 @@ export function getIncompleteContentBlocks(node, parent = null) {
   walk(node, parent)
   return results
 }
+
+/**
+ * Иерархический список незаполненности для unit-уровня:
+ * каждый верхнеуровневый ребёнок (онбординг / теор. блок / практика / завершение)
+ * с массивом вложенных контентных потомков, у которых готовность < 100%.
+ */
+export function getIncompleteHierarchy(node) {
+  if (!node || !node.children) return []
+  return node.children
+    .map((child) => {
+      const r = getRecursiveReadiness(child, node)
+      const progress = getProgress(r.passed, r.total)
+      if (progress >= 100) return null
+
+      const nested = []
+      function walk(n, p) {
+        for (const c of n.children || []) {
+          if (CONTENT_TYPES.has(c.type)) {
+            const cr = getRecursiveReadiness(c, n)
+            const cp = getProgress(cr.passed, cr.total)
+            if (cp < 100) {
+              nested.push({ id: c.id, title: c.title, type: c.type, progress: cp })
+            }
+          }
+          walk(c, n)
+        }
+      }
+      walk(child, node)
+
+      return {
+        id: child.id,
+        title: child.title,
+        type: child.type,
+        progress,
+        nested,
+      }
+    })
+    .filter(Boolean)
+}
