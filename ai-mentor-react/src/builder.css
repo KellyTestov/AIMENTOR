@@ -2475,6 +2475,14 @@ select.cu-edit-input { appearance: auto; cursor: pointer; }
   color: var(--muted);
 }
 
+.crit-section-toggle {
+  margin: 0 0 14px;
+  padding: 8px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border-sub);
+  border-radius: var(--radius-sm);
+}
+
 .crit-card__head {
   display: flex;
   align-items: center;

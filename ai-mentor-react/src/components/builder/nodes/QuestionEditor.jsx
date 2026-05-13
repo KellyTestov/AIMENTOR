@@ -202,6 +202,16 @@ export default function QuestionEditor({ node }) {
         <p className="crit-section-desc">
           Добавьте пункты, которые должны быть в ответе сотрудника. AI проверит каждый пункт отдельно и начислит баллы.
         </p>
+        <label className="ig-toggle crit-section-toggle">
+          <input
+            type="checkbox"
+            checked={!!content.useClientCard}
+            onChange={e => save({ useClientCard: e.target.checked })}
+          />
+          <span className="ig-toggle__track" />
+          <span className="ig-toggle__label">Учитывать карточку клиента</span>
+          <InfoTip wide>При оценке ответа AI будет использовать данные из карточки клиента (статус, баланс, условия договора и т.п.). Включайте если вопрос требует от сотрудника опираться на индивидуальные данные клиента.</InfoTip>
+        </label>
         <div className="crit-cards" id="crit-cards">
           {criteria.map((cr, i) => (
             <div key={cr.id} className="crit-card">
