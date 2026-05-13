@@ -33,8 +33,10 @@ export default function QuestionEditor({ node }) {
   const { queries, criteria } = content
 
   const parentCase = unit ? builderService.findParent(unit, node.id) : null
-  const effectiveHintsMode =
-    node.settings?.hintsMode || parentCase?.settings?.hintsMode || 'auto'
+  const isExam = unit?.type === 'exam'
+  const effectiveHintsMode = isExam
+    ? 'none'
+    : (node.settings?.hintsMode || parentCase?.settings?.hintsMode || 'auto')
   const showHints = effectiveHintsMode === 'manual'
 
   const noAbook     = !!node.settings?.noAbook

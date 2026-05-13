@@ -14,7 +14,7 @@ function txt(v) {
  * Собственные проверки узла (без учёта детей).
  * Возвращает массив { ok: boolean, label: string }.
  */
-export function getOwnChecks(node, parent = null) {
+export function getOwnChecks(node, parent = null, unitType = null) {
   if (!node) return []
   switch (node.type) {
     case 'trainer':
@@ -85,7 +85,10 @@ export function getOwnChecks(node, parent = null) {
       const c = node.content || {}
       const settings = node.settings || {}
       const criteria = Array.isArray(c.criteria) ? c.criteria : []
-      const effectiveHintsMode = settings.hintsMode || parent?.settings?.hintsMode || 'auto'
+      const isExam = unitType === 'exam'
+      const effectiveHintsMode = isExam
+        ? 'none'
+        : (settings.hintsMode || parent?.settings?.hintsMode || 'auto')
       const checks = [
         { ok: !!txt(c.text), label: 'Текст вопроса' },
         { ok: criteria.length > 0, label: 'Минимум один пункт чек-листа' },
@@ -127,8 +130,8 @@ export function getOwnChecks(node, parent = null) {
 }
 
 /** Готовность только этого узла (без потомков). */
-export function getNodeReadiness(node, parent = null) {
-  const checks = getOwnChecks(node, parent)
+export function getNodeReadiness(node, parent = null, unitType = null) {
+  const checks = getOwnChecks(node, parent, unitType)
   return {
     passed: checks.filter((c) => c.ok).length,
     total: checks.length,
@@ -137,13 +140,14 @@ export function getNodeReadiness(node, parent = null) {
 }
 
 /** Рекурсивная готовность: этот узел + все потомки. */
-export function getRecursiveReadiness(node, parent = null) {
+export function getRecursiveReadiness(node, parent = null, unitType = null) {
   if (!node) return { passed: 0, total: 0 }
-  const own = getNodeReadiness(node, parent)
+  const ut = unitType || ((node.type === 'trainer' || node.type === 'exam') ? node.type : null)
+  const own = getNodeReadiness(node, parent, ut)
   let passed = own.passed
   let total = own.total
   for (const child of node.children || []) {
-    const r = getRecursiveReadiness(child, node)
+    const r = getRecursiveReadiness(child, node, ut)
     passed += r.passed
     total += r.total
   }
@@ -166,14 +170,15 @@ export function getProgress(passed, total) {
  * Был ли в поддереве (включая сам узел) хотя бы один visited-узел
  * с незавершённой рекурсивной готовностью.
  */
-export function hasVisitedProblem(node, visitedSet, parent = null) {
+export function hasVisitedProblem(node, visitedSet, parent = null, unitType = null) {
   if (!node || !visitedSet) return false
+  const ut = unitType || ((node.type === 'trainer' || node.type === 'exam') ? node.type : null)
   if (visitedSet.has(node.id)) {
-    const r = getRecursiveReadiness(node, parent)
+    const r = getRecursiveReadiness(node, parent, ut)
     if (r.passed < r.total) return true
   }
   for (const child of node.children || []) {
-    if (hasVisitedProblem(child, visitedSet, node)) return true
+    if (hasVisitedProblem(child, visitedSet, node, ut)) return true
   }
   return false
 }
@@ -182,11 +187,11 @@ export function hasVisitedProblem(node, visitedSet, parent = null) {
  * Дочерние узлы первого уровня, у которых рекурсивная готовность < 100%.
  * Используется для inspector-сообщения при агрегаторах.
  */
-export function getIncompleteChildren(node) {
+export function getIncompleteChildren(node, unitType = null) {
   if (!node || !node.children) return []
   return node.children
     .map((child) => {
-      const r = getRecursiveReadiness(child, node)
+      const r = getRecursiveReadiness(child, node, unitType)
       const progress = getProgress(r.passed, r.total)
       return { id: child.id, title: child.title, type: child.type, progress }
     })
@@ -227,9 +232,10 @@ export function getIncompleteContentBlocks(node, parent = null) {
  */
 export function getIncompleteHierarchy(node) {
   if (!node || !node.children) return []
+  const unitType = (node.type === 'trainer' || node.type === 'exam') ? node.type : null
   return node.children
     .map((child) => {
-      const r = getRecursiveReadiness(child, node)
+      const r = getRecursiveReadiness(child, node, unitType)
       const progress = getProgress(r.passed, r.total)
       if (progress >= 100) return null
 
@@ -237,7 +243,7 @@ export function getIncompleteHierarchy(node) {
       function walk(n, p) {
         for (const c of n.children || []) {
           if (CONTENT_TYPES.has(c.type)) {
-            const cr = getRecursiveReadiness(c, n)
+            const cr = getRecursiveReadiness(c, n, unitType)
             const cp = getProgress(cr.passed, cr.total)
             if (cp < 100) {
               nested.push({ id: c.id, title: c.title, type: c.type, progress: cp })

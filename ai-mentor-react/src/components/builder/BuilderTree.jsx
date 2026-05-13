@@ -75,9 +75,11 @@ function TreeNode({ node, parent, depth, isRoot }) {
   const canRename  = node.type === 'theory'
   const indent     = depth * 16 + 8
 
-  const r = getRecursiveReadiness(node, parent)
+  const unit = useBuilderStore((s) => s.unit)
+  const unitType = unit?.type
+  const r = getRecursiveReadiness(node, parent, unitType)
   const status = getStatus(r.passed, r.total)
-  const showStatus = status !== 'ok' && hasVisitedProblem(node, visitedIds, parent)
+  const showStatus = status !== 'ok' && hasVisitedProblem(node, visitedIds, parent, unitType)
   const statusTitle = status === 'empty'
     ? 'Этот блок открыт, но не заполнен. Откройте его, чтобы заполнить обязательные поля.'
     : `Этот блок открыт, но заполнен не до конца (${r.passed} из ${r.total}). Откройте, чтобы доделать.`

@@ -11,18 +11,18 @@ import {
   getIncompleteHierarchy,
 } from '../../builderServices/readiness.js'
 
-function ReadinessPanel({ node, parent }) {
+function ReadinessPanel({ node, parent, unitType }) {
   const selectNode = useBuilderStore((s) => s.selectNode)
   if (!node) return null
 
-  const own = getNodeReadiness(node, parent)
-  const recursive = getRecursiveReadiness(node, parent)
+  const own = getNodeReadiness(node, parent, unitType)
+  const recursive = getRecursiveReadiness(node, parent, unitType)
   const recStatus = getStatus(recursive.passed, recursive.total)
   const recProgress = getProgress(recursive.passed, recursive.total)
 
   const isUnitRoot = node.type === 'trainer' || node.type === 'exam'
   const hierarchy = isUnitRoot ? getIncompleteHierarchy(node) : []
-  const incompleteChildren = isUnitRoot ? [] : getIncompleteChildren(node)
+  const incompleteChildren = isUnitRoot ? [] : getIncompleteChildren(node, unitType)
   const incompleteCount = isUnitRoot
     ? hierarchy.length
     : incompleteChildren.length
@@ -139,6 +139,8 @@ const HINTS_MODE_INFO = (
   </>
 )
 
+const HINTS_MODE_INFO_EXAM = 'В экзамене подсказки не могут быть использованы'
+
 function IGroup({ icon, label, info, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
@@ -180,7 +182,7 @@ function SectionInspector({ node }) {
   return <PassthroughInspector node={node} />
 }
 
-function CaseInspector({ node, updateNode }) {
+function CaseInspector({ node, isExam, updateNode }) {
   const s = node.settings || {}
 
   function bindSelect(key) {
@@ -220,19 +222,25 @@ function CaseInspector({ node, updateNode }) {
           </select>
         </IField>
       </IGroup>
-      <IGroup icon="💡" label="Подсказки" info={HINTS_MODE_INFO} defaultOpen>
+      <IGroup icon="💡" label="Подсказки" info={isExam ? HINTS_MODE_INFO_EXAM : HINTS_MODE_INFO} defaultOpen>
         <IField label="Режим подсказок">
-          <select value={s.hintsMode || 'auto'} onChange={bindHintsMode}>
-            <option value="auto">Генерируются автоматически</option>
-            <option value="manual">Указываются вручную</option>
-          </select>
+          {isExam ? (
+            <select value="none" disabled>
+              <option value="none">Не выдаются</option>
+            </select>
+          ) : (
+            <select value={s.hintsMode || 'auto'} onChange={bindHintsMode}>
+              <option value="auto">Генерируются автоматически</option>
+              <option value="manual">Указываются вручную</option>
+            </select>
+          )}
         </IField>
       </IGroup>
     </>
   )
 }
 
-function QuestionInspector({ node, parentCase, updateNode }) {
+function QuestionInspector({ node, parentCase, isExam, updateNode }) {
   const s = node.settings || {}
   const noAbook = !!s.noAbook
   const [restrict, setRestrict] = useState(!!s.abookRestrict)
@@ -308,13 +316,19 @@ function QuestionInspector({ node, parentCase, updateNode }) {
         </>
       )}
       </IGroup>
-      <IGroup icon="💡" label="Подсказки" info={HINTS_MODE_INFO} defaultOpen>
-        <IField label="Режим подсказок" inherited={!ownHintsMode}>
-          <select value={ownHintsMode || 'inherit'} onChange={bindHintsMode}>
-            <option value="inherit">По умолчанию ({hintsModeLbl(inheritedHintsMode)})</option>
-            <option value="auto">Генерируются автоматически</option>
-            <option value="manual">Указываются вручную</option>
-          </select>
+      <IGroup icon="💡" label="Подсказки" info={isExam ? HINTS_MODE_INFO_EXAM : HINTS_MODE_INFO} defaultOpen>
+        <IField label="Режим подсказок" inherited={!isExam && !ownHintsMode}>
+          {isExam ? (
+            <select value="none" disabled>
+              <option value="none">Не выдаются</option>
+            </select>
+          ) : (
+            <select value={ownHintsMode || 'inherit'} onChange={bindHintsMode}>
+              <option value="inherit">По умолчанию ({hintsModeLbl(inheritedHintsMode)})</option>
+              <option value="auto">Генерируются автоматически</option>
+              <option value="manual">Указываются вручную</option>
+            </select>
+          )}
         </IField>
       </IGroup>
     </>
@@ -429,11 +443,11 @@ export default function Inspector() {
       switch (node.type) {
         case 'question':
           title = 'Вопрос'
-          body  = <QuestionInspector node={node} parentCase={activeParent} updateNode={updateNode} />
+          body  = <QuestionInspector node={node} parentCase={activeParent} isExam={unit.type === 'exam'} updateNode={updateNode} />
           break
         case 'case':
           title = 'Кейс'
-          body  = <CaseInspector node={node} updateNode={updateNode} />
+          body  = <CaseInspector node={node} isExam={unit.type === 'exam'} updateNode={updateNode} />
           break
         case 'section':
           title = 'Раздел'
@@ -456,7 +470,7 @@ export default function Inspector() {
         <span className="bld-right__title" id="inspector-title">{title}</span>
       </div>
       <div className="bld-right__body" id="inspector-body">
-        {activeNode && <ReadinessPanel node={activeNode} parent={activeParent} />}
+        {activeNode && <ReadinessPanel node={activeNode} parent={activeParent} unitType={unit.type} />}
         {body}
       </div>
     </aside>
