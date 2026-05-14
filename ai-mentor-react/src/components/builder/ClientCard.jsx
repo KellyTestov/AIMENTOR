@@ -125,12 +125,13 @@ export default function ClientCard({ clientCard, onChange }) {
               <div className="cc-choice__desc">Свои разделы и поля под нужды вашей бизнес-линии</div>
             </button>
           </div>
-          <div className="cc-choice__none">
-            <button type="button" className="cc-choice__none-btn" onClick={pickNone}>
-              Не создавать
-            </button>
-            <InfoTip wide>Выбирайте этот вариант в случае, если ваши вопросы не будут связаны с конкретным клиентом</InfoTip>
-          </div>
+          <button type="button" className="cc-choice__none-btn" onClick={pickNone}>
+            <span className="cc-choice__none-icon">⊘</span>
+            <span className="cc-choice__none-text">Не создавать</span>
+            <span className="cc-choice__none-tip" onClick={(e) => e.stopPropagation()}>
+              <InfoTip wide>Выбирайте этот вариант в случае, если ваши вопросы не будут связаны с конкретным клиентом</InfoTip>
+            </span>
+          </button>
         </div>
         <ClientCardTemplateModal
           open={tplModalOpen}
