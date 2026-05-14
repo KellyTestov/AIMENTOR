@@ -68,9 +68,10 @@ export function getOwnChecks(node, parent = null, unitType = null) {
       const cc = c.clientCard
       const checks = [
         { ok: !!txt(c.description), label: 'Описание кейса' },
-        { ok: !!cc?.source, label: 'Карточка клиента создана' },
+        { ok: !!cc?.source, label: 'Способ карточки клиента выбран' },
       ]
-      if (cc?.source) {
+      // Если выбрано «не создавать» — карточка не учитывается дальше
+      if (cc?.source && cc.source !== 'none') {
         const sections = Array.isArray(cc.sections) ? cc.sections : []
         if (cc.source === 'custom') {
           const hasAnyField = sections.some((s) => Array.isArray(s.fields) && s.fields.length > 0)

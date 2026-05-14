@@ -3,6 +3,7 @@ import { genId } from '../../stores/builderStore.js'
 import { instantiateTemplate, migrateLegacyClientCard, getTemplate } from '../../builderServices/clientCardTemplates.js'
 import ClientCardTemplateModal from './ClientCardTemplateModal.jsx'
 import ConfirmModal from '../shared/ConfirmModal.jsx'
+import InfoTip from '../shared/InfoTip.jsx'
 
 function newCustomSection(initialTitle = '') {
   return {
@@ -33,6 +34,7 @@ export default function ClientCard({ clientCard, onChange }) {
   const isEmpty = cc.source == null
   const isTemplate = cc.source === 'template'
   const isCustom = cc.source === 'custom'
+  const isNone = cc.source === 'none'
 
   function pickTemplate(templateId) {
     const sections = instantiateTemplate(templateId)
@@ -50,6 +52,10 @@ export default function ClientCard({ clientCard, onChange }) {
     }]
     onChange({ source: 'custom', templateId: null, sections })
     setOpenSections(new Set([sections[0].id]))
+  }
+
+  function pickNone() {
+    onChange({ source: 'none', templateId: null, sections: [] })
   }
 
   function resetCard() {
@@ -119,11 +125,46 @@ export default function ClientCard({ clientCard, onChange }) {
               <div className="cc-choice__desc">Свои разделы и поля под нужды вашей бизнес-линии</div>
             </button>
           </div>
+          <div className="cc-choice__none">
+            <button type="button" className="cc-choice__none-btn" onClick={pickNone}>
+              Не создавать
+            </button>
+            <InfoTip wide>Выбирайте этот вариант в случае, если ваши вопросы не будут связаны с конкретным клиентом</InfoTip>
+          </div>
         </div>
         <ClientCardTemplateModal
           open={tplModalOpen}
           onClose={() => setTplModalOpen(false)}
           onPick={pickTemplate}
+        />
+      </>
+    )
+  }
+
+  // ── None state: card not used ──────────────────
+  if (isNone) {
+    return (
+      <>
+        <div className="cc-none">
+          <div className="cc-none__icon">⊘</div>
+          <div className="cc-none__text">
+            Карточка клиента не используется в этом кейсе
+          </div>
+          <button
+            type="button"
+            className="cc-toolbar__reset"
+            onClick={() => setConfirmReset(true)}
+          >
+            Изменить
+          </button>
+        </div>
+        <ConfirmModal
+          open={confirmReset}
+          title="Изменить решение по карточке клиента?"
+          description="Вы вернётесь к выбору способа создания карточки."
+          confirmLabel="Изменить"
+          onConfirm={resetCard}
+          onCancel={() => setConfirmReset(false)}
         />
       </>
     )
