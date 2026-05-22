@@ -473,6 +473,185 @@ export const CLIENT_CARD_TEMPLATES = [
       },
     ],
   },
+  {
+    id: 'delivery-debit',
+    name: 'Доставка — клиент с дебетовой картой',
+    description: 'Карточка встречи по доставке дебетовой карты: обслуживание, кэшбэк, снятие, переводы, СМС, возраст выдачи, Альфа-Смарт.',
+    icon: '🚚',
+    sections: [
+      {
+        id: 'meetingInfo',
+        title: 'Информация о встрече',
+        collapsible: false,
+        fields: [
+          { id: 'name',        label: 'ФИО',           placeholder: 'Антонов Аркадий Сергеевич' },
+          { id: 'meetingDate', label: 'Дата встречи',  placeholder: '28.12.2025' },
+        ],
+      },
+      {
+        id: 'productDetails',
+        title: 'Условия по продукту',
+        collapsible: true,
+        fields: [
+          { id: 'service',    label: 'Обслуживание',      placeholder: 'Бесплатно' },
+          { id: 'cashback',   label: 'Кэшбэк',            placeholder: '5% в 3х категориях / 5% в 2х категориях +1% на все, барабан до 100%, максимум 5000' },
+          { id: 'withdrawal', label: 'Снятие',             placeholder: '1 млн ₽ в месяц' },
+          { id: 'transfers',  label: 'Переводы',           placeholder: 'СБП до 100 тыс. руб' },
+          { id: 'sms',        label: 'Смс уведомление',   placeholder: '99 ₽' },
+          { id: 'minAge',     label: 'Возраст выдачи',    placeholder: 'с 14 лет' },
+          { id: 'alfaSmart',  label: 'Пакет Альфа-Смарт', placeholder: '9 привилегий' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'delivery-credit',
+    name: 'Доставка — клиент с кредитной картой',
+    description: 'Карточка встречи по доставке кредитной карты: обслуживание, кэшбэк, льготный период, переводы, комиссия снятия, минимальный платёж.',
+    icon: '🚚',
+    sections: [
+      {
+        id: 'meetingInfo',
+        title: 'Информация о встрече',
+        collapsible: false,
+        fields: [
+          { id: 'name',        label: 'ФИО',           placeholder: 'Петров Василий Семёнович' },
+          { id: 'meetingDate', label: 'Дата встречи',  placeholder: '29.12.2025' },
+        ],
+      },
+      {
+        id: 'productDetails',
+        title: 'Условия по продукту',
+        collapsible: true,
+        fields: [
+          { id: 'service',       label: 'Обслуживание',      placeholder: '1 год бесплатно, второй год 990 ₽' },
+          { id: 'cashback',      label: 'Кэшбэк',            placeholder: '5% в 3х категориях / 5% в 2х категориях +1% на все, барабан до 100%, максимум 5000' },
+          { id: 'graceperiod',   label: 'Льготный период',   placeholder: '60 дней на покупки, снятие наличных и переводы; 100 дней на Balance Transfer' },
+          { id: 'transfers',     label: 'Переводы',           placeholder: 'Комиссия 5,9%+390 рублей по номеру карты. Переводы по СБП, между своими счетами 5,9% + 150 рублей' },
+          { id: 'commWithdraw',  label: 'Комиссия снятие',   placeholder: '50 000 тыс. руб. без комиссии далее 4,9% + 490 руб' },
+          { id: 'minPayment',    label: 'Минимальный платёж', placeholder: 'от 0% до 10% от суммы задолженности (мин 300 руб.)' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'delivery-credit-120',
+    name: 'Доставка — клиент с кредитной картой (120 дней без %)',
+    description: 'Карточка встречи по доставке кредитной карты с льготным периодом 120 дней на покупки.',
+    icon: '🚚',
+    sections: [
+      {
+        id: 'meetingInfo',
+        title: 'Информация о встрече',
+        collapsible: false,
+        fields: [
+          { id: 'name',        label: 'ФИО',           placeholder: 'Иванов Евгений Антонович' },
+          { id: 'meetingDate', label: 'Дата встречи',  placeholder: '30.12.2025' },
+        ],
+      },
+      {
+        id: 'productDetails',
+        title: 'Условия по продукту',
+        collapsible: true,
+        fields: [
+          { id: 'service',      label: 'Обслуживание',       placeholder: '1 год бесплатно, второй год 1 290 ₽' },
+          { id: 'cashback',     label: 'Кэшбэк',             placeholder: '+1% на все, барабан до 100%, максимум 5000' },
+          { id: 'graceperiod',  label: 'Льготный период',    placeholder: '120 дней на покупки, 100 дней на Balance Transfer' },
+          { id: 'transfers',    label: 'Переводы',            placeholder: 'с комиссией 5,9%+390 рублей по номеру карты. Переводы по СБП, между своими счетами 5,9% + 150 рублей' },
+          { id: 'commWithdraw', label: 'Комиссия снятие',    placeholder: 'сразу же с комиссией 4,9% + 490 руб.' },
+          { id: 'minPayment',   label: 'Минимальный платёж', placeholder: 'от 0% до 10% от суммы задолженности (мин 300 руб.)' },
+          { id: 'minAge',       label: 'Возраст выдачи',     placeholder: 'с 18 лет' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'delivery-debit-alfa-only',
+    name: 'Доставка — клиент с дебетовой картой (Alfa Only)',
+    description: 'Карточка встречи по доставке дебетовой карты пакета Alfa Only: расширенные условия обслуживания, кэшбэк до 30 000 ₽/мес.',
+    icon: '🚚',
+    sections: [
+      {
+        id: 'meetingInfo',
+        title: 'Информация о встрече',
+        collapsible: false,
+        fields: [
+          { id: 'name',        label: 'ФИО',           placeholder: 'Безруков Арнольд Васильевич' },
+          { id: 'meetingDate', label: 'Дата встречи',  placeholder: '31.12.2025' },
+        ],
+      },
+      {
+        id: 'productDetails',
+        title: 'Условия по продукту',
+        collapsible: true,
+        fields: [
+          { id: 'service',    label: 'Обслуживание',     placeholder: 'условия одного и тогда карта бесплатная: 1. остаток 2 млн ₽ и траты от 200 000 ₽ в месяц по картам Альфа-Банка; 2. ежемесячный остаток по счетам — от 3 млн ₽; 3. зарплата от 400 000 ₽ в месяц.' },
+          { id: 'cashback',   label: 'Кэшбэк',           placeholder: '5 категорий по 7% или 4 категории по 7% + 1% на всё, 2 барабана супер кэшбека где может выпасть до 100% до 30 000 руб. в месяц' },
+          { id: 'withdrawal', label: 'Снятие',            placeholder: 'Без ограничений в любых банкоматах' },
+          { id: 'transfers',  label: 'Переводы',          placeholder: 'Бесплатно переводы с карты на карту. До 100 000 ₽ в месяц. На любую сумму при остатках от 12 млн' },
+          { id: 'sms',        label: 'Смс уведомление',  placeholder: 'Бесплатно' },
+          { id: 'minAge',     label: 'Возраст выдачи',   placeholder: 'ДК ПЭП (без бумажной анкеты) — с 18 лет; Семейный банк Alfa Only — с 20 лет; Зарплатная карта Alfa Only/TOP — с 18 лет' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'delivery-rko',
+    name: 'Доставка — Расчётно-кассовое обслуживание',
+    description: 'Карточка встречи по РКО: услуги, тариф, подписки, нефинансовые сервисы.',
+    icon: '🚚',
+    sections: [
+      {
+        id: 'meetingInfo',
+        title: 'Информация о встрече',
+        collapsible: false,
+        fields: [
+          { id: 'name',        label: 'ФИО',           placeholder: 'Смирнов Анатолий Валерьевич' },
+          { id: 'meetingDate', label: 'Дата встречи',  placeholder: '20.04.2026' },
+        ],
+      },
+      {
+        id: 'productDetails',
+        title: 'Условия по продукту',
+        collapsible: true,
+        fields: [
+          { id: 'services',    label: 'Услуги',                placeholder: 'Торговый эквайринг' },
+          { id: 'tariff',      label: 'Тариф',                 placeholder: 'Быстрое развитие' },
+          { id: 'subs',        label: 'Подписки',              placeholder: 'Бесплатные переводы' },
+          { id: 'nonFinance',  label: 'Нефинансовые сервисы', placeholder: 'Альфа-Безопасность' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'delivery-corporate-card',
+    name: 'Доставка — Корпоративная карта для лиц, принимающих решения',
+    description: 'Карточка встречи по доставке корпоративной карты: обслуживание, кэшбэк, снятие, переводы, СМС.',
+    icon: '🚚',
+    sections: [
+      {
+        id: 'meetingInfo',
+        title: 'Информация о встрече',
+        collapsible: false,
+        fields: [
+          { id: 'name',        label: 'ФИО',           placeholder: 'Смолина Виталина Андреевна' },
+          { id: 'meetingDate', label: 'Дата встречи',  placeholder: '24.01.2026' },
+        ],
+      },
+      {
+        id: 'productDetails',
+        title: 'Условия по продукту',
+        collapsible: true,
+        fields: [
+          { id: 'service',    label: 'Обслуживание',      placeholder: 'Бесплатно' },
+          { id: 'cashback',   label: 'Кэшбэк',            placeholder: '7% в 4х категориях / 7% в 3х категориях +1% на все, 2 прокрутки барабана до 100%, максимум 30 000' },
+          { id: 'withdrawal', label: 'Снятие',             placeholder: '2 млн в месяц, далее комиссия — 1,99%' },
+          { id: 'transfers',  label: 'Переводы',           placeholder: 'Без комиссии' },
+          { id: 'sms',        label: 'Смс уведомления',   placeholder: 'Бесплатно' },
+        ],
+      },
+    ],
+  },
 ]
 
 export function getTemplate(id) {
