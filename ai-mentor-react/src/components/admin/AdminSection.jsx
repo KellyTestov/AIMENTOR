@@ -48,11 +48,11 @@ export default function AdminSection() {
   const isGlobalBl = bl === 'global'
 
   // Фильтр по бизнес-линии:
-  //   global  → только L6 (специальные администраторы)
-  //   <bl>    → пользователи этой BL, исключая L6
+  //   global  → только L6 (спец администраторы — кросс-BL)
+  //   <bl>    → L6 (везде видны) + пользователи этой BL
   function inCurrentBl(u) {
     if (isGlobalBl) return u.level === 6
-    return u.level !== 6 && u.businessLine === bl
+    return u.level === 6 || u.businessLine === bl
   }
 
   // Разделяем заявки (L0) и активных пользователей
@@ -65,13 +65,15 @@ export default function AdminSection() {
     [accessUsers, bl] // eslint-disable-line react-hooks/exhaustive-deps
   )
 
-  // Подсчёт по BL (для бейджей на BL-табах)
+  // Подсчёт по BL (для бейджей на BL-табах).
+  // В Global — только L6. В остальных — L6 (везде) + пользователи этой BL (без L0).
   const blCounts = useMemo(() => {
     const counts = {}
     BUSINESS_LINES.forEach((b) => {
       counts[b.id] = accessUsers.filter((u) => {
         if (b.id === 'global') return u.level === 6
-        return u.level !== 6 && u.level !== 0 && u.businessLine === b.id
+        if (u.level === 0) return false
+        return u.level === 6 || u.businessLine === b.id
       }).length
     })
     return counts
