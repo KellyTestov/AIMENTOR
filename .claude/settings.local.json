@@ -81,7 +81,9 @@
       "Bash(git -C f:/ownerpagementor show --stat 07dc48f)",
       "Bash(git -C f:/ownerpagementor log --all --oneline --graph -20)",
       "Bash(git -C f:/ownerpagementor status)",
-      "Bash(git -C f:/ownerpagementor diff --check)"
+      "Bash(git -C f:/ownerpagementor diff --check)",
+      "Bash(Get-ChildItem -Path \".\" -Attributes Directory)",
+      "Bash(Select-Object Name)"
     ]
   }
 }

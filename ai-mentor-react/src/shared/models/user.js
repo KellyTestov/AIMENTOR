@@ -5,7 +5,7 @@
  */
 
 import { initials } from '../../core/utils.js';
-import { USER_RIGHTS, USER_ROLES } from '../../core/constants.js';
+import { USER_RIGHTS, USER_ROLES, getRoleLevel, levelToRights } from '../../core/constants.js';
 
 /**
  * Класс пользователя
@@ -15,9 +15,13 @@ export class User {
     this.id = data.id || null;
     this.name = data.name || data.fullName || '';
     this.fullName = data.fullName || data.name || '';
-    this.roleName = data.roleName || data.role || '';
-    this.role = data.role || data.roleName || '';
-    this.rights = data.rights || {};
+    this.level = typeof data.level === 'number' ? data.level : null;
+    // Если есть level — выводим название из ROLE_LEVELS, иначе берём legacy role
+    const roleByLevel = this.level !== null ? getRoleLevel(this.level).name : '';
+    this.roleName = data.roleName || roleByLevel || data.role || '';
+    this.role = data.role || roleByLevel || data.roleName || '';
+    // rights — либо явные, либо выводим из level
+    this.rights = data.rights || (this.level !== null ? levelToRights(this.level) : {});
     this.isProtected = data.isProtected || false;
     this.isDeveloper = data.isDeveloper || false;
     this.allowedUnitIds = data.allowedUnitIds || [];
@@ -103,6 +107,43 @@ export class User {
   }
 
   /**
+   * Метка уровня (например «L4 · Администратор»)
+   */
+  get levelLabel() {
+    if (this.level === null) return this.roleName || 'Без уровня';
+    const r = getRoleLevel(this.level);
+    return `L${r.level} · ${r.name}`;
+  }
+
+  /**
+   * Может ли текущий пользователь менять уровень другого пользователя.
+   * Правила по матрице:
+   *   L5 (Главный)        — может менять уровни 0..4 (ниже себя)
+   *   L6 (Специальный)    — может менять любые уровни, включая других L6
+   *   Прочие              — не могут
+   * Также: никто не может менять собственный уровень через эту таблицу.
+   */
+  canManageUserLevel(targetUser) {
+    if (!targetUser) return false;
+    if (targetUser.userId === this.id || targetUser.id === this.id) return false;
+    const myLevel = this.level ?? 0;
+    const targetLevel = targetUser.level ?? 0;
+    if (myLevel >= 6) return true;
+    if (myLevel >= 5) return targetLevel < myLevel;
+    return false;
+  }
+
+  /**
+   * Максимальный уровень, который текущий пользователь может назначить.
+   */
+  get maxAssignableLevel() {
+    const myLevel = this.level ?? 0;
+    if (myLevel >= 6) return 6;
+    if (myLevel >= 5) return 4;   // L5 не может назначать L5 или L6
+    return -1;
+  }
+
+  /**
    * Проверка доступа к единице обучения
    * @param {Object} unit - единица обучения
    * @returns {boolean}
@@ -164,6 +205,7 @@ export class User {
       id: this.id,
       name: this.name,
       fullName: this.fullName,
+      level: this.level,
       roleName: this.roleName,
       role: this.role,
       rights: this.rights,

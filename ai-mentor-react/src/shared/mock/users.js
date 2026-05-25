@@ -2,20 +2,22 @@
  * ══════════════════════════════════════════════════
  * Mock Users Data
  * ══════════════════════════════════════════════════
- * 
+ *
  * Тестовые данные пользователей и прав доступа.
+ * Использует 7-уровневую модель (level: 0..6).
  */
 
 import { User } from '../models/user.js';
+import { ROLE_LEVELS, levelToRights, getRoleLevel } from '../../core/constants.js';
 
 /**
- * Обязательные пользователи сервиса (защищённые)
- * @type {Array<Object>}
+ * Защищённые сервисные пользователи (всегда уровень 6 — Специальный администратор).
  */
 export const REQUIRED_SERVICE_USERS = [
   {
     fullName: "Плишкин Роман Валерьевич",
     userId: "U_DD7RZ",
+    level: 6,
     role: "Команда сервиса",
     isProtected: true,
     isDeveloper: true,
@@ -23,6 +25,7 @@ export const REQUIRED_SERVICE_USERS = [
   {
     fullName: "Голощапов Кирилл Юрьевич",
     userId: "U_KG4H1",
+    level: 6,
     role: "Команда сервиса",
     isProtected: true,
     isDeveloper: true,
@@ -30,6 +33,7 @@ export const REQUIRED_SERVICE_USERS = [
   {
     fullName: "Манафов Дмитрий Русланович",
     userId: "U_DM8Q2",
+    level: 6,
     role: "Команда сервиса",
     isProtected: true,
     isDeveloper: true,
@@ -37,6 +41,7 @@ export const REQUIRED_SERVICE_USERS = [
   {
     fullName: "Ватуева Ирина Алексеевна",
     userId: "U_IV3N5",
+    level: 6,
     role: "Команда сервиса",
     isProtected: true,
     isDeveloper: false,
@@ -44,68 +49,91 @@ export const REQUIRED_SERVICE_USERS = [
 ];
 
 /**
- * Mock-данные пользователей с доступом
- * @type {Array<Object>}
+ * Заявки на доступ (level: 0, ожидают одобрения).
  */
-export const MOCK_ACCESS_USERS = [
-  ...REQUIRED_SERVICE_USERS.map((user) => ({ ...user })),
-  { fullName: "Рожков Александр Игоревич", userId: "U_QD7RZ", role: "Редактор" },
-  { fullName: "Савельева Мария Сергеевна", userId: "U_W2K9M", role: "Редактор" },
-  { fullName: "Игнатов Павел Андреевич", userId: "U_FH18Q", role: "Редактор" },
-  { fullName: "Климова Ирина Николаевна", userId: "U_R7N4X", role: "Редактор" },
-  { fullName: "Королев Денис Владимирович", userId: "U_M0T5B", role: "Редактор" },
-  { fullName: "Новикова Валерия Олеговна", userId: "U_Z8P3D", role: "Редактор" },
-  { fullName: "Баранов Олег Михайлович", userId: "U_K4V1S", role: "Редактор" },
-  { fullName: "Филатова Наталья Юрьевна", userId: "U_Q6Y2N", role: "Редактор" },
-  { fullName: "Пахомов Евгений Александрович", userId: "U_H9C7L", role: "Редактор" },
-  { fullName: "Орлова Софья Артёмовна", userId: "U_J3R8P", role: "Редактор" },
-  { fullName: "Елисеев Артем Константинович", userId: "U_B5U0K", role: "Редактор" },
-  { fullName: "Громова Ксения Дмитриевна", userId: "U_T1M6V", role: "Редактор" },
-  { fullName: "Чернов Роман Евгеньевич", userId: "U_N2A9F", role: "Редактор" },
-  { fullName: "Егорова Татьяна Борисовна", userId: "U_P7E4J", role: "Редактор" },
+export const MOCK_ACCESS_REQUESTS = [
+  { fullName: "Соколов Артём Викторович",   userId: "U_AR12P", level: 0, requestedAt: "2026-05-10T08:30:00Z" },
+  { fullName: "Мамонтова Ольга Дмитриевна", userId: "U_OM85K", level: 0, requestedAt: "2026-05-12T14:15:00Z" },
+  { fullName: "Зуев Кирилл Олегович",       userId: "U_KZ47N", level: 0, requestedAt: "2026-05-13T10:00:00Z" },
 ];
 
 /**
- * Mock-данные текущего пользователя
- * @type {Object}
+ * Список пользователей с доступом (различные уровни).
+ */
+export const MOCK_ACCESS_USERS = [
+  // L6 — защищённые сервисные
+  ...REQUIRED_SERVICE_USERS.map((user) => ({ ...user })),
+
+  // L5 — Главный администратор
+  { fullName: "Рожков Александр Игоревич", userId: "U_QD7RZ", level: 5 },
+
+  // L4 — Администраторы
+  { fullName: "Савельева Мария Сергеевна", userId: "U_W2K9M", level: 4 },
+  { fullName: "Игнатов Павел Андреевич",   userId: "U_FH18Q", level: 4 },
+
+  // L3 — Аналитики обучения
+  { fullName: "Климова Ирина Николаевна",   userId: "U_R7N4X", level: 3 },
+  { fullName: "Королев Денис Владимирович", userId: "U_M0T5B", level: 3 },
+  { fullName: "Новикова Валерия Олеговна",  userId: "U_Z8P3D", level: 3 },
+
+  // L2 — Создатели обучения
+  { fullName: "Баранов Олег Михайлович",        userId: "U_K4V1S", level: 2 },
+  { fullName: "Филатова Наталья Юрьевна",       userId: "U_Q6Y2N", level: 2 },
+  { fullName: "Пахомов Евгений Александрович",  userId: "U_H9C7L", level: 2 },
+  { fullName: "Орлова Софья Артёмовна",         userId: "U_J3R8P", level: 2 },
+  { fullName: "Елисеев Артем Константинович",   userId: "U_B5U0K", level: 2 },
+
+  // L1 — Гости
+  { fullName: "Громова Ксения Дмитриевна",  userId: "U_T1M6V", level: 1 },
+  { fullName: "Чернов Роман Евгеньевич",    userId: "U_N2A9F", level: 1 },
+  { fullName: "Егорова Татьяна Борисовна",  userId: "U_P7E4J", level: 1 },
+  { fullName: "Лебедев Сергей Андреевич",   userId: "U_LS92T", level: 1 },
+  { fullName: "Кузнецова Анна Викторовна",  userId: "U_KA38R", level: 1 },
+
+  // L0 — заявки
+  ...MOCK_ACCESS_REQUESTS.map((user) => ({ ...user })),
+];
+
+/**
+ * Текущий пользователь (по умолчанию L6 — для демо доступны все вкладки).
  */
 export const MOCK_CURRENT_USER = {
-  id: "u-101",
+  id: "U_DD7RZ",
   name: "Плишкин Роман Валерьевич",
-  roleName: "Команда сервиса",
-  rights: {
-    canAccessHome: true,
-    canViewCatalog: true,
-    canViewAnalytics: true,
-    canManageUsers: true,
-    canCreate: true,
-    isAdmin: true,
-    allowedUnitIds: ["edu-001", "edu-002", "edu-003", "edu-004"],
-  },
+  roleName: "Специальный администратор",
+  level: 6,
+  rights: levelToRights(6),
+  allowedUnitIds: ["edu-001", "edu-002", "edu-003", "edu-004"],
 };
 
 /**
- * Получить текущего пользователя
- * @param {Object} bootstrap - Bootstrap-данные
- * @returns {User} Инстанс пользователя
+ * Получить текущего пользователя.
  */
 export function getCurrentUser(bootstrap) {
   const userData = bootstrap?.currentUser || MOCK_CURRENT_USER;
+  // Если в bootstrap не пришли rights — выводим из level
+  if (!userData.rights && typeof userData.level === 'number') {
+    userData.rights = levelToRights(userData.level);
+  }
   return new User(userData);
 }
 
 /**
- * Получить список пользователей с доступом
- * @param {Object} bootstrap - Bootstrap-данные
- * @returns {Array<Object>} Массив пользователей
+ * Получить список пользователей с доступом.
  */
 export function getAccessUsers(bootstrap) {
   return bootstrap?.accessUsers || [...MOCK_ACCESS_USERS];
 }
 
 /**
- * Роли пользователей
- * @type {Object}
+ * Получить отображаемое имя роли по уровню.
+ */
+export function roleNameByLevel(level) {
+  return getRoleLevel(level).name;
+}
+
+/**
+ * Роли пользователей (legacy — для обратной совместимости).
  */
 export const USER_ROLES = {
   SERVICE_TEAM: "Команда сервиса",
@@ -114,20 +142,18 @@ export const USER_ROLES = {
 };
 
 /**
- * Проверить, является ли пользователь защищённым
- * @param {string} userId - ID пользователя
- * @returns {boolean}
+ * Проверить, является ли пользователь защищённым.
  */
 export function isProtectedUser(userId) {
   return REQUIRED_SERVICE_USERS.some(u => u.userId === userId);
 }
 
 /**
- * Проверить, является ли пользователь разработчиком
- * @param {string} userId - ID пользователя
- * @returns {boolean}
+ * Проверить, является ли пользователь разработчиком.
  */
 export function isDeveloperUser(userId) {
   const user = REQUIRED_SERVICE_USERS.find(u => u.userId === userId);
   return user?.isDeveloper || false;
 }
+
+export { ROLE_LEVELS, levelToRights, getRoleLevel };

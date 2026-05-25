@@ -123,7 +123,7 @@ export const BUSINESS_LINES = [
   'HR и развитие персонала',
 ];
 
-/* ── Роли пользователей ─────────────────────────────── */
+/* ── Роли пользователей (legacy — для обратной совместимости) ─────── */
 export const USER_ROLES = {
   SERVICE_TEAM: 'Команда сервиса',
   EDITOR: 'Редактор',
@@ -139,6 +139,126 @@ export const USER_RIGHTS = {
   CAN_CREATE: 'canCreate',
   IS_ADMIN: 'isAdmin',
 };
+
+/* ══════════════════════════════════════════════════
+   7-уровневая ролевая модель
+   ══════════════════════════════════════════════════ */
+
+/**
+ * Уровни доступа.
+ * Каждый уровень включает все права предыдущего + добавляет свои.
+ */
+export const ROLE_LEVELS = [
+  {
+    level: 0,
+    name: 'Ожидает доступ',
+    short: 'Ожидает',
+    color: '#94a3b8',
+    bgColor: '#f1f5f9',
+    description: 'Заявка на получение доступа ещё не рассмотрена. Доступа к платформе нет.',
+  },
+  {
+    level: 1,
+    name: 'Гость',
+    short: 'Гость',
+    color: '#0284c7',
+    bgColor: '#e0f2fe',
+    description: 'Может заходить в каталог и проходить опубликованные обучения.',
+  },
+  {
+    level: 2,
+    name: 'Создатель обучения',
+    short: 'Создатель',
+    color: '#15803d',
+    bgColor: '#dcfce7',
+    description: 'Создаёт, редактирует и публикует свои единицы обучения, смотрит аналитику по ним.',
+  },
+  {
+    level: 3,
+    name: 'Аналитик обучения',
+    short: 'Аналитик',
+    color: '#7e22ce',
+    bgColor: '#f3e8ff',
+    description: 'Имеет доступ к аналитике по всем единицам обучения, не только к своим.',
+  },
+  {
+    level: 4,
+    name: 'Администратор',
+    short: 'Администратор',
+    color: '#c2410c',
+    bgColor: '#ffedd5',
+    description: 'Может редактировать, публиковать и удалять чужие единицы обучения.',
+  },
+  {
+    level: 5,
+    name: 'Главный администратор',
+    short: 'Главный',
+    color: '#b91c1c',
+    bgColor: '#fee2e2',
+    description: 'Рассматривает заявки на доступ и меняет уровни пользователей ниже себя.',
+  },
+  {
+    level: 6,
+    name: 'Специальный администратор',
+    short: 'Специальный',
+    color: '#1e293b',
+    bgColor: '#e2e8f0',
+    description: 'Глобально настраивает правила прав админ-уровней, меняет уровни на своём уровне.',
+  },
+];
+
+export function getRoleLevel(level) {
+  return ROLE_LEVELS.find((r) => r.level === level) || ROLE_LEVELS[0];
+}
+
+/**
+ * Матрица прав: каждая строка — действие, value[i] — true если уровень i может.
+ */
+export const PERMISSION_MATRIX = [
+  { id: 'access_home',         label: 'Заходить на главную страницу платформы (каталог)', perLevel: [false, true,  true,  true,  true,  true,  true ] },
+  { id: 'enroll_unit',         label: 'Открывать единицу обучения для прохождения',       perLevel: [false, true,  true,  true,  true,  true,  true ] },
+  { id: 'create_unit',         label: 'Создавать учебную единицу',                        perLevel: [false, false, true,  true,  true,  true,  true ] },
+  { id: 'edit_own_unit',       label: 'Редактировать свою учебную единицу',               perLevel: [false, false, true,  true,  true,  true,  true ] },
+  { id: 'delete_own_unit',     label: 'Удалять свою единицу обучения',                    perLevel: [false, false, true,  true,  true,  true,  true ] },
+  { id: 'publish_own_unit',    label: 'Изменять статус публикации своей единицы',         perLevel: [false, false, true,  true,  true,  true,  true ] },
+  { id: 'view_own_analytics',  label: 'Просматривать аналитику по своей единице',         perLevel: [false, false, true,  true,  true,  true,  true ] },
+  { id: 'view_any_analytics',  label: 'Просматривать аналитику по любой единице',         perLevel: [false, false, false, true,  true,  true,  true ] },
+  { id: 'edit_any_unit',       label: 'Редактировать чужую учебную единицу',              perLevel: [false, false, false, false, true,  true,  true ] },
+  { id: 'publish_any_unit',    label: 'Изменять статус публикации чужой единицы',         perLevel: [false, false, false, false, true,  true,  true ] },
+  { id: 'delete_any_unit',     label: 'Удалять чужую единицу обучения',                   perLevel: [false, false, false, false, true,  true,  true ] },
+  { id: 'review_requests',     label: 'Рассматривать заявку на получение доступа',        perLevel: [false, false, false, false, false, true,  true ] },
+  { id: 'change_lower_levels', label: 'Изменять уровень прав пользователей ниже себя',    perLevel: [false, false, false, false, false, true,  true ] },
+  { id: 'edit_role_rules',     label: 'Редактировать глобально права админ уровней',      perLevel: [false, false, false, false, false, false, true ] },
+  { id: 'change_same_level',   label: 'Изменять уровень пользователей на уровне себя',    perLevel: [false, false, false, false, false, false, true ] },
+];
+
+/**
+ * Маппинг level → rights (для обратной совместимости с canAccessHome / canViewCatalog / ...)
+ */
+export function levelToRights(level) {
+  const l = Math.max(0, Math.min(6, Number(level) || 0));
+  return {
+    canAccessHome:        l >= 1,
+    canViewCatalog:       l >= 1,
+    canEnrollUnit:        l >= 1,
+    canCreate:            l >= 2,
+    canEditOwnUnit:       l >= 2,
+    canDeleteOwnUnit:     l >= 2,
+    canPublishOwnUnit:    l >= 2,
+    canViewOwnAnalytics:  l >= 2,
+    canViewAnyAnalytics:  l >= 3,
+    canViewAnalytics:     l >= 3,   // legacy alias
+    canEditAnyUnit:       l >= 4,
+    canDeleteAnyUnit:     l >= 4,
+    canPublishAnyUnit:    l >= 4,
+    isAdmin:              l >= 4,
+    canReviewRequests:    l >= 5,
+    canManageUsers:       l >= 5,
+    canChangeLowerLevels: l >= 5,
+    canEditRoleRules:     l >= 6,
+    canChangeSameLevel:   l >= 6,
+  };
+}
 
 /* ── Иконки навигации ───────────────────────────────── */
 export const NAV_ICONS = {
