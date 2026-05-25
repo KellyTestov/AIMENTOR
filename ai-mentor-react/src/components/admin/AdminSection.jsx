@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useAppStore } from '../../stores/appStore.js'
 import { REQUIRED_SERVICE_USERS } from '../../shared/mock/users.js'
-import { ROLE_LEVELS, getRoleLevel } from '../../core/constants.js'
+import { ROLE_LEVELS, getRoleLevel, BUSINESS_LINES, getBusinessLine } from '../../core/constants.js'
 import ConfirmModal from '../shared/ConfirmModal.jsx'
 import RoleBadge from './RoleBadge.jsx'
 import RolePicker from './RolePicker.jsx'
@@ -36,6 +36,7 @@ export default function AdminSection() {
   const canReview = myLevel >= 5
   const maxAssignableLevel = myLevel >= 6 ? 6 : myLevel >= 5 ? 4 : -1
 
+  const [bl, setBl] = useState('global')
   const [tab, setTab] = useState('users')
   const [search, setSearch] = useState('')
   const [levelFilter, setLevelFilter] = useState('all')
@@ -43,17 +44,49 @@ export default function AdminSection() {
   const [pickerFor, setPickerFor] = useState(null)
   const [confirmRevoke, setConfirmRevoke] = useState(null)
 
+  const activeBl = getBusinessLine(bl)
+  const isGlobalBl = bl === 'global'
+
+  // Фильтр по бизнес-линии:
+  //   global  → только L6 (специальные администраторы)
+  //   <bl>    → пользователи этой BL, исключая L6
+  function inCurrentBl(u) {
+    if (isGlobalBl) return u.level === 6
+    return u.level !== 6 && u.businessLine === bl
+  }
+
   // Разделяем заявки (L0) и активных пользователей
   const requests = useMemo(
-    () => accessUsers.filter((u) => u.level === 0),
-    [accessUsers]
+    () => accessUsers.filter((u) => u.level === 0 && inCurrentBl({ ...u, level: 0 })),
+    [accessUsers, bl] // eslint-disable-line react-hooks/exhaustive-deps
   )
   const activeUsers = useMemo(
-    () => accessUsers.filter((u) => u.level !== 0),
-    [accessUsers]
+    () => accessUsers.filter((u) => u.level !== 0 && inCurrentBl(u)),
+    [accessUsers, bl] // eslint-disable-line react-hooks/exhaustive-deps
   )
 
-  // Сводка по уровням
+  // Подсчёт по BL (для бейджей на BL-табах)
+  const blCounts = useMemo(() => {
+    const counts = {}
+    BUSINESS_LINES.forEach((b) => {
+      counts[b.id] = accessUsers.filter((u) => {
+        if (b.id === 'global') return u.level === 6
+        return u.level !== 6 && u.level !== 0 && u.businessLine === b.id
+      }).length
+    })
+    return counts
+  }, [accessUsers])
+
+  const blRequestCounts = useMemo(() => {
+    const counts = {}
+    BUSINESS_LINES.forEach((b) => {
+      if (b.id === 'global') { counts[b.id] = 0; return }
+      counts[b.id] = accessUsers.filter((u) => u.level === 0 && u.businessLine === b.id).length
+    })
+    return counts
+  }, [accessUsers])
+
+  // Сводка по уровням (внутри текущей BL)
   const levelCounts = useMemo(() => {
     const counts = {}
     activeUsers.forEach((u) => {
@@ -125,7 +158,36 @@ export default function AdminSection() {
   return (
     <section className="section section--admin" aria-label="Управление доступом">
       <div className="admin-card">
-        {/* Tabs */}
+        {/* Business line top tabs */}
+        <div className="admin-bl-tabs" role="tablist" aria-label="Бизнес-линии">
+          {BUSINESS_LINES.map((b) => {
+            const isActive = bl === b.id
+            const count = blCounts[b.id] || 0
+            const pending = blRequestCounts[b.id] || 0
+            return (
+              <button
+                key={b.id}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                title={b.name}
+                className={`admin-bl-tab${isActive ? ' is-active' : ''}${b.isGlobal ? ' admin-bl-tab--global' : ''}`}
+                onClick={() => { setBl(b.id); setLevelFilter('all'); setSearch('') }}
+              >
+                {b.isGlobal && <span className="admin-bl-tab__icon" aria-hidden="true">★</span>}
+                <span className="admin-bl-tab__name">{b.short}</span>
+                <span className="admin-bl-tab__count">{count}</span>
+                {pending > 0 && <span className="admin-bl-tab__dot" title={`${pending} новых заявок`} />}
+              </button>
+            )
+          })}
+        </div>
+
+        <div className="admin-bl-context">
+          <span className="admin-bl-context__name">{activeBl?.name}</span>
+        </div>
+
+        {/* Sub tabs (Users / Requests) */}
         <div className="admin-tabs" role="tablist">
           <button
             type="button"

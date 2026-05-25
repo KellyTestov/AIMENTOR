@@ -113,15 +113,19 @@ export const SESSION_STATUS_LABELS = {
   [SESSION_STATUS.COMPLETED]: 'Завершено',
 };
 
-/* ── Бизнес-линии ───────────────────────────────────── */
+/* ── Бизнес-линии банка ─────────────────────────────── */
 export const BUSINESS_LINES = [
-  'Розничный бизнес',
-  'Корпоративный бизнес',
-  'Инвестиционный бизнес',
-  'Цифровой бизнес',
-  'Операционный блок',
-  'HR и развитие персонала',
-];
+  { id: 'global', short: 'Глобал.', name: 'Глобальная администрация', isGlobal: true },
+  { id: 'siv',    short: 'СиВ',     name: 'Сервис и взыскание' },
+  { id: 'rb',     short: 'РБ',      name: 'Розничный бизнес' },
+  { id: 'mmb',    short: 'ММБ',     name: 'Массовый и микро бизнес' },
+  { id: 'srb',    short: 'СРБ',     name: 'Средний и региональный бизнес' },
+  { id: 'kib',    short: 'КИБ',     name: 'Корпоративно-инвестиционный бизнес' },
+]
+
+export function getBusinessLine(id) {
+  return BUSINESS_LINES.find((bl) => bl.id === id) || null
+}
 
 /* ── Роли пользователей (legacy — для обратной совместимости) ─────── */
 export const USER_ROLES = {
@@ -203,7 +207,7 @@ export const ROLE_LEVELS = [
     short: 'Специальный',
     color: '#b91c1c',
     bgColor: '#fee2e2',
-    description: 'Глобально настраивает правила прав админ-уровней, меняет уровни на своём уровне.',
+    description: 'Руководство платформы, имеет доступ к администрированию всех бизнес-линий банка.',
   },
 ];
 
@@ -230,6 +234,7 @@ export const PERMISSION_MATRIX = [
   { id: 'change_lower_levels', label: 'Изменять уровень прав пользователей ниже себя',    perLevel: [false, false, false, false, false, true,  true ] },
   { id: 'edit_role_rules',     label: 'Редактировать глобально права админ уровней',      perLevel: [false, false, false, false, false, false, true ] },
   { id: 'change_same_level',   label: 'Изменять уровень пользователей на уровне себя',    perLevel: [false, false, false, false, false, false, true ] },
+  { id: 'admin_all_bl',        label: 'Доступ к администрации всех бизнес-линий банка',   perLevel: [false, false, false, false, false, false, true ] },
 ];
 
 /**
