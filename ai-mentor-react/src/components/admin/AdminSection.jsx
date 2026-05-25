@@ -14,6 +14,19 @@ import { Select } from '@alfalab/core-components/select/esm'
 
 const PROTECTED_IDS = new Set(REQUIRED_SERVICE_USERS.map((u) => u.userId))
 
+function formatDate(iso) {
+  if (!iso) return '—'
+  try {
+    const d = new Date(iso)
+    const dd = String(d.getDate()).padStart(2, '0')
+    const mm = String(d.getMonth() + 1).padStart(2, '0')
+    const yyyy = d.getFullYear()
+    return `${dd}.${mm}.${yyyy}`
+  } catch {
+    return '—'
+  }
+}
+
 export default function AdminSection() {
   const accessUsers = useAppStore((s) => s.accessUsers)
   const setAccessUsers = useAppStore((s) => s.setAccessUsers)
@@ -40,6 +53,15 @@ export default function AdminSection() {
     [accessUsers]
   )
 
+  // Сводка по уровням
+  const levelCounts = useMemo(() => {
+    const counts = {}
+    activeUsers.forEach((u) => {
+      counts[u.level] = (counts[u.level] || 0) + 1
+    })
+    return counts
+  }, [activeUsers])
+
   // Фильтрация активных по поиску и уровню
   const filteredUsers = useMemo(() => {
     let list = activeUsers
@@ -52,21 +74,13 @@ export default function AdminSection() {
       list = list.filter((u) =>
         u.fullName.toLowerCase().includes(q) ||
         u.userId.toLowerCase().includes(q) ||
+        String(u.adminId || '').includes(q) ||
         getRoleLevel(u.level).name.toLowerCase().includes(q)
       )
     }
-    // Сортируем по уровню (сверху — выше)
-    return [...list].sort((a, b) => b.level - a.level)
+    // Сортируем по adminId
+    return [...list].sort((a, b) => (a.adminId || 0) - (b.adminId || 0))
   }, [activeUsers, search, levelFilter])
-
-  // Сводка по уровням
-  const levelCounts = useMemo(() => {
-    const counts = {}
-    activeUsers.forEach((u) => {
-      counts[u.level] = (counts[u.level] || 0) + 1
-    })
-    return counts
-  }, [activeUsers])
 
   // ── Действия ──
   function handleChangeLevel(user, newLevel) {
@@ -85,7 +99,9 @@ export default function AdminSection() {
 
   function handleApproveRequest(userId, level) {
     const updated = accessUsers.map((u) =>
-      u.userId === userId ? { ...u, level } : u
+      u.userId === userId
+        ? { ...u, level, registeredAt: u.registeredAt || new Date().toISOString() }
+        : u
     )
     setAccessUsers(updated)
   }
@@ -95,13 +111,16 @@ export default function AdminSection() {
     setAccessUsers(updated)
   }
 
-  const levelFilterOptions = [
-    { key: 'all', content: 'Все уровни' },
-    ...ROLE_LEVELS.filter((r) => r.level >= 1).map((r) => ({
-      key: String(r.level),
-      content: `L${r.level} · ${r.name}`,
-    })),
-  ]
+  // Опции фильтра уровней со счётчиками
+  const levelFilterOptions = useMemo(() => [
+    { key: 'all', content: `Все уровни (${activeUsers.length})` },
+    ...ROLE_LEVELS
+      .filter((r) => r.level >= 1)
+      .map((r) => ({
+        key: String(r.level),
+        content: `L${r.level} · ${r.name} (${levelCounts[r.level] || 0})`,
+      })),
+  ], [activeUsers.length, levelCounts])
 
   return (
     <section className="section section--admin" aria-label="Управление доступом">
@@ -152,7 +171,7 @@ export default function AdminSection() {
                 selected={levelFilterOptions.find((o) => o.key === String(levelFilter))}
                 onChange={({ selected }) => selected && setLevelFilter(selected.key)}
                 optionsListWidth="content"
-                style={{ minWidth: 220 }}
+                style={{ minWidth: 260 }}
               />
               <div style={{ flex: 1 }} />
               <Button
@@ -164,41 +183,22 @@ export default function AdminSection() {
               </Button>
             </div>
 
-            {/* Summary chips */}
-            <div className="admin-summary">
-              {ROLE_LEVELS.filter((r) => r.level >= 1).map((r) => {
-                const count = levelCounts[r.level] || 0
-                if (count === 0) return null
-                return (
-                  <button
-                    key={r.level}
-                    type="button"
-                    className={`admin-summary__chip${levelFilter === String(r.level) ? ' is-active' : ''}`}
-                    style={{ '--role-color': r.color, '--role-bg': r.bgColor }}
-                    onClick={() => setLevelFilter(levelFilter === String(r.level) ? 'all' : String(r.level))}
-                  >
-                    <span className="admin-summary__dot" />
-                    <span className="admin-summary__name">L{r.level} · {r.short}</span>
-                    <span className="admin-summary__count">{count}</span>
-                  </button>
-                )
-              })}
-            </div>
-
             {/* Table */}
             <div className="admin-table-wrap">
-              <table className="admin-table">
+              <table className="admin-table admin-table--levels">
                 <thead>
                   <tr>
+                    <th className="admin-col-id">ID</th>
                     <th>Пользователь</th>
-                    <th>ID</th>
+                    <th>USERID</th>
+                    <th>Дата рег.</th>
                     <th>Уровень доступа</th>
                     <th aria-label="Действия" />
                   </tr>
                 </thead>
                 <tbody>
                   {filteredUsers.length === 0 ? (
-                    <tr><td colSpan={4} className="admin-empty-row">Пользователи не найдены</td></tr>
+                    <tr><td colSpan={6} className="admin-empty-row">Пользователи не найдены</td></tr>
                   ) : (
                     filteredUsers.map((user) => {
                       const isProtected = PROTECTED_IDS.has(user.userId) || user.isProtected
@@ -212,19 +212,10 @@ export default function AdminSection() {
 
                       return (
                         <tr key={user.userId}>
-                          <td>
-                            <span className="admin-user-cell">
-                              {user.fullName}
-                              {user.isDeveloper && (
-                                <span className="dev-badge">
-                                  DEV
-                                  <span className="dev-tooltip">Разработчик сервиса. Доступ не может быть изменён.</span>
-                                </span>
-                              )}
-                              {isSelf && <span className="self-badge">вы</span>}
-                            </span>
-                          </td>
+                          <td className="admin-col-id">{user.adminId || '—'}</td>
+                          <td>{user.fullName}</td>
                           <td><code>{user.userId}</code></td>
+                          <td className="admin-col-date">{formatDate(user.registeredAt)}</td>
                           <td>
                             <RoleBadge level={user.level} />
                           </td>

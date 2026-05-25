@@ -72,7 +72,8 @@ body {
 .app-shell {
   display: grid;
   grid-template-columns: 260px 1fr;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* ─── Sidebar ─── */
@@ -238,8 +239,10 @@ body {
 /* ─── Workspace ─── */
 
 .workspace {
-  padding: 28px 32px;
-  min-height: 100vh;
+  padding: 28px 32px 60px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
 }
 
 .workspace__header,
@@ -1627,62 +1630,23 @@ body {
   flex-wrap: wrap;
 }
 
-.admin-summary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 0 4px 14px;
-}
-.admin-summary__chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 11px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  font: 600 12px/1 Inter, sans-serif;
-  cursor: pointer;
-  transition: border-color 0.12s, background 0.12s, transform 0.1s;
-}
-.admin-summary__chip:hover {
-  border-color: var(--role-color, var(--muted));
-  background: var(--role-bg, var(--bg));
-}
-.admin-summary__chip.is-active {
-  background: var(--role-bg, var(--bg));
-  border-color: var(--role-color, var(--muted));
-  color: var(--role-color, var(--text));
-}
-.admin-summary__dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--role-color, #94a3b8);
-  flex-shrink: 0;
-}
-.admin-summary__name { font-weight: 600; }
-.admin-summary__count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: 9px;
-  background: rgba(0, 0, 0, 0.05);
-  font-size: 11px;
-  font-weight: 700;
-}
-.admin-summary__chip.is-active .admin-summary__count {
-  background: var(--role-color, #94a3b8);
-  color: #fff;
-}
-
 .admin-table__actions {
   width: 50px;
   text-align: right;
+}
+
+/* Columns: ID + Date — narrow, centered/right-aligned */
+.admin-table--levels .admin-col-id {
+  width: 60px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  font-weight: 600;
+}
+.admin-table--levels .admin-col-date {
+  width: 110px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  white-space: nowrap;
 }
 
 /* ══════════════════════════════════════════
