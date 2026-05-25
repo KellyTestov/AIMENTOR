@@ -57,16 +57,6 @@ export const REQUIRED_SERVICE_USERS = [
     registeredAt: "2023-01-15T10:00:00Z",
     businessLine: "global",
   },
-  {
-    adminId: 4,
-    fullName: "Ватуева Ирина Алексеевна",
-    userId: "U_IV3N5",
-    level: 6,
-    role: "Команда сервиса",
-    isProtected: true,
-    isDeveloper: false,
-    registeredAt: "2023-02-01T10:00:00Z",
-  },
 ];
 
 /**
