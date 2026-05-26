@@ -27,8 +27,12 @@ function newSection() {
  *   blName: string (полное имя BL)
  */
 export default function CcTemplatesManager({ businessLine, blName }) {
-  const templates = useCcTemplatesStore((s) =>
-    s.templates.filter((t) => t.businessLine === businessLine)
+  // Берём весь массив (стабильная ссылка пока ничего не меняется),
+  // фильтруем через useMemo — иначе Zustand будет триггерить infinite re-render.
+  const allTemplates = useCcTemplatesStore((s) => s.templates)
+  const templates = useMemo(
+    () => allTemplates.filter((t) => t.businessLine === businessLine),
+    [allTemplates, businessLine]
   )
   const add = useCcTemplatesStore((s) => s.add)
   const update = useCcTemplatesStore((s) => s.update)
