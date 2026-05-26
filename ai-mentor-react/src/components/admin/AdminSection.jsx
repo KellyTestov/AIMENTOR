@@ -8,6 +8,8 @@ import RolePicker from './RolePicker.jsx'
 import PermissionMatrixModal from './PermissionMatrixModal.jsx'
 import UserActionsMenu from './UserActionsMenu.jsx'
 import AccessRequestsList from './AccessRequestsList.jsx'
+import AuditLogsList from './AuditLogsList.jsx'
+import { generateLogsForBL } from '../../shared/mock/auditLogs.js'
 import { Input } from '@alfalab/core-components/input/esm'
 import { Button } from '@alfalab/core-components/button/esm'
 import { Select } from '@alfalab/core-components/select/esm'
@@ -46,6 +48,12 @@ export default function AdminSection() {
 
   const activeBl = getBusinessLine(bl)
   const isGlobalBl = bl === 'global'
+
+  // Логи генерируются один раз на BL и кешируются
+  const logs = useMemo(() => {
+    if (isGlobalBl) return []
+    return generateLogsForBL(bl, 60)
+  }, [bl, isGlobalBl])
 
   // Фильтр по бизнес-линии:
   //   global  → только L6 (спец администраторы — кросс-BL)
@@ -174,7 +182,12 @@ export default function AdminSection() {
                 aria-selected={isActive}
                 title={b.name}
                 className={`admin-bl-tab${isActive ? ' is-active' : ''}${b.isGlobal ? ' admin-bl-tab--global' : ''}`}
-                onClick={() => { setBl(b.id); setLevelFilter('all'); setSearch('') }}
+                onClick={() => {
+                  setBl(b.id)
+                  setLevelFilter('all')
+                  setSearch('')
+                  if (b.id === 'global' && tab === 'logs') setTab('users')
+                }}
               >
                 {b.isGlobal && <span className="admin-bl-tab__icon" aria-hidden="true">★</span>}
                 <span className="admin-bl-tab__name">{b.short}</span>
@@ -211,6 +224,17 @@ export default function AdminSection() {
             >
               <span>Заявки на доступ</span>
               {requests.length > 0 && <span className="admin-tab__badge admin-tab__badge--alert">{requests.length}</span>}
+            </button>
+          )}
+          {canReview && !isGlobalBl && (
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === 'logs'}
+              className={`admin-tab${tab === 'logs' ? ' is-active' : ''}`}
+              onClick={() => setTab('logs')}
+            >
+              <span>Логи</span>
             </button>
           )}
         </div>
@@ -310,6 +334,13 @@ export default function AdminSection() {
               onApprove={handleApproveRequest}
               onReject={handleRejectRequest}
             />
+          </div>
+        )}
+
+        {/* === LOGS TAB === */}
+        {tab === 'logs' && canReview && !isGlobalBl && (
+          <div style={{ padding: '18px 24px 28px' }}>
+            <AuditLogsList logs={logs} />
           </div>
         )}
       </div>
