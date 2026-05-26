@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { genId } from '../../stores/builderStore.js'
+import { genId, useBuilderStore } from '../../stores/builderStore.js'
 import { instantiateTemplate, migrateLegacyClientCard, getTemplate } from '../../builderServices/clientCardTemplates.js'
 import ClientCardTemplateModal from './ClientCardTemplateModal.jsx'
 import ConfirmModal from '../shared/ConfirmModal.jsx'
@@ -22,6 +22,7 @@ function newCustomField() {
 
 export default function ClientCard({ clientCard, onChange }) {
   const cc = migrateLegacyClientCard(clientCard)
+  const factory = useBuilderStore((s) => s.unit?.factory || '')
   const [openSections, setOpenSections] = useState(() => {
     // По умолчанию открыта первая секция
     const set = new Set()
@@ -135,6 +136,7 @@ export default function ClientCard({ clientCard, onChange }) {
           open={tplModalOpen}
           onClose={() => setTplModalOpen(false)}
           onPick={pickTemplate}
+          factory={factory}
         />
       </>
     )
