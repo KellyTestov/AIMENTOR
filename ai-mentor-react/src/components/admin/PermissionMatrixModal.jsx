@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { ModalDesktop } from '@alfalab/core-components/modal/esm/desktop'
 import { Button } from '@alfalab/core-components/button/esm'
-import { ROLE_LEVELS, PERMISSION_MATRIX, getRoleLevel } from '../../core/constants.js'
+import { ROLE_LEVELS, getRoleLevel } from '../../core/constants.js'
+import { useMatrixStore } from '../../stores/matrixStore.js'
 
 export default function PermissionMatrixModal({ open, onClose, highlightLevel = null }) {
   const [hoveredCol, setHoveredCol] = useState(highlightLevel)
+  const PERMISSION_MATRIX = useMatrixStore((s) => s.matrix)
 
   const activeCol = hoveredCol !== null ? hoveredCol : highlightLevel
 

@@ -9,14 +9,14 @@
 
 import { MOCK_ACCESS_USERS } from './users.js'
 
-/** Категории для фильтрации (чипсы или dropdown). */
+/** Категории для фильтрации. icon — emoji или unicode, рендерится в иконке записи. */
 export const LOG_CATEGORIES = [
-  { id: 'units',      label: 'Обучения',  color: '#0284c7', bgColor: '#e0f2fe' },
-  { id: 'analytics',  label: 'Аналитика', color: '#7e22ce', bgColor: '#f3e8ff' },
-  { id: 'enrollment', label: 'Прохождение', color: '#15803d', bgColor: '#dcfce7' },
-  { id: 'requests',   label: 'Заявки',    color: '#c2410c', bgColor: '#ffedd5' },
-  { id: 'levels',     label: 'Уровни',    color: '#b91c1c', bgColor: '#fee2e2' },
-  { id: 'system',     label: 'Система',   color: '#1e293b', bgColor: '#e2e8f0' },
+  { id: 'units',      label: 'Обучения',    icon: '📘', color: '#0284c7', bgColor: '#dbeafe' },
+  { id: 'analytics',  label: 'Аналитика',   icon: '📊', color: '#7e22ce', bgColor: '#ede9fe' },
+  { id: 'enrollment', label: 'Прохождение', icon: '▶️', color: '#15803d', bgColor: '#dcfce7' },
+  { id: 'requests',   label: 'Заявки',      icon: '📩', color: '#c2410c', bgColor: '#ffedd5' },
+  { id: 'levels',     label: 'Уровни',      icon: '👤', color: '#b91c1c', bgColor: '#fee2e2' },
+  { id: 'system',     label: 'Система',     icon: '⚙️', color: '#475569', bgColor: '#e2e8f0' },
 ]
 
 export function getLogCategory(id) {

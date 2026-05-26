@@ -9,6 +9,8 @@ import PermissionMatrixModal from './PermissionMatrixModal.jsx'
 import UserActionsMenu from './UserActionsMenu.jsx'
 import AccessRequestsList from './AccessRequestsList.jsx'
 import AuditLogsList from './AuditLogsList.jsx'
+import AdminRightsEditor from './AdminRightsEditor.jsx'
+import CcTemplatesManager from './CcTemplatesManager.jsx'
 import { generateLogsForBL } from '../../shared/mock/auditLogs.js'
 import { Input } from '@alfalab/core-components/input/esm'
 import { Button } from '@alfalab/core-components/button/esm'
@@ -36,6 +38,8 @@ export default function AdminSection() {
 
   const myLevel = currentUser?.level ?? 0
   const canReview = myLevel >= 5
+  const canMonitor = myLevel >= 4
+  const canEditAdminRights = myLevel >= 6
   const maxAssignableLevel = myLevel >= 6 ? 6 : myLevel >= 5 ? 4 : -1
 
   const [bl, setBl] = useState('global')
@@ -186,7 +190,10 @@ export default function AdminSection() {
                   setBl(b.id)
                   setLevelFilter('all')
                   setSearch('')
-                  if (b.id === 'global' && tab === 'logs') setTab('users')
+                  const validInNew = b.id === 'global'
+                    ? ['users', 'rights']
+                    : ['users', 'requests', 'logs', 'templates']
+                  if (!validInNew.includes(tab)) setTab('users')
                 }}
               >
                 {b.isGlobal && <span className="admin-bl-tab__icon" aria-hidden="true">★</span>}
@@ -198,12 +205,8 @@ export default function AdminSection() {
           })}
         </div>
 
-        <div className="admin-bl-context">
-          <span className="admin-bl-context__name">{activeBl?.name}</span>
-        </div>
-
-        {/* Sub tabs (Users / Requests) */}
-        <div className="admin-tabs" role="tablist">
+        {/* Sub tabs (Users / Requests / Logs / Monitoring) */}
+        <div className="admin-tabs" role="tablist" data-bl-name={activeBl?.name}>
           <button
             type="button"
             role="tab"
@@ -234,7 +237,45 @@ export default function AdminSection() {
               className={`admin-tab${tab === 'logs' ? ' is-active' : ''}`}
               onClick={() => setTab('logs')}
             >
-              <span>Логи</span>
+              <span>Журнал аудита</span>
+            </button>
+          )}
+          {canMonitor && !isGlobalBl && (
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === 'templates'}
+              className={`admin-tab${tab === 'templates' ? ' is-active' : ''}`}
+              onClick={() => setTab('templates')}
+            >
+              <span>Шаблоны карточек</span>
+            </button>
+          )}
+          {canMonitor && !isGlobalBl && (
+            <button
+              type="button"
+              role="tab"
+              aria-selected={false}
+              disabled
+              className="admin-tab admin-tab--locked"
+              title="Раздел в разработке"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="4" y="11" width="16" height="10" rx="2" />
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+              </svg>
+              <span>Мониторинг</span>
+            </button>
+          )}
+          {canEditAdminRights && isGlobalBl && (
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === 'rights'}
+              className={`admin-tab${tab === 'rights' ? ' is-active' : ''}`}
+              onClick={() => setTab('rights')}
+            >
+              <span>Админ-права</span>
             </button>
           )}
         </div>
@@ -341,6 +382,20 @@ export default function AdminSection() {
         {tab === 'logs' && canReview && !isGlobalBl && (
           <div style={{ padding: '18px 24px 28px' }}>
             <AuditLogsList logs={logs} />
+          </div>
+        )}
+
+        {/* === CC TEMPLATES TAB === */}
+        {tab === 'templates' && canMonitor && !isGlobalBl && (
+          <div style={{ padding: '18px 24px 28px' }}>
+            <CcTemplatesManager businessLine={bl} blName={activeBl?.name || ''} />
+          </div>
+        )}
+
+        {/* === ADMIN RIGHTS TAB === */}
+        {tab === 'rights' && canEditAdminRights && isGlobalBl && (
+          <div style={{ padding: '18px 24px 28px' }}>
+            <AdminRightsEditor />
           </div>
         )}
       </div>

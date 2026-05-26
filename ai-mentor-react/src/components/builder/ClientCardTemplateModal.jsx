@@ -1,8 +1,9 @@
 import { ModalDesktop } from '@alfalab/core-components/modal/esm/desktop'
 import { Button } from '@alfalab/core-components/button/esm'
-import { CLIENT_CARD_TEMPLATES } from '../../builderServices/clientCardTemplates.js'
+import { getAllTemplates } from '../../builderServices/clientCardTemplates.js'
 
 export default function ClientCardTemplateModal({ open, onClose, onPick }) {
+  const templates = getAllTemplates()
   return (
     <ModalDesktop open={open} onClose={onClose} size={600} hasCloser={false}>
       <ModalDesktop.Header title="Выбор шаблона карточки клиента" hasCloser={false} />
@@ -11,7 +12,7 @@ export default function ClientCardTemplateModal({ open, onClose, onPick }) {
           Выберите готовую структуру карточки. Названия разделов и полей зафиксированы, вы только подставляете значения.
         </p>
         <div className="cct-list">
-          {CLIENT_CARD_TEMPLATES.map((tpl) => (
+          {templates.map((tpl) => (
             <button
               key={tpl.id}
               type="button"

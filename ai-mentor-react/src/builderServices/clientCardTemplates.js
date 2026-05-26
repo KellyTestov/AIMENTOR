@@ -655,7 +655,28 @@ export const CLIENT_CARD_TEMPLATES = [
 ]
 
 export function getTemplate(id) {
-  return CLIENT_CARD_TEMPLATES.find((t) => t.id === id) || null
+  const builtIn = CLIENT_CARD_TEMPLATES.find((t) => t.id === id)
+  if (builtIn) return builtIn
+  // Также ищем среди кастомных (сохранённых в localStorage)
+  try {
+    const raw = localStorage.getItem('ai-mentor-cc-templates-v1')
+    if (!raw) return null
+    const custom = JSON.parse(raw)
+    return Array.isArray(custom) ? (custom.find((t) => t.id === id) || null) : null
+  } catch { return null }
+}
+
+/** Все шаблоны (встроенные + кастомные из localStorage). */
+export function getAllTemplates() {
+  let custom = []
+  try {
+    const raw = localStorage.getItem('ai-mentor-cc-templates-v1')
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed)) custom = parsed
+    }
+  } catch {}
+  return [...CLIENT_CARD_TEMPLATES, ...custom]
 }
 
 /**
