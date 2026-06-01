@@ -47,10 +47,6 @@ export default function QuestionEditor({ node }) {
   const isLocked    = loading || isResponded || isApproved
   const allFilled   = queries.every(q => (q.text || '').trim().length > 0)
 
-  const maxScoreNum = parseInt(content.maxScore) || 0
-  const critSum     = criteria.reduce((acc, c) => acc + (parseInt(c.score) || 0), 0)
-  const scoreOverflow = maxScoreNum > 0 && critSum > maxScoreNum
-
   function save(patch) {
     updateNodeFull(node.id, { ...content, ...patch })
   }
@@ -207,34 +203,11 @@ export default function QuestionEditor({ node }) {
         </div>
         <p className="crit-section-desc">
           Добавьте пункты, которые должны быть в ответе сотрудника. AI проверит каждый пункт отдельно и начислит баллы.
+          Сумма баллов по всем критериям формирует максимальный балл за вопрос.
         </p>
-
-        {/* Max score per question */}
-        <div className="qe-maxscore-row">
-          <div className="qe-maxscore-row__info">
-            <span className="qe-maxscore-row__label">Максимальный балл за вопрос</span>
-            <span className="qe-maxscore-row__hint">
-              Задайте общий максимум, затем распределите его по критериям ниже
-            </span>
-          </div>
-          <div className="crit-card__score-pill qe-maxscore-pill">
-            <input
-              type="number"
-              className="crit-card__score-inp"
-              value={content.maxScore || ''}
-              min="0"
-              max="1000"
-              placeholder="—"
-              onChange={e => save({ maxScore: parseInt(e.target.value) || '' })}
-            />
-            <span className="crit-card__score-unit">б.</span>
-          </div>
-        </div>
-        {scoreOverflow && (
-          <div className="qe-score-warn">
-            ⚠️ Сумма баллов по критериям ({critSum} б.) превышает максимальный балл за вопрос ({maxScoreNum} б.)
-          </div>
-        )}
+        <p className="qe-compl-hint">
+          💡 Порог прохождения единицы обучения настраивается в блоке «Завершение»
+        </p>
 
         {!caseHasNoCard && (
           <label className="ig-toggle crit-section-toggle">

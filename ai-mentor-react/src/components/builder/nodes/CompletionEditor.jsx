@@ -28,6 +28,10 @@ const DEFAULT_TIMER = {
   expireText: '',
 }
 
+const DEFAULT_SCORING = {
+  passingPct: 80,
+}
+
 const METRIC_LABELS = {
   score:     'Общий балл',
   correct:   'Количество правильных ответов',
@@ -43,11 +47,19 @@ const AI_CONTEXT_LABELS = {
   includeTime:       'Время по каждому блоку',
 }
 
-const ON_FAIL_OPTIONS = [
-  { value: 'retry',  label: 'Предложить пройти заново' },
-  { value: 'end',    label: 'Просто закрыть обучение' },
-  { value: 'mentor', label: 'Направить к куратору' },
-]
+function sumQuestionScores(unit) {
+  let sum = 0
+  function walk(node) {
+    if (node.type === 'question') {
+      sum += (node.content?.criteria || []).reduce(
+        (acc, c) => acc + (parseInt(c.score) || 0), 0
+      )
+    }
+    ;(node.children || []).forEach(walk)
+  }
+  ;(unit?.children || []).forEach(walk)
+  return sum
+}
 
 function ComplSection({ num, title, info, children, accent = false }) {
   return (
@@ -74,13 +86,12 @@ export default function CompletionEditor({ node }) {
   const metrics  = { ...DEFAULT_METRICS, ...(content.metrics || {}) }
   const ai       = { ...DEFAULT_AI, ...(content.aiFeedback || {}) }
   const timer    = { ...DEFAULT_TIMER, ...(content.timer || {}) }
-  const passingScore = content.passingScore ?? 80
-  const onFail   = content.onFail || 'retry'
+  const scoring  = { ...DEFAULT_SCORING, ...(content.scoring || {}) }
 
-  const isExam = unit?.type === 'exam'
-  // sections: 1 final, 2 summary, 3 AI, [4 threshold exam], N timer
-  const timerNum     = isExam ? 5 : 4
-  const totalSections = timerNum
+  const totalMaxScore = sumQuestionScores(unit)
+
+  // sections: 1 final, 2 summary, 3 AI, 4 scoring, 5 timer
+  const totalSections = 5
 
   function save(patch) {
     updateNodeFull(node.id, { ...content, elements, ...patch })
@@ -107,6 +118,11 @@ export default function CompletionEditor({ node }) {
     save({ timer: { ...timer, ...patch } })
   }
 
+  function setScoring(patch) {
+    save({ scoring: { ...scoring, ...patch } })
+  }
+  const isExam = unit?.type === 'exam'
+
   const limitH = Math.floor(timer.limitMinutes / 60)
   const limitM = timer.limitMinutes % 60
 
@@ -116,7 +132,8 @@ export default function CompletionEditor({ node }) {
         <span className="cv-heading-icon">🏁</span>Завершение
       </h2>
       <p className="cv-subheading">
-        Финал обучения — поздравление, сводка результатов и обратная связь от AI на основе пройденной сессии. Шаги {totalSections > 0 ? `1–${totalSections}` : ''} выполняются по порядку.
+        Финал обучения — поздравление, сводка результатов и обратная связь от AI на основе пройденной сессии.
+        Шаги 1–{totalSections} выполняются по порядку.
       </p>
 
       {/* 1. Финальный экран */}
@@ -215,39 +232,57 @@ export default function CompletionEditor({ node }) {
         )}
       </ComplSection>
 
-      {/* 4. Exam threshold */}
-      {isExam && (
-        <ComplSection
-          num="4"
-          title="Порог прохождения"
-          info="Минимальный балл, при котором экзамен считается пройденным. Если сотрудник набрал меньше — выполняется заданное действие."
-        >
-          <label className="field-lbl">Минимальный балл, %</label>
+      {/* 4. Система оценивания */}
+      <ComplSection
+        num="4"
+        title="Система оценивания"
+        info="Настройте порог успешного прохождения и поведение при недостаточном балле. Применяется ко всем практическим блокам единицы обучения."
+      >
+        {/* Auto-calculated max score */}
+        <div className="compl-score-total">
+          <div className="compl-score-total__label">Максимальный балл</div>
+          <div className="compl-score-total__value">{totalMaxScore} б.</div>
+          <div className="compl-score-total__hint">
+            Сумма баллов по всем критериям оценки во всех вопросах
+          </div>
+        </div>
+
+        {/* Passing threshold in % */}
+        <label className="field-lbl" style={{ marginTop: 16 }}>
+          Порог прохождения, %
+        </label>
+        <p className="compl-score-hint">
+          Минимальный процент от максимального балла, который сотрудник должен набрать
+          для успешного прохождения — учитывается по всем практическим блокам.
+        </p>
+        <div className="compl-score-pct-row">
           <input
             type="number"
-            className="cv-inp"
+            className="cv-inp compl-score-pct-inp"
             min="0"
             max="100"
-            value={passingScore}
-            onChange={e => save({ passingScore: Math.max(0, Math.min(100, parseInt(e.target.value) || 0)) })}
+            value={scoring.passingPct}
+            onChange={e => setScoring({ passingPct: Math.max(0, Math.min(100, parseInt(e.target.value) || 0)) })}
           />
+          <span className="compl-score-pct-unit">%</span>
+          {totalMaxScore > 0 && (
+            <span className="compl-score-pct-abs">
+              = {Math.round(totalMaxScore * scoring.passingPct / 100)} б. из {totalMaxScore}
+            </span>
+          )}
+        </div>
 
-          <label className="field-lbl" style={{ marginTop: 12 }}>При недостаточном балле</label>
-          <select
-            className="cv-inp"
-            value={onFail}
-            onChange={e => save({ onFail: e.target.value })}
-          >
-            {ON_FAIL_OPTIONS.map(o => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
-        </ComplSection>
-      )}
+        {/* Fixed behavior by unit type */}
+        <div className="compl-score-behavior">
+          {isExam
+            ? '📋 Экзамен даётся 1 раз — при недостаточном балле результат фиксируется как «Неуспешный»'
+            : '🔄 Тренажёр можно проходить неограниченное количество раз'}
+        </div>
+      </ComplSection>
 
-      {/* N. Таймер прохождения */}
+      {/* 5. Таймер прохождения */}
       <ComplSection
-        num={timerNum}
+        num="5"
         title="Таймер прохождения"
         info="Ограничьте время на прохождение. Обратный отсчёт отображается в шапке сессии в реальном времени."
       >
