@@ -17,8 +17,8 @@ export default function SandboxPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
-  const { unit, phase, error, client, session, isBusy, clearSession, publishUnit, loadUnit, cases, activeCaseId, setActiveCaseId, closedCaseIds } = useSandboxStore()
-  const { handleInput, handleStartButton, handleNextButton, startTrainer, startExam, resumeExam, handleFinish } = useSandboxEngine()
+  const { unit, phase, error, client, session, isBusy, clearSession, publishUnit, loadUnit, cases, activeCaseId, setActiveCaseId, closedCaseIds, timerExpired, setTimerExpired } = useSandboxStore()
+  const { handleInput, handleStartButton, handleNextButton, startTrainer, startExam, resumeExam, handleFinish, forceFinish } = useSandboxEngine()
 
   const [publishing, setPublishing] = useState(false)
   const [published,  setPublished]  = useState(false)
@@ -98,7 +98,7 @@ export default function SandboxPage() {
           <span className="sb-header__title" id="sb-unit-title">{unit.title}</span>
         </div>
         <div className="sb-header__right">
-          {isExam && phase === 'running' && <ElapsedTimer />}
+          {phase === 'running' && <ElapsedTimer />}
         </div>
       </header>
 
@@ -198,6 +198,34 @@ export default function SandboxPage() {
       {published && (
         <PublishSuccessModal onBackToBuilder={goToBuilder} onCatalog={() => navigate('/')} />
       )}
+
+      {/* Timer expired modal */}
+      {timerExpired && phase === 'running' && (() => {
+        const cn = (unit?.children || []).find(c => c.type === 'completion')
+        const tc = cn?.content?.timer || {}
+        const title = tc.expireTitle?.trim() || 'Время истекло'
+        const text  = tc.expireText?.trim()  || 'К сожалению, время, отведённое на прохождение, истекло. Результаты будут зафиксированы автоматически.'
+        return (
+          <div className="sb-modal-backdrop">
+            <div className="sb-modal sb-modal--timer-expired">
+              <div className="sb-modal__timer-icon">⏱</div>
+              <h2 className="sb-modal__title">{title}</h2>
+              <p className="sb-modal__desc">{text}</p>
+              <div className="sb-modal__actions">
+                <button
+                  className="sb-modal__btn sb-modal__btn--primary"
+                  onClick={async () => {
+                    setTimerExpired(false)
+                    await forceFinish()
+                  }}
+                >
+                  Завершить
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }

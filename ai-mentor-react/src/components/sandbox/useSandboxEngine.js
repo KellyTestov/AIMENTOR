@@ -267,5 +267,14 @@ export function useSandboxEngine() {
     store.setPhase('done')
   }, [])
 
-  return { handleInput, handleStartButton, handleNextButton, startTrainer, startExam, resumeExam, handleFinish }
+  const forceFinish = useCallback(async () => {
+    const { unit } = useSandboxStore.getState()
+    if (unit?.type === 'trainer') {
+      await trainerFinish()
+    } else {
+      await examFinish()
+    }
+  }, [])
+
+  return { handleInput, handleStartButton, handleNextButton, startTrainer, startExam, resumeExam, handleFinish, forceFinish }
 }

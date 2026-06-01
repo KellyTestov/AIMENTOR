@@ -2235,6 +2235,56 @@ select.cu-edit-input { appearance: auto; cursor: pointer; }
   padding-top: 2px;
 }
 
+/* ── Timer section ── */
+.compl-timer-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.compl-timer-inp {
+  width: 64px !important;
+  text-align: center;
+}
+.compl-timer-unit {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.compl-timer-warn {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--accent);
+}
+.compl-expire-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+.compl-radio {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.45;
+}
+.compl-radio input[type="radio"] {
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.compl-expire-fields {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
 /* ── Empty state: choice between template and custom ── */
 .cc-choice {
   border: 1px dashed var(--border);

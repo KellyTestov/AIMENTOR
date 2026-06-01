@@ -20,6 +20,14 @@ const DEFAULT_AI = {
   includeTime: false,
 }
 
+const DEFAULT_TIMER = {
+  enabled: false,
+  limitMinutes: 30,
+  onExpire: 'none',
+  expireTitle: '',
+  expireText: '',
+}
+
 const METRIC_LABELS = {
   score:     'Общий балл',
   correct:   'Количество правильных ответов',
@@ -65,11 +73,14 @@ export default function CompletionEditor({ node }) {
     : [{ id: genId('el'), heading: '', text: '' }]
   const metrics  = { ...DEFAULT_METRICS, ...(content.metrics || {}) }
   const ai       = { ...DEFAULT_AI, ...(content.aiFeedback || {}) }
+  const timer    = { ...DEFAULT_TIMER, ...(content.timer || {}) }
   const passingScore = content.passingScore ?? 80
   const onFail   = content.onFail || 'retry'
 
   const isExam = unit?.type === 'exam'
-  const totalSections = isExam ? 4 : 3
+  // sections: 1 final, 2 summary, 3 AI, [4 threshold exam], N timer
+  const timerNum     = isExam ? 5 : 4
+  const totalSections = timerNum
 
   function save(patch) {
     updateNodeFull(node.id, { ...content, elements, ...patch })
@@ -91,6 +102,13 @@ export default function CompletionEditor({ node }) {
   function setAi(patch) {
     save({ aiFeedback: { ...ai, ...patch } })
   }
+
+  function setTimer(patch) {
+    save({ timer: { ...timer, ...patch } })
+  }
+
+  const limitH = Math.floor(timer.limitMinutes / 60)
+  const limitM = timer.limitMinutes % 60
 
   return (
     <div className="cv">
@@ -226,6 +244,102 @@ export default function CompletionEditor({ node }) {
           </select>
         </ComplSection>
       )}
+
+      {/* N. Таймер прохождения */}
+      <ComplSection
+        num={timerNum}
+        title="Таймер прохождения"
+        info="Ограничьте время на прохождение. Обратный отсчёт отображается в шапке сессии в реальном времени."
+      >
+        <label className="ig-toggle compl-toggle-row">
+          <input
+            type="checkbox"
+            checked={!!timer.enabled}
+            onChange={() => setTimer({ enabled: !timer.enabled })}
+          />
+          <span className="ig-toggle__track" />
+          <span className="ig-toggle__label" style={{ fontWeight: 600 }}>Включить таймер</span>
+        </label>
+
+        {timer.enabled && (
+          <>
+            <label className="field-lbl" style={{ marginTop: 14 }}>Лимит времени</label>
+            <div className="compl-timer-inputs">
+              <input
+                type="number"
+                className="cv-inp compl-timer-inp"
+                min="0"
+                max="23"
+                value={limitH}
+                onChange={e => {
+                  const h = Math.max(0, Math.min(23, parseInt(e.target.value) || 0))
+                  setTimer({ limitMinutes: h * 60 + limitM })
+                }}
+              />
+              <span className="compl-timer-unit">ч</span>
+              <input
+                type="number"
+                className="cv-inp compl-timer-inp"
+                min="0"
+                max="59"
+                value={limitM}
+                onChange={e => {
+                  const m = Math.max(0, Math.min(59, parseInt(e.target.value) || 0))
+                  setTimer({ limitMinutes: limitH * 60 + m })
+                }}
+              />
+              <span className="compl-timer-unit">мин</span>
+            </div>
+            {timer.limitMinutes < 1 && (
+              <p className="compl-timer-warn">Укажите хотя бы 1 минуту</p>
+            )}
+
+            <label className="field-lbl" style={{ marginTop: 16 }}>При истечении времени</label>
+            <div className="compl-expire-options">
+              <label className="compl-radio">
+                <input
+                  type="radio"
+                  name={`timer-onExpire-${node.id}`}
+                  value="none"
+                  checked={timer.onExpire === 'none'}
+                  onChange={() => setTimer({ onExpire: 'none' })}
+                />
+                <span>Не прерывать — сотрудник продолжает работу без уведомления</span>
+              </label>
+              <label className="compl-radio">
+                <input
+                  type="radio"
+                  name={`timer-onExpire-${node.id}`}
+                  value="warn_and_finish"
+                  checked={timer.onExpire === 'warn_and_finish'}
+                  onChange={() => setTimer({ onExpire: 'warn_and_finish' })}
+                />
+                <span>Уведомить и завершить — показать сообщение и автоматически закрыть сессию</span>
+              </label>
+            </div>
+
+            {timer.onExpire === 'warn_and_finish' && (
+              <div className="compl-expire-fields">
+                <label className="field-lbl" style={{ marginTop: 12 }}>Заголовок уведомления</label>
+                <input
+                  className="cv-inp"
+                  value={timer.expireTitle}
+                  placeholder="Время истекло"
+                  onChange={e => setTimer({ expireTitle: e.target.value })}
+                />
+                <label className="field-lbl" style={{ marginTop: 10 }}>Текст уведомления</label>
+                <textarea
+                  className="cv-textarea"
+                  rows={2}
+                  value={timer.expireText}
+                  placeholder="К сожалению, время, отведённое на прохождение, истекло. Результаты будут зафиксированы автоматически."
+                  onChange={e => setTimer({ expireText: e.target.value })}
+                />
+              </div>
+            )}
+          </>
+        )}
+      </ComplSection>
     </div>
   )
 }

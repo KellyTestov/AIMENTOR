@@ -76,10 +76,12 @@ html, body {
   border: 1.5px solid currentColor; letter-spacing: .04em;
   flex-shrink: 0;
 }
-.sb-timer--green { color: #166534; background: #f0fdf4; border-color: #86efac; }
-.sb-timer--blue  { color: #1e40af; background: #eff6ff; border-color: #93c5fd; }
-.sb-timer--red   { color: #991b1b; background: #fef2f2; border-color: #fca5a5;
-                   animation: timerPulse 1s ease-in-out infinite; }
+.sb-timer--green  { color: #166534; background: #f0fdf4; border-color: #86efac; }
+.sb-timer--blue   { color: #1e40af; background: #eff6ff; border-color: #93c5fd; }
+.sb-timer--yellow { color: #92400e; background: #fffbeb; border-color: #fcd34d; }
+.sb-timer--red    { color: #991b1b; background: #fef2f2; border-color: #fca5a5;
+                    animation: timerPulse 1s ease-in-out infinite; }
+.sb-timer__label  { font-size: 10px; opacity: .75; margin-right: 1px; }
 @keyframes timerPulse {
   0%, 100% { opacity: 1; } 50% { opacity: .7; }
 }
@@ -384,8 +386,10 @@ html, body {
   padding: 32px 28px; width: 100%; max-width: 420px;
   text-align: center; position: relative; animation: slideIn .18s ease;
 }
-.sb-modal--wide    { max-width: 480px; }
-.sb-modal--compact { max-width: 300px; padding: 40px 28px; }
+.sb-modal--wide          { max-width: 480px; }
+.sb-modal--compact       { max-width: 300px; padding: 40px 28px; }
+.sb-modal--timer-expired { max-width: 360px; }
+.sb-modal__timer-icon    { font-size: 36px; margin-bottom: 10px; }
 .sb-modal--scroll  { max-height: 90vh; overflow-y: auto; }
 
 @keyframes slideIn {

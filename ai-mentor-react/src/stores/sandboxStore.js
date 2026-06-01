@@ -133,6 +133,7 @@ export const useSandboxStore = create((set, get) => ({
   questionElapsed:   0,
   phase:             'idle',   // idle | rules | resume | running | done | error
   error:             null,
+  timerExpired:      false,
   client:            MOCK_CLIENT,
   cases:             [],        // [{ id, clientName }] — tabs for exam
   activeCaseId:      null,
@@ -235,6 +236,7 @@ export const useSandboxStore = create((set, get) => ({
 
   setPhase(phase) { set({ phase }) },
   setError(error) { set({ error, phase: 'error' }) },
+  setTimerExpired(v) { set({ timerExpired: v }) },
   tickElapsed() {
     set(s => {
       const elapsed  = s.elapsed + 1
@@ -250,7 +252,7 @@ export const useSandboxStore = create((set, get) => ({
 
   clearSession() {
     clearSession()
-    set({ session: null, messages: [], elapsed: 0, questionElapsed: 0, phase: 'idle', cases: [], activeCaseId: null, closedCaseIds: [] })
+    set({ session: null, messages: [], elapsed: 0, questionElapsed: 0, phase: 'idle', cases: [], activeCaseId: null, closedCaseIds: [], timerExpired: false })
   },
 
   publishUnit() {
