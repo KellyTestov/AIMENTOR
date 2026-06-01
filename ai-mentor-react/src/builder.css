@@ -2782,6 +2782,14 @@ select.cu-edit-input { appearance: auto; cursor: pointer; }
   border-radius: var(--radius-sm);
   line-height: 1.5;
 }
+.prac-retry-fields {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.prac-retry-fields .field-lbl { margin-top: 0; }
 
 .crit-card__head {
   display: flex;

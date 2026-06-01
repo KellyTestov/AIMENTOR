@@ -24,10 +24,12 @@ export default function PracticeEditor({ node }) {
   const sections = (node.children || []).filter(c => c.type === 'section')
   const total    = sections.length
 
-  const content      = node.content || {}
-  const maxScore     = content.maxScore     ?? ''
-  const passingScore = content.passingScore ?? ''
-  const onFail       = content.onFail       || 'fail'
+  const content        = node.content || {}
+  const maxScore       = content.maxScore       ?? ''
+  const passingScore   = content.passingScore   ?? ''
+  const onFail         = content.onFail         || 'fail'
+  const retryTitle     = content.retryTitle     ?? ''
+  const retryText      = content.retryText      ?? ''
 
   const totalQScore  = sumQuestionMaxScores(node)
   const maxScoreNum  = parseInt(maxScore) || 0
@@ -125,7 +127,7 @@ export default function PracticeEditor({ node }) {
                   checked={onFail === 'fail'}
                   onChange={() => save({ onFail: 'fail' })}
                 />
-                <span>Считать обучение непройденным — сессия завершается как неуспешная</span>
+                <span>Завершить единицу обучения как «Неуспешную»</span>
               </label>
               <label className="compl-radio">
                 <input
@@ -141,6 +143,26 @@ export default function PracticeEditor({ node }) {
                 </span>
               </label>
             </div>
+
+            {onFail === 'retry' && (
+              <div className="prac-retry-fields">
+                <label className="field-lbl">Заголовок модального окна</label>
+                <input
+                  className="cv-inp"
+                  value={retryTitle}
+                  placeholder="Недостаточный балл"
+                  onChange={e => save({ retryTitle: e.target.value })}
+                />
+                <label className="field-lbl" style={{ marginTop: 10 }}>Текст сообщения</label>
+                <textarea
+                  className="cv-textarea"
+                  rows={2}
+                  value={retryText}
+                  placeholder="К сожалению, вы не набрали минимальный балл. Хотите пройти обучение ещё раз?"
+                  onChange={e => save({ retryText: e.target.value })}
+                />
+              </div>
+            )}
           </>
         )}
       </div>
