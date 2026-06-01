@@ -2684,6 +2684,105 @@ select.cu-edit-input { appearance: auto; cursor: pointer; }
   border-radius: var(--radius-sm);
 }
 
+/* ── Max score row (question editor) ── */
+.qe-maxscore-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border-sub);
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px;
+}
+.qe-maxscore-row__info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.qe-maxscore-row__label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+.qe-maxscore-row__hint {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.qe-maxscore-pill { flex-shrink: 0; }
+.qe-score-warn {
+  margin: -4px 0 10px;
+  padding: 7px 10px;
+  font-size: 12px;
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: var(--radius-sm);
+  line-height: 1.4;
+}
+
+/* ── Practice scoring panel ── */
+.prac-scoring {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.prac-scoring__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.prac-scoring__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+.prac-scoring__fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.prac-scoring__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.prac-scoring__field .field-lbl { margin: 0; font-size: 12px; }
+.prac-scoring__inp-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.prac-scoring__inp {
+  max-width: 110px !important;
+  text-align: right;
+}
+.prac-scoring__unit {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.prac-scoring__sub {
+  font-size: 11px;
+  color: var(--muted);
+}
+.prac-scoring__warn {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: var(--radius-sm);
+  line-height: 1.5;
+}
+
 .crit-card__head {
   display: flex;
   align-items: center;
